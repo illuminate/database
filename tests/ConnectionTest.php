@@ -37,6 +37,7 @@ class ConnectionTest extends PHPUnit_Framework_TestCase {
 		$mock = $this->getMockConnection(array(), $pdo);
 		$results = $mock->select('foo', array('foo' => 'bar'));
 		$this->assertEquals(array('boom'), $results);
+		$this->assertEquals(array(array('query' => 'foo', 'bindings' => array('foo' => 'bar'))), $mock->getQueryLog());
 	}
 
 
@@ -76,6 +77,7 @@ class ConnectionTest extends PHPUnit_Framework_TestCase {
 		$mock = $this->getMockConnection(array(), $pdo);
 		$results = $mock->statement('foo', array('bar'));
 		$this->assertEquals('foo', $results);
+		$this->assertEquals(array(array('query' => 'foo', 'bindings' => array('bar'))), $mock->getQueryLog());
 	}
 
 
@@ -89,6 +91,7 @@ class ConnectionTest extends PHPUnit_Framework_TestCase {
 		$mock = $this->getMockConnection(array(), $pdo);
 		$results = $mock->update('foo', array('foo' => 'bar'));
 		$this->assertEquals(array('boom'), $results);
+		$this->assertEquals(array(array('query' => 'foo', 'bindings' => array('foo' => 'bar'))), $mock->getQueryLog());
 	}
 
 

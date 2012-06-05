@@ -17,6 +17,13 @@ abstract class Connection implements ConnectionInterface {
 	protected $queryGrammar;
 
 	/**
+	 * All of the queries run against the connection.
+	 *
+	 * @var array
+	 */
+	protected $queryLog = array();
+
+	/**
 	 * Create a new database connection instance.
 	 *
 	 * @param  PDO   $pdo
@@ -67,6 +74,11 @@ abstract class Connection implements ConnectionInterface {
 	 */
 	public function select($query, $bindings = array())
 	{
+		$this->logQuery($query, $bindings);
+
+		// For select statements, we'll simply execute the query and return an array
+		// of the database result set. Each element in the array will be a single
+		// row from the database table, and may either be an array or object.
 		$statement = $this->pdo->prepare($query);
 
 		$statement->execute($bindings);
@@ -119,6 +131,8 @@ abstract class Connection implements ConnectionInterface {
 	 */
 	public function statement($query, $bindings = array())
 	{
+		$this->logQuery($query, $bindings);
+
 		return $this->pdo->prepare($query)->execute($bindings);
 	}
 
@@ -131,11 +145,28 @@ abstract class Connection implements ConnectionInterface {
 	 */
 	protected function affectingStatement($query, $bindings = array())
 	{
+		$this->logQuery($query, $bindings);
+
+		// For update or delete statements, we want to get the number of rows affected
+		// by the statement and return that back to the developer. We'll first need
+		// to execute the statement and then we'll use PDO to fetch the affected.
 		$statement = $this->pdo->prepare($query);
 
 		$statement->execute($bindings);
 
 		return $statement->rowCount();
+	}
+
+	/**
+	 * Log a query in the connection's query log.
+	 *
+	 * @param  string  $query
+	 * @param  array   $bindings
+	 * @return void
+	 */
+	protected function logQuery($query, $bindings)
+	{
+		$this->queryLog[] = compact('query', 'bindings');
 	}
 
 	/**
@@ -167,6 +198,16 @@ abstract class Connection implements ConnectionInterface {
 	public function setQueryGrammar(Query\Grammars\Grammar $grammar)
 	{
 		$this->queryGrammar = $grammar;
+	}
+
+	/**
+	 * Get the connection query log.
+	 *
+	 * @return array
+	 */
+	public function getQueryLog()
+	{
+		return $this->queryLog;
 	}
 
 }
