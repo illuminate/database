@@ -1,4 +1,4 @@
-<?php namespace Illuminate\Database;
+<?php namespace Illuminate\Database; use Closure;
 
 interface ConnectionInterface {
 
@@ -55,5 +55,13 @@ interface ConnectionInterface {
 	 * @return bool
 	 */
 	public function statement($query, $bindings = array());
+
+	/**
+	 * Execute a Closure within a transaction.
+	 *
+	 * @param  Closure  $callback
+	 * @return mixed
+	 */
+	public function transaction(Closure $callback);
 
 }
