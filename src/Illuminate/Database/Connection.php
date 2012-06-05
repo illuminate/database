@@ -161,6 +161,39 @@ abstract class Connection implements ConnectionInterface {
 	}
 
 	/**
+	 * Execute a Closure within a transaction.
+	 *
+	 * @param  Closure  $callback
+	 * @return mixed
+	 */
+	public function transaction(Closure $callback)
+	{
+		$this->pdo->beginTransaction();
+
+		// We'll simply execute the given callback within a try / catch block
+		// and if we catch any exceptions we can rollback the transaction
+		// so that none of the changes are persisted to the database.
+		try
+		{
+			$result = $callback();
+
+			$this->pdo->commit();
+		}
+
+		// If we catch an exception, we will roll back so nothing gets messed
+		// up in the database. Then we'll re-throw the exception so it can
+		// be handled how the developer sees fit for their application.
+		catch (\Exception $e)
+		{
+			$this->pdo->rollBack();
+
+			throw $e;
+		}
+
+		return $result;
+	}
+
+	/**
 	 * Run a SQL statement and log its execution context.
 	 *
 	 * @param  string   $query
@@ -174,7 +207,7 @@ abstract class Connection implements ConnectionInterface {
 
 		// To execute the statement, we'll simply call the callback, which will actually
 		// run the SQL against the PDO connection. Then we can calculate the time it
-		// took to execute and log the query SQL, bindings, and time in memory.
+		// took to execute and log the query SQL, bindings and time in our memory.
 		$result = $callback($this, $query, $bindings);
 
 		$time = number_format((microtime(true) - $start) * 1000, 2);

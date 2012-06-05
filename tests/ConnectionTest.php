@@ -104,6 +104,35 @@ class ConnectionTest extends PHPUnit_Framework_TestCase {
 	}
 
 
+	public function testTransactionMethodRunsSuccessfully()
+	{
+		$pdo = $this->getMock('MockPDO', array('beginTransaction', 'commit'));
+		$mock = $this->getMockConnection(array(), $pdo);
+		$pdo->expects($this->once())->method('beginTransaction');
+		$pdo->expects($this->once())->method('commit');
+		$result = $mock->transaction(function() { return 'foo'; });
+		$this->assertEquals('foo', $result);
+	}
+
+
+	public function testTransactionMethodRollsbackAndThrows()
+	{
+		$pdo = $this->getMock('MockPDO', array('beginTransaction', 'commit', 'rollBack'));
+		$mock = $this->getMockConnection(array(), $pdo);
+		$pdo->expects($this->once())->method('beginTransaction');
+		$pdo->expects($this->once())->method('rollBack');
+		$pdo->expects($this->never())->method('commit');
+		try
+		{
+			$mock->transaction(function() { throw new Exception('foo'); });
+		}
+		catch (Exception $e)
+		{
+			$this->assertEquals('foo', $e->getMessage());
+		}
+	}
+
+
 	protected function getMockConnection($methods = array(), $pdo = null)
 	{
 		$pdo = $pdo ?: new MockPDO;
