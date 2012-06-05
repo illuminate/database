@@ -79,6 +79,19 @@ class ConnectionTest extends PHPUnit_Framework_TestCase {
 	}
 
 
+	public function testAffectingStatementProperlyCallsPDO()
+	{
+		$pdo = $this->getMock('MockPDO', array('prepare'));
+		$statement = $this->getMock('PDOStatement', array('execute', 'rowCount'));
+		$statement->expects($this->once())->method('execute')->with($this->equalTo(array('foo' => 'bar')));
+		$statement->expects($this->once())->method('rowCount')->will($this->returnValue(array('boom')));
+		$pdo->expects($this->once())->method('prepare')->with('foo')->will($this->returnValue($statement));
+		$mock = $this->getMockConnection(array(), $pdo);
+		$results = $mock->update('foo', array('foo' => 'bar'));
+		$this->assertEquals(array('boom'), $results);
+	}
+
+
 	protected function getMockConnection($methods = array(), $pdo = null)
 	{
 		$pdo = $pdo ?: new MockPDO;
