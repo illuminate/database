@@ -110,8 +110,8 @@ class ConnectionTest extends PHPUnit_Framework_TestCase {
 		$mock = $this->getMockConnection(array(), $pdo);
 		$pdo->expects($this->once())->method('beginTransaction');
 		$pdo->expects($this->once())->method('commit');
-		$result = $mock->transaction(function() { return 'foo'; });
-		$this->assertEquals('foo', $result);
+		$result = $mock->transaction(function($db) { return $db; });
+		$this->assertEquals($mock, $result);
 	}
 
 

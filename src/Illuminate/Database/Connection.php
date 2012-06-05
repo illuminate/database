@@ -175,7 +175,7 @@ abstract class Connection implements ConnectionInterface {
 		// so that none of the changes are persisted to the database.
 		try
 		{
-			$result = $callback();
+			$result = $callback($this);
 
 			$this->pdo->commit();
 		}
