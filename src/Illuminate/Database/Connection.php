@@ -1,6 +1,6 @@
 <?php namespace Illuminate\Database; use PDO;
 
-abstract class Connection {
+abstract class Connection implements ConnectionInterface {
 
 	/**
 	 * The active PDO connection.
