@@ -28,15 +28,32 @@ abstract class Connection {
 	}
 
 	/**
-	 * Run a select statement against the database.
+	 * Set the query grammar to the default implementation.
 	 *
-	 * @param  string  $sql
+	 * @return void
+	 */
+	public function useDefaultQueryGrammar()
+	{
+		$this->queryGrammar = $this->getDefaultQueryGrammar();
+	}
+
+	/**
+	 * Get the default query grammar instance.
+	 *
+	 * @return Illuminate\Database\Query\Grammars\Grammar
+	 */
+	abstract protected function getDefaultQueryGrammar();
+
+	/**
+	 * Run a select statement and return a single result.
+	 *
+	 * @param  string  $query
 	 * @param  array   $bindings
 	 * @return mixed
 	 */
-	public function selectOne($sql, $bindings = array())
+	public function selectOne($query, $bindings = array())
 	{
-		$records = $this->select($sqll, $bindings);
+		$records = $this->select($query, $bindings);
 
 		return count($records) > 0 ? reset($records) : null;
 	}
@@ -44,13 +61,13 @@ abstract class Connection {
 	/**
 	 * Run a select statement against the database.
 	 *
-	 * @param  string  $sql
+	 * @param  string  $query
 	 * @param  array   $bindings
 	 * @return array
 	 */
-	public function select($sql, $bindings = array())
+	public function select($query, $bindings = array())
 	{
-		$statement = $this->pdo->prepare($sql);
+		$statement = $this->pdo->prepare($query);
 
 		$statement->execute($bindings);
 
@@ -60,61 +77,61 @@ abstract class Connection {
 	/**
 	 * Run an insert statement against the database.
 	 *
-	 * @param  string  $sql
+	 * @param  string  $query
 	 * @param  array   $bindings
 	 * @return bool
 	 */
-	public function insert($sql, $bindings = array())
+	public function insert($query, $bindings = array())
 	{
-		return $this->statement($sql, $bindings);
+		return $this->statement($query, $bindings);
 	}
 
 	/**
 	 * Run an update statement against the database.
 	 *
-	 * @param  string  $sql
+	 * @param  string  $query
 	 * @param  array   $bindings
 	 * @return int
 	 */
-	public function update($sql, $bindings = array())
+	public function update($query, $bindings = array())
 	{
-		return $this->affectingStatement($sql, $bindings);
+		return $this->affectingStatement($query, $bindings);
 	}
 
 	/**
 	 * Run a delete statement against the database.
 	 *
-	 * @param  string  $sql
+	 * @param  string  $query
 	 * @param  array   $bindings
 	 * @return int
 	 */
-	public function delete($sql, $bindings = array())
+	public function delete($query, $bindings = array())
 	{
-		return $this->affectingStatement($sql, $bindings);
+		return $this->affectingStatement($query, $bindings);
 	}
 
 	/**
 	 * Execute an SQL statement and return the boolean result.
 	 *
-	 * @param  string  $sql
+	 * @param  string  $query
 	 * @param  array   $bindings
 	 * @return bool
 	 */
-	public function statement($sql, $bindings = array())
+	public function statement($query, $bindings = array())
 	{
-		return $this->pdo->prepare($sql)->execute($bindings);
+		return $this->pdo->prepare($query)->execute($bindings);
 	}
 
 	/**
 	 * Run an SQL statement and get the number of rows affected.
 	 *
-	 * @param  string  $sql
+	 * @param  string  $query
 	 * @param  array   $bindings
 	 * @return int
 	 */
-	public function affectingStatement($sql, $bindings = array())
+	protected function affectingStatement($query, $bindings = array())
 	{
-		$statement = $this->pdo->prepare($sql);
+		$statement = $this->pdo->prepare($query);
 
 		$statement->execute($bindings);
 
