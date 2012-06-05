@@ -37,7 +37,10 @@ class ConnectionTest extends PHPUnit_Framework_TestCase {
 		$mock = $this->getMockConnection(array(), $pdo);
 		$results = $mock->select('foo', array('foo' => 'bar'));
 		$this->assertEquals(array('boom'), $results);
-		$this->assertEquals(array(array('query' => 'foo', 'bindings' => array('foo' => 'bar'))), $mock->getQueryLog());
+		$log = $mock->getQueryLog();
+		$this->assertEquals('foo', $log[0]['query']);
+		$this->assertEquals(array('foo' => 'bar'), $log[0]['bindings']);
+		$this->assertTrue(is_numeric($log[0]['time']));
 	}
 
 
@@ -77,7 +80,10 @@ class ConnectionTest extends PHPUnit_Framework_TestCase {
 		$mock = $this->getMockConnection(array(), $pdo);
 		$results = $mock->statement('foo', array('bar'));
 		$this->assertEquals('foo', $results);
-		$this->assertEquals(array(array('query' => 'foo', 'bindings' => array('bar'))), $mock->getQueryLog());
+		$log = $mock->getQueryLog();
+		$this->assertEquals('foo', $log[0]['query']);
+		$this->assertEquals(array('bar'), $log[0]['bindings']);
+		$this->assertTrue(is_numeric($log[0]['time']));
 	}
 
 
@@ -91,7 +97,10 @@ class ConnectionTest extends PHPUnit_Framework_TestCase {
 		$mock = $this->getMockConnection(array(), $pdo);
 		$results = $mock->update('foo', array('foo' => 'bar'));
 		$this->assertEquals(array('boom'), $results);
-		$this->assertEquals(array(array('query' => 'foo', 'bindings' => array('foo' => 'bar'))), $mock->getQueryLog());
+		$log = $mock->getQueryLog();
+		$this->assertEquals('foo', $log[0]['query']);
+		$this->assertEquals(array('foo' => 'bar'), $log[0]['bindings']);
+		$this->assertTrue(is_numeric($log[0]['time']));
 	}
 
 

@@ -1,4 +1,4 @@
-<?php namespace Illuminate\Database; use PDO;
+<?php namespace Illuminate\Database; use PDO, Closure;
 
 abstract class Connection implements ConnectionInterface {
 
@@ -74,16 +74,17 @@ abstract class Connection implements ConnectionInterface {
 	 */
 	public function select($query, $bindings = array())
 	{
-		$this->logQuery($query, $bindings);
+		return $this->run($query, $bindings, function($me, $query, $bindings)
+		{
+			// For select statements, we'll simply execute the query and return an array
+			// of the database result set. Each element in the array will be a single
+			// row from the database table, and may either be an array or object.
+			$statement = $me->getPdo()->prepare($query);
 
-		// For select statements, we'll simply execute the query and return an array
-		// of the database result set. Each element in the array will be a single
-		// row from the database table, and may either be an array or object.
-		$statement = $this->pdo->prepare($query);
+			$statement->execute($bindings);
 
-		$statement->execute($bindings);
-
-		return $statement->fetchAll();
+			return $statement->fetchAll();
+		});
 	}
 
 	/**
@@ -131,9 +132,10 @@ abstract class Connection implements ConnectionInterface {
 	 */
 	public function statement($query, $bindings = array())
 	{
-		$this->logQuery($query, $bindings);
-
-		return $this->pdo->prepare($query)->execute($bindings);
+		return $this->run($query, $bindings, function($me, $query, $bindings)
+		{
+			return $me->getPdo()->prepare($query)->execute($bindings);
+		});
 	}
 
 	/**
@@ -143,18 +145,43 @@ abstract class Connection implements ConnectionInterface {
 	 * @param  array   $bindings
 	 * @return int
 	 */
-	protected function affectingStatement($query, $bindings = array())
+	public function affectingStatement($query, $bindings = array())
 	{
-		$this->logQuery($query, $bindings);
+		return $this->run($query, $bindings, function($me, $query, $bindings)
+		{
+			// For update or delete statements, we want to get the number of rows affected
+			// by the statement and return that back to the developer. We'll first need
+			// to execute the statement and then we'll use PDO to fetch the affected.
+			$statement = $me->getPdo()->prepare($query);
 
-		// For update or delete statements, we want to get the number of rows affected
-		// by the statement and return that back to the developer. We'll first need
-		// to execute the statement and then we'll use PDO to fetch the affected.
-		$statement = $this->pdo->prepare($query);
+			$statement->execute($bindings);
 
-		$statement->execute($bindings);
+			return $statement->rowCount();
+		});
+	}
 
-		return $statement->rowCount();
+	/**
+	 * Run a SQL statement and log its execution context.
+	 *
+	 * @param  string   $query
+	 * @param  array    $bindings
+	 * @param  Closure  $callback
+	 * @return mixed
+	 */
+	protected function run($query, $bindings, Closure $callback)
+	{
+		$start = microtime(true);
+
+		// To execute the statement, we'll simply call the callback, which will actually
+		// run the SQL against the PDO connection. Then we can calculate the time it
+		// took to execute and log the query SQL, bindings, and time in memory.
+		$result = $callback($this, $query, $bindings);
+
+		$time = number_format((microtime(true) - $start) * 1000, 2);
+
+		$this->logQuery($query, $bindings, $time);
+
+		return $result;
 	}
 
 	/**
@@ -164,9 +191,9 @@ abstract class Connection implements ConnectionInterface {
 	 * @param  array   $bindings
 	 * @return void
 	 */
-	protected function logQuery($query, $bindings)
+	protected function logQuery($query, $bindings, $time)
 	{
-		$this->queryLog[] = compact('query', 'bindings');
+		$this->queryLog[] = compact('query', 'bindings', 'time');
 	}
 
 	/**
