@@ -40,6 +40,15 @@ class ConnectionTest extends PHPUnit_Framework_TestCase {
 	}
 
 
+	public function testInsertCallsTheStatementMethod()
+	{
+		$connection = $this->getMockConnection(array('statement'));
+		$connection->expects($this->once())->method('statement')->with($this->equalTo('foo'), $this->equalTo(array('bar')))->will($this->returnValue('baz'));
+		$results = $connection->insert('foo', array('bar'));
+		$this->assertEquals('baz', $results);
+	}
+
+
 	protected function getMockConnection($methods = array(), $pdo = null)
 	{
 		$pdo = $pdo ?: new MockPDO;
