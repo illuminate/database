@@ -1,5 +1,5 @@
-# Illuminate Auth
+# Illuminate Database
 
-A flexible, driver based authentication system.
+A clean, fast database abstraction library.
 
-[![Build Status](https://secure.travis-ci.org/illuminate/auth.png)](http://travis-ci.org/illuminate/auth)
+[![Build Status](https://secure.travis-ci.org/illuminate/database`.png)](http://travis-ci.org/illuminate/database)
