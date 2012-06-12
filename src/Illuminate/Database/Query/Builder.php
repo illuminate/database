@@ -99,6 +99,37 @@ class Builder {
 	public function take($value)
 	{
 		$this->take = $value;
+
+		return $this;
+	}
+
+	/**
+	 * Execute the query and get the first result.
+	 *
+	 * @return mixed
+	 */
+	public function first()
+	{
+		$results = $this->take(1)->get();
+
+		return count($results) > 0 ? reset($results) : null;
+	}
+
+	/**
+	 * Execute the query as a "select" statement.
+	 *
+	 * @return array
+	 */
+	public function get()
+	{
+		// First we need to compile the query into actual SQL using the query grammar.
+		// Once we have the SQL, we can execute it against the database connection
+		// and run the results through the post-processor before returning out.
+		$sql = $this->grammar->compileSelect($this);
+
+		$results = $this->connection->select($sql, $this->bindings);
+
+		return $this->processor->processSelect($this, $results);
 	}
 
 }
