@@ -34,6 +34,20 @@ class Builder {
 	public $from;
 
 	/**
+	 * The "offset" value of the query.
+	 *
+	 * @var int
+	 */
+	public $skip;
+
+	/**
+	 * The "limit" clause of the query.
+	 *
+	 * @var int
+	 */
+	public $take;
+
+	/**
 	 * Create a new query builder instance.
 	 *
 	 * @param  Illuminate\Database\Connection  $connection
@@ -61,6 +75,30 @@ class Builder {
 		$this->from = $table;
 
 		return $this;
+	}
+
+	/**
+	 * Set the "offset" value of the query.
+	 *
+	 * @param  int  $value
+	 * @return Illuminate\Database\Query\Builder
+	 */
+	public function skip($value)
+	{
+		$this->skip = $value;
+
+		return $this;
+	}
+
+	/**
+	 * Set the "limit" value of the query.
+	 *
+	 * @param  int  $value
+	 * @return Illuminate\Database\Query\Builder
+	 */
+	public function take($value)
+	{
+		$this->take = $value;
 	}
 
 }
