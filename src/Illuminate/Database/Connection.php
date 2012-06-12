@@ -12,9 +12,16 @@ abstract class Connection implements ConnectionInterface {
 	/**
 	 * The query grammar implementation.
 	 *
-	 * @var Illuminate\Database\Query\Grammars\Grammar
+	 * @var Illuminate\Database\Query\Grammar
 	 */
 	protected $queryGrammar;
+
+	/**
+	 * The query post processor implementation.
+	 *
+	 * @var Illuminate\Database\Query\Processors\Processor
+	 */
+	protected $postProcessor;
 
 	/**
 	 * All of the queries run against the connection.
@@ -47,9 +54,41 @@ abstract class Connection implements ConnectionInterface {
 	/**
 	 * Get the default query grammar instance.
 	 *
-	 * @return Illuminate\Database\Query\Grammars\Grammar
+	 * @return Illuminate\Database\Query\Grammar
 	 */
 	abstract protected function getDefaultQueryGrammar();
+
+	/**
+	 * Set the query post processor to the default implementation.
+	 *
+	 * @return void
+	 */
+	public function useDefaultPostProcessor()
+	{
+		$this->queryGrammar = $this->getDefaultPostProcessor();
+	}
+
+	/**
+	 * Get the default post processor instance.
+	 *
+	 * @return Illuminate\Database\Query\Processors\Processor
+	 */
+	abstract protected function getDefaultPostProcessor();
+
+	/**
+	 * Begin a fluent query against a database table.
+	 *
+	 * @param  string  $table
+	 * @return Illuminate\Database\Query\Builder
+	 */
+	public function from($table)
+	{
+		$processor = $this->getPostProcessor();
+
+		$query = new Query\Builder($this, $this->getQueryGrammar(), $processor);
+
+		return $query->from($table);
+	}
 
 	/**
 	 * Run a select statement and return a single result.
@@ -242,7 +281,7 @@ abstract class Connection implements ConnectionInterface {
 	/**
 	 * Get the query grammar used by the connection.
 	 *
-	 * @return Illuminate\Database\Query\Grammars\Grammar
+	 * @return Illuminate\Database\Query\Grammar
 	 */
 	public function getQueryGrammar()
 	{
@@ -252,12 +291,33 @@ abstract class Connection implements ConnectionInterface {
 	/**
 	 * Set the query grammar used by the connection.
 	 *
-	 * @param  Illuminate\Database\Query\Grammars\Grammar
+	 * @param  Illuminate\Database\Query\Grammar
 	 * @return void
 	 */
-	public function setQueryGrammar(Query\Grammars\Grammar $grammar)
+	public function setQueryGrammar(Query\Grammar $grammar)
 	{
 		$this->queryGrammar = $grammar;
+	}
+
+	/**
+	 * Get the query post processor used by the connection.
+	 *
+	 * @return Illuminate\Database\Query\Processors\Processor
+	 */
+	public function getPostProcessor()
+	{
+		return $this->postProcessor;
+	}
+
+	/**
+	 * Set the query post processor used by the connection.
+	 *
+	 * @param  Illuminate\Database\Query\Processors\Processor
+	 * @return void
+	 */
+	public function setPostProcessor(Query\Processors\Processor $processor)
+	{
+		$this->postProcessor = $processor;
 	}
 
 	/**

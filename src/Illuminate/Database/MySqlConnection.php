@@ -12,4 +12,14 @@ class MySqlConnection extends Connection {
 		return new Query\Grammars\MySqlGrammar;
 	}
 
+	/**
+	 * Get the default post processor instance.
+	 *
+	 * @return Illuminate\Database\Processors\Processor
+	 */
+	protected function getDefaultPostProcessor()
+	{
+		return new Processors\MySqlProcessor;
+	}
+
 }
