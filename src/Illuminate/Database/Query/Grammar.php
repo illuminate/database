@@ -1,6 +1,6 @@
 <?php namespace Illuminate\Database\Query;
 
-use Illumiante\Database\Grammar as BaseGrammar;
+use Illuminate\Database\Grammar as BaseGrammar;
 
 abstract class Grammar extends BaseGrammar {
 
