@@ -19,7 +19,7 @@ abstract class Connection implements ConnectionInterface {
 	/**
 	 * The query post processor implementation.
 	 *
-	 * @var Illuminate\Database\Query\Processors\Processor
+	 * @var Illuminate\Database\Query\Processor
 	 */
 	protected $postProcessor;
 
@@ -71,7 +71,7 @@ abstract class Connection implements ConnectionInterface {
 	/**
 	 * Get the default post processor instance.
 	 *
-	 * @return Illuminate\Database\Query\Processors\Processor
+	 * @return Illuminate\Database\Query\Processor
 	 */
 	abstract protected function getDefaultPostProcessor();
 
@@ -302,7 +302,7 @@ abstract class Connection implements ConnectionInterface {
 	/**
 	 * Get the query post processor used by the connection.
 	 *
-	 * @return Illuminate\Database\Query\Processors\Processor
+	 * @return Illuminate\Database\Query\Processor
 	 */
 	public function getPostProcessor()
 	{
@@ -312,10 +312,10 @@ abstract class Connection implements ConnectionInterface {
 	/**
 	 * Set the query post processor used by the connection.
 	 *
-	 * @param  Illuminate\Database\Query\Processors\Processor
+	 * @param  Illuminate\Database\Query\Processor
 	 * @return void
 	 */
-	public function setPostProcessor(Query\Processors\Processor $processor)
+	public function setPostProcessor(Query\Processor $processor)
 	{
 		$this->postProcessor = $processor;
 	}

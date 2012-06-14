@@ -15,7 +15,7 @@ class MySqlConnection extends Connection {
 	/**
 	 * Get the default post processor instance.
 	 *
-	 * @return Illuminate\Database\Processors\Processor
+	 * @return Illuminate\Database\Processor
 	 */
 	protected function getDefaultPostProcessor()
 	{

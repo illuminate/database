@@ -1,6 +1,4 @@
-<?php namespace Illuminate\Database\Query\Processors;
-
-use Illuminate\Database\Query\Builder;
+<?php namespace Illuminate\Database\Query;
 
 abstract class Processor {
 

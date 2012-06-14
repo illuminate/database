@@ -2,7 +2,7 @@
 
 use Illuminate\Database\Grammar as BaseGrammar;
 
-abstract class Grammar extends BaseGrammar {
+class Grammar extends BaseGrammar {
 
 	/**
 	 * The components that make up a select clause.
@@ -16,7 +16,7 @@ abstract class Grammar extends BaseGrammar {
 		'joins',
 		'wheres',
 		'groups',
-		'having',
+		'havings',
 		'orders',
 		'limit',
 		'offset',
@@ -45,7 +45,7 @@ abstract class Grammar extends BaseGrammar {
 			}
 		}
 
-		return $this->concatenate($sql);
+		return trim($this->concatenate($sql));
 	}
 
 	/**
@@ -61,8 +61,8 @@ abstract class Grammar extends BaseGrammar {
 
 		// If the query has a "distinct" constraint and we're not asking for all columns
 		// we need to prepend "distinct" onto the column name so that the query takes
-		// it into account when it performs the aggregating operation on the data.
-		if ($query->distinct and $column != '*')
+		// it into account when it performs the aggregating operations on the data.
+		if ($query->distinct and $column !== '*')
 		{
 			$column = 'distinct '.$column;
 		}
@@ -87,6 +87,137 @@ abstract class Grammar extends BaseGrammar {
 		$select = $query->distinct ? 'select distinct ' : 'select ';
 
 		return $select.$this->columnize($columns);
+	}
+
+	/**
+	 * Compile the "from" portion of the query.
+	 *
+	 * @param  Illuminate\Database\Query\Builder  $query
+	 * @param  string  $table
+	 * @return string
+	 */
+	protected function compileFrom(Builder $query, $table)
+	{
+		return "from $table";
+	}
+
+	/**
+	 * Compile the "join" portions of the query.
+	 *
+	 * @param  Illuminate\Database\Query\Builder  $query
+	 * @param  array  $joins
+	 * @return string
+	 */
+	protected function compileJoins(Builder $query, $joins)
+	{
+		$sql = array();
+
+		foreach ($joins as $join)
+		{
+			$table = $join['table'];
+
+			// First we need to build all of the "on" clauses for the join. There may
+			// be many of these clauses, so we will need to spin through each one
+			// and built it separately, then we will join them up at the end.
+			$clauses = array();
+
+			foreach ($join['conditions'] as $condition)
+			{
+				extract($condition);
+
+				$clauses[] = "$boolean $first $operator $second";
+			}
+
+			// Once we have constructed the clauses, we'll need to take the boolean
+			// connector off of the first clause since it obviously will not be
+			// needed on that clause since it leads the rest of the clauses.
+			$search = array('and ', 'or ');
+
+			$clauses[0] = str_replace($search, '', $clauses[0]);
+
+			$clauses = implode(' ', $clauses);
+
+			$type = $join['type'];
+
+			// Once we have everything ready to go, we'll just concatenate all the
+			// parts to build the final "join" statement SQL for the query and
+			// we can then return it back to the caller as a single string.
+			$sql[] = "$type join $table on $clauses";
+		}
+
+		return implode(' ', $sql);
+	}
+
+	/**
+	 * Compile the "where" portions of the query.
+	 *
+	 * @param  Illuminate\Database\Query\Builder  $query
+	 * @param  array  $wheres
+	 * @return string
+	 */
+	protected function compileWheres(Builder $query, $wheres)
+	{
+		return '';
+	}
+
+	/**
+	 * Compile the "group by" portions of the query.
+	 *
+	 * @param  Illuminate\Database\Query\Builder  $query
+	 * @param  array  $groups
+	 * @return string
+	 */
+	protected function compileGroups(Builder $query, $groups)
+	{
+		return '';
+	}
+
+	/**
+	 * Compile the "having" portions of the query.
+	 *
+	 * @param  Illuminate\Database\Query\Builder  $query
+	 * @param  array  $havings
+	 * @return string
+	 */
+	protected function compileHavings(Builder $query, $havings)
+	{
+		return '';
+	}
+
+	/**
+	 * Compile the "order by" portions of the query.
+	 *
+	 * @param  Illuminate\Database\Query\Builder  $query
+	 * @param  array  $orders
+	 * @return string
+	 */
+	protected function compileOrders(Builder $query, $orders)
+	{
+		return '';
+	}
+
+	/**
+	 * Compile the "limit" portions of the query.
+	 *
+	 * @param  Illuminate\Database\Query\Builder  $query
+	 * @param  int  $limit
+	 * @return string
+	 */
+	protected function compileLimit(Builder $query, $limit)
+	{
+		return "limit $limit";
+	}
+
+	/**
+	 * Compile the "offset" portions of the query.
+	 *
+	 * @param  Illuminate\Database\Query\Builder  $query
+	 * @param  int  $offset
+	 * @return string
+	 */
+	protected function compileOffset(Builder $query, $offset)
+	{
+		return "offset $offset";
 	}
 
 	/**

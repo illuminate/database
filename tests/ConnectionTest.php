@@ -137,7 +137,7 @@ class ConnectionTest extends PHPUnit_Framework_TestCase {
 	{
 		$conn = $this->getMockConnection();
 		$conn->setQueryGrammar(m::mock('Illuminate\Database\Query\Grammar'));
-		$conn->setPostProcessor(m::mock('Illuminate\Database\Query\Processors\Processor'));
+		$conn->setPostProcessor(m::mock('Illuminate\Database\Query\Processor'));
 		$builder = $conn->from('users');
 		$this->assertInstanceOf('Illuminate\Database\Query\Builder', $builder);
 		$this->assertEquals('users', $builder->from);

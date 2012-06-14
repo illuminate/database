@@ -1,7 +1,6 @@
 <?php namespace Illuminate\Database\Query;
 
-use Illuminate\Database\Connection;
-use Illuminate\Database\Query\Processors\Processor;
+use Illuminate\Database\ConnectionInterface;
 
 class Builder {
 
@@ -22,9 +21,30 @@ class Builder {
 	/**
 	 * The database query post processor instance.
 	 *
-	 * @var Illuminate\Database\Query\Processors\Processor
+	 * @var Illuminate\Database\Query\Processor
 	 */
 	protected $processor;
+
+	/**
+	 * An aggregate function and column to be run.
+	 *
+	 * @var array
+	 */
+	public $aggregate;
+
+	/**
+	 * The columns that should be returned.
+	 *
+	 * @var array
+	 */
+	public $columns = array('*');
+
+	/**
+	 * Indicates if the query returns distinct results.
+	 *
+	 * @var bool
+	 */
+	public $distinct = false;
 
 	/**
 	 * The table which the query is targeting.
@@ -32,6 +52,55 @@ class Builder {
 	 * @var string
 	 */
 	public $from;
+
+	/**
+	 * The table joins for the query.
+	 *
+	 * @var array
+	 */
+	public $joins;
+
+	/**
+	 * The where constraints for the query.
+	 *
+	 * @var array
+	 */
+	public $wheres;
+
+	/**
+	 * The groupings for the query.
+	 *
+	 * @var array
+	 */
+	public $groups;
+
+	/**
+	 * The having constraints for the query.
+	 *
+	 * @var array
+	 */
+	public $havings;
+
+	/**
+	 * The orderings for the query.
+	 *
+	 * @var array
+	 */
+	public $orders;
+
+	/**
+	 * The maximum number of records to return.
+	 *
+	 * @var int
+	 */
+	public $limit;
+
+	/**
+	 * The number of records to skip.
+	 *
+	 * @var int
+	 */
+	public $offset;
 
 	/**
 	 * The "offset" value of the query.
@@ -50,18 +119,43 @@ class Builder {
 	/**
 	 * Create a new query builder instance.
 	 *
-	 * @param  Illuminate\Database\Connection  $connection
+	 * @param  Illuminate\Database\ConnectionInterface  $connection
 	 * @param  Illuminate\Databaase\Query\Grammar  $grammar
-	 * @param  Illuminate\Database\Query\Processors\Processor  $processor
+	 * @param  Illuminate\Database\Query\Processor  $processor
 	 * @return void
 	 */
-	public function __construct(Connection $connection,
+	public function __construct(ConnectionInterface $connection,
                                 Grammar $grammar,
                                 Processor $processor)
 	{
 		$this->grammar = $grammar;
 		$this->processor = $processor;
 		$this->connection = $connection;
+	}
+
+	/**
+	 * Set the columns to be selected.
+	 *
+	 * @param  array  $columns
+	 * @return Illuminate\Database\Query\Builder
+	 */
+	public function select($columns = array('*'))
+	{
+		$this->columns = is_array($columns) ? $columns : func_get_args();
+
+		return $this;
+	}
+
+	/**
+	 * Force the query to only return distinct results.
+	 *
+	 * @return Illuminate\Database\Query\Builder
+	 */
+	public function distinct()
+	{
+		$this->distinct = true;
+
+		return $this;
 	}
 
 	/**
@@ -85,7 +179,7 @@ class Builder {
 	 */
 	public function skip($value)
 	{
-		$this->skip = $value;
+		$this->offset = $value;
 
 		return $this;
 	}
@@ -98,9 +192,19 @@ class Builder {
 	 */
 	public function take($value)
 	{
-		$this->take = $value;
+		$this->limit = $value;
 
 		return $this;
+	}
+
+	/**
+	 * Get the SQL representation of the query.
+	 *
+	 * @return string
+	 */
+	public function toSql()
+	{
+		return $this->grammar->compileSelect($this);
 	}
 
 	/**
@@ -122,12 +226,7 @@ class Builder {
 	 */
 	public function get()
 	{
-		// First we need to compile the query into actual SQL using the query grammar.
-		// Once we have the SQL, we can execute it against the database connection
-		// and run the results through the post-processor before returning out.
-		$sql = $this->grammar->compileSelect($this);
-
-		$results = $this->connection->select($sql, $this->bindings);
+		$results = $this->connection->select($this->toSql(), $this->bindings);
 
 		return $this->processor->processSelect($this, $results);
 	}
