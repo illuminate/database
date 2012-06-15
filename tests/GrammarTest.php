@@ -125,6 +125,14 @@ class GrammarTest extends PHPUnit_Framework_TestCase {
 	}
 
 
+	public function testOrderBys()
+	{
+		$builder = $this->getBuilder();
+		$builder->select('*')->from('users')->orderBy('email')->orderBy('age', 'desc');
+		$this->assertEquals('select * from "users" order by "email" asc, "age" desc', $builder->toSql());
+	}
+
+
 	public function testLimitsAndOffsets()
 	{
 		$builder = $this->getBuilder();
