@@ -204,7 +204,7 @@ class Grammar extends BaseGrammar {
 	{
 		$nested = $where['query'];
 
-		return '('.substr($this->compileWheres($nested), 6).')';
+		return '('.substr($this->compileWheres($nested, $nested->wheres), 6).')';
 	}
 
 	/**
@@ -424,7 +424,7 @@ class Grammar extends BaseGrammar {
 		// Of course, update queries may also be constrained by where clauses so
 		// we'll need to compile the where clause and attach it to the query
 		// so only the intended rows are updated by the SQL we generate.
-		$where = $this->compileWheres($query);
+		$where = $this->compileWheres($query, $query->wheres);
 
 		return trim("update $table set $columns $where");
 	}
@@ -440,7 +440,7 @@ class Grammar extends BaseGrammar {
 	{
 		$table = $this->wrapTable($query->from);
 
-		return trim("delete from $table ".$this->compileWheres($query));
+		return trim("delete from $table ".$this->compileWheres($query, $query->wheres));
 	}
 
 	/**

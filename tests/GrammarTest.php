@@ -141,6 +141,18 @@ class GrammarTest extends PHPUnit_Framework_TestCase {
 	}
 
 
+	public function testNestedWheres()
+	{
+		$builder = $this->getBuilder();
+		$builder->select('*')->from('users')->where('email', '=', 'foo')->orWhere(function($q)
+		{
+			$q->where('name', '=', 'bar')->where('age', '=', 25);
+		});
+		$this->assertEquals('select * from "users" where "email" = ? or ("name" = ? and "age" = ?)', $builder->toSql());
+		$this->assertEquals(array(0 => 'foo', 1 => 'bar', 2 => 25), $builder->getBindings());
+	}
+
+
 	protected function getBuilder()
 	{
 		$grammar = new Illuminate\Database\Query\Grammar;
