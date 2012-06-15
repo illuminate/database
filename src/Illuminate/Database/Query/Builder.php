@@ -125,6 +125,13 @@ class Builder {
 	public $take;
 
 	/**
+	 * All of the available clause operators.
+	 *
+	 * @var array
+	 */
+	protected $operators = array('=', '<', '>', '<=', '>=', 'like', 'not like');
+
+	/**
 	 * Create a new query builder instance.
 	 *
 	 * @param  Illuminate\Database\ConnectionInterface  $connection
@@ -249,6 +256,17 @@ class Builder {
 			return $this->whereNested($column, $boolean);
 		}
 
+		// If the given operator is not found in the list of valid operators we will
+		// assume that the develoepr is just short-cutting the '=' operator and
+		// we will set the operator to '=' and set the value appropriately.
+		if ( ! in_array($operator, $this->operators))
+		{
+			list($value, $operator) = array($operator, '=');
+		}
+
+		// Now that we are working with just a simple query we can put the elements
+		// in our array and add the query binding to our array of bindings that
+		// will be bound to the SQL statements when it is finally executed.
 		$type = 'Basic';
 
 		$this->wheres[] = compact('type', 'column', 'operator', 'value', 'boolean');

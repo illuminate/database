@@ -111,8 +111,8 @@ class GrammarTest extends PHPUnit_Framework_TestCase {
 		$this->assertEquals(array(), $builder->getBindings());
 
 		$builder = $this->getBuilder();
-		$builder->select('*')->from('users')->where('id', '=', 1)->orWhereNotNull('id');
-		$this->assertEquals('select * from "users" where "id" = ? or "id" is not null', $builder->toSql());
+		$builder->select('*')->from('users')->where('id', '>', 1)->orWhereNotNull('id');
+		$this->assertEquals('select * from "users" where "id" > ? or "id" is not null', $builder->toSql());
 		$this->assertEquals(array(0 => 1), $builder->getBindings());
 	}
 
@@ -138,6 +138,15 @@ class GrammarTest extends PHPUnit_Framework_TestCase {
 		$builder = $this->getBuilder();
 		$builder->select('*')->from('users')->skip(5)->take(10);
 		$this->assertEquals('select * from "users" limit 10 offset 5', $builder->toSql());
+	}
+
+
+	public function testWhereShortcut()
+	{
+		$builder = $this->getBuilder();
+		$builder->select('*')->from('users')->where('id', 1);
+		$this->assertEquals('select * from "users" where "id" = ?', $builder->toSql());
+		$this->assertEquals(array(0 => 1), $builder->getBindings());
 	}
 
 
