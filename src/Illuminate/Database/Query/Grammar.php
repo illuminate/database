@@ -128,9 +128,9 @@ class Grammar extends BaseGrammar {
 			// and built it separately, then we will join them up at the end.
 			$clauses = array();
 
-			foreach ($join['conditions'] as $condition)
+			foreach ($join->clauses as $clause)
 			{
-				extract($condition);
+				extract($clause);
 
 				$first = $this->wrap($first);
 
@@ -349,6 +349,98 @@ class Grammar extends BaseGrammar {
 	protected function compileOffset(Builder $query, $offset)
 	{
 		return "offset $offset";
+	}
+
+	/**
+	 * Compile an insert statement into SQL.
+	 *
+	 * @param  Illuminate\Database\Query\Builder  $query
+	 * @param  array  $values
+	 * @return string
+	 */
+	public function compileInsert(Builder $query, array $values)
+	{
+		$table = $this->wrapTable($query->from);
+
+		// Essentially we will force every insert to be treated as a batch insert
+		// which simply makes creating the SQL easier for us since we can use
+		// the same basic routine regardless of the number of rows given.
+		if ( ! is_array(reset($values)))
+		{
+			$values = array($values);
+		}
+
+		$columns = $this->columnize(array_keys(reset($values)));
+
+		// We need to build a list of parameter place-holders of values that are
+		// bound to the query. Each insert should have the exact same number
+		// of parameters so we can just go off the first list of values.
+		$parameters = $this->parameterize(reset($values));
+
+		$value = array_fill(0, count($values), "($parameters)");
+
+		$parameters = implode(', ', $value);
+
+		return "insert into $table ($columns) values ($parameters)";
+	}
+
+	/**
+	 * Compile an insert and get ID statement into SQL.
+	 *
+	 * @param  Illuminate\Database\Query\Builder  $query
+	 * @param  array  $values
+	 * @return string
+	 */
+	public function compileInsertGetId(Builder $query, $values)
+	{
+		return $this->compileInsert($query, $values);
+	}
+
+	/**
+	 * Compile an update statement into SQL.
+	 *
+	 * @param  Illuminate\Database\Query\Builder  $query
+	 * @param  array  $values
+	 * @return string
+	 */
+	public function compileUpdate(Builder $query, $values)
+	{
+		$table = $this->wrapTable($query->from);
+
+		$columns = array();
+
+		// Each one of the columns in the update statements needs to be wrapped in
+		// keyword identifiers, and a place-holder needs to be created for all
+		// of the values in the array of bindings so we can build the sets.
+		foreach ($values as $key => $value)
+		{
+			$key = $this->wrap($key);
+
+			$columns[] = $key.' = '.$this->parameter($value);
+		}
+
+		$columns = implode(', ', $columns);
+
+		// Of course, update queries may also be constrained by where clauses so
+		// we'll need to compile the where clause and attach it to the query
+		// so only the intended rows are updated by the SQL we generate.
+		$where = $this->compileWheres($query);
+
+		return trim("update $table set $columns $where");
+	}
+
+	/**
+	 * Compile a delete statement into SQL.
+	 *
+	 * @param  Illuminate\Database\Query\Builder  $query
+	 * @param  array  $values
+	 * @return string
+	 */
+	public function compileDelete(Builder $query)
+	{
+		$table = $this->wrapTable($query->from);
+
+		return trim("delete from $table ".$this->compileWheres($query));
 	}
 
 	/**
