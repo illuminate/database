@@ -144,9 +144,9 @@ class GrammarTest extends PHPUnit_Framework_TestCase {
 	public function testWhereShortcut()
 	{
 		$builder = $this->getBuilder();
-		$builder->select('*')->from('users')->where('id', 1);
-		$this->assertEquals('select * from "users" where "id" = ?', $builder->toSql());
-		$this->assertEquals(array(0 => 1), $builder->getBindings());
+		$builder->select('*')->from('users')->where('id', 1)->orWhere('name', 'foo');
+		$this->assertEquals('select * from "users" where "id" = ? or "name" = ?', $builder->toSql());
+		$this->assertEquals(array(0 => 1, 1 => 'foo'), $builder->getBindings());
 	}
 
 
