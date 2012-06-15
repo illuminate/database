@@ -117,6 +117,14 @@ class GrammarTest extends PHPUnit_Framework_TestCase {
 	}
 
 
+	public function testGroupBys()
+	{
+		$builder = $this->getBuilder();
+		$builder->select('*')->from('users')->groupBy('id', 'email');
+		$this->assertEquals('select * from "users" group by "id", "email"', $builder->toSql());
+	}
+
+
 	public function testLimitsAndOffsets()
 	{
 		$builder = $this->getBuilder();

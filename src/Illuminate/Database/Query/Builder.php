@@ -416,12 +416,12 @@ class Builder {
 	/**
 	 * Add a "group by" clause to the query.
 	 *
-	 * @param  string  $column
+	 * @param  dynamic  $columns
 	 * @return Illuminate\Database\Query\Builder
 	 */
-	public function groupBy($column)
+	public function groupBy()
 	{
-		$this->groups[] = $column;
+		$this->groups = array_merge((array) $this->groups, func_get_args());
 
 		return $this;
 	}
