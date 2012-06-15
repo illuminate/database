@@ -121,7 +121,7 @@ class Grammar extends BaseGrammar {
 
 		foreach ($joins as $join)
 		{
-			$table = $this->wrapTable($join['table']);
+			$table = $this->wrapTable($join->table);
 
 			// First we need to build all of the "on" clauses for the join. There may
 			// be many of these clauses, so we will need to spin through each one
@@ -148,7 +148,7 @@ class Grammar extends BaseGrammar {
 
 			$clauses = implode(' ', $clauses);
 
-			$type = $join['type'];
+			$type = $join->type;
 
 			// Once we have everything ready to go, we'll just concatenate all the
 			// parts to build the final "join" statement SQL for the query and

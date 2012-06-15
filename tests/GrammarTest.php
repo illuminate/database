@@ -153,6 +153,17 @@ class GrammarTest extends PHPUnit_Framework_TestCase {
 	}
 
 
+	public function testComplexJoin()
+	{
+		$builder = $this->getBuilder();
+		$builder->select('*')->from('users')->join('contacts', function($j)
+		{
+			$j->on('users.id', '=', 'contacts.id')->orOn('users.name', '=', 'contacts.name');
+		});
+		$this->assertEquals('select * from "users" inner join "contacts" on "users"."id" = "contacts"."id" or "users"."name" = "contacts"."name"', $builder->toSql());
+	}
+
+
 	protected function getBuilder()
 	{
 		$grammar = new Illuminate\Database\Query\Grammar;
