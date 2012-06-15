@@ -163,17 +163,16 @@ class Grammar extends BaseGrammar {
 	 * Compile the "where" portions of the query.
 	 *
 	 * @param  Illuminate\Database\Query\Builder  $query
-	 * @param  array  $wheres
 	 * @return string
 	 */
-	protected function compileWheres(Builder $query, $wheres)
+	protected function compileWheres(Builder $query)
 	{
 		$sql = array();
 
 		// Each type of where clause has its own compiler function whichi is responsible
 		// for actually creating the where clause SQL. This helps keep the code nice
 		// and maintainable since each clause has a very small function it uses.
-		foreach ($wheres as $where)
+		foreach ($query->wheres as $where)
 		{
 			$method = "where{$where['type']}";
 
@@ -204,7 +203,7 @@ class Grammar extends BaseGrammar {
 	{
 		$nested = $where['query'];
 
-		return '('.substr($this->compileWheres($nested, $nested->wheres), 6).')';
+		return '('.substr($this->compileWheres($nested), 6).')';
 	}
 
 	/**
@@ -424,7 +423,7 @@ class Grammar extends BaseGrammar {
 		// Of course, update queries may also be constrained by where clauses so
 		// we'll need to compile the where clause and attach it to the query
 		// so only the intended rows are updated by the SQL we generate.
-		$where = $this->compileWheres($query, $query->wheres);
+		$where = $this->compileWheres($query);
 
 		return trim("update $table set $columns $where");
 	}
@@ -440,7 +439,7 @@ class Grammar extends BaseGrammar {
 	{
 		$table = $this->wrapTable($query->from);
 
-		return trim("delete from $table ".$this->compileWheres($query, $query->wheres));
+		return trim("delete from $table ".$this->compileWheres($query));
 	}
 
 	/**
