@@ -94,7 +94,7 @@ abstract class Grammar {
 	 */
 	public function parameterize(array $values)
 	{
-		return implode(', ', array_map(array($this, 'parameter'), $value));
+		return implode(', ', array_map(array($this, 'parameter'), $values));
 	}
 
 	/**

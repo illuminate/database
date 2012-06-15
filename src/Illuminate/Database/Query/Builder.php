@@ -313,7 +313,7 @@ class Builder {
 	 * @param  bool    $not
 	 * @return Illuminate\Database\Query\Builder
 	 */
-	public function whereIn($colum, array $values, $boolean = 'and', $not = false)
+	public function whereIn($column, array $values, $boolean = 'and', $not = false)
 	{
 		$type = $not ? 'NotIn' : 'In';
 

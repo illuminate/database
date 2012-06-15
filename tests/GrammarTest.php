@@ -61,6 +61,15 @@ class GrammarTest extends PHPUnit_Framework_TestCase {
 	}
 
 
+	public function testBasicWhereIns()
+	{
+		$builder = $this->getBuilder();
+		$builder->select('*')->from('users')->whereIn('id', array(1, 2, 3));
+		$this->assertEquals('select * from "users" where "id" in (?, ?, ?)', $builder->toSql());
+		$this->assertEquals(array(0 => 1, 1 => 2, 2 => 3), $builder->getBindings());
+	}
+
+
 	public function testLimitsAndOffsets()
 	{
 		$builder = $this->getBuilder();
