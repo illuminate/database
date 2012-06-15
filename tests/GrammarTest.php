@@ -14,8 +14,8 @@ class GrammarTest extends PHPUnit_Framework_TestCase {
 	public function testBasicSelect()
 	{
 		$builder = $this->getBuilder();
-		$builder->from('users');
-		$this->assertEquals('select * from users', $builder->toSql());
+		$builder->select('*')->from('users');
+		$this->assertEquals('select * from "users"', $builder->toSql());
 	}
 
 
@@ -23,15 +23,15 @@ class GrammarTest extends PHPUnit_Framework_TestCase {
 	{
 		$builder = $this->getBuilder();
 		$builder->distinct()->select('foo', 'bar')->from('users');
-		$this->assertEquals('select distinct foo, bar from users', $builder->toSql());
+		$this->assertEquals('select distinct "foo", "bar" from "users"', $builder->toSql());
 	}
 
 
 	public function testLimitsAndOffsets()
 	{
 		$builder = $this->getBuilder();
-		$builder->from('users')->skip(5)->take(10);
-		$this->assertEquals('select * from users limit 10 offset 5', $builder->toSql());
+		$builder->select('*')->from('users')->skip(5)->take(10);
+		$this->assertEquals('select * from "users" limit 10 offset 5', $builder->toSql());
 	}
 
 

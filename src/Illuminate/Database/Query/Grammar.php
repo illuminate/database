@@ -5,6 +5,13 @@ use Illuminate\Database\Grammar as BaseGrammar;
 class Grammar extends BaseGrammar {
 
 	/**
+	 * The keyword identifier wrapper format.
+	 *
+	 * @var string
+	 */
+	protected $wrapper = '"%s"';
+
+	/**
 	 * The components that make up a select clause.
 	 *
 	 * @var array
@@ -98,7 +105,7 @@ class Grammar extends BaseGrammar {
 	 */
 	protected function compileFrom(Builder $query, $table)
 	{
-		return "from $table";
+		return 'from '.$this->wrapTable($table);
 	}
 
 	/**
@@ -114,7 +121,7 @@ class Grammar extends BaseGrammar {
 
 		foreach ($joins as $join)
 		{
-			$table = $join['table'];
+			$table = $this->wrapTable($join['table']);
 
 			// First we need to build all of the "on" clauses for the join. There may
 			// be many of these clauses, so we will need to spin through each one
@@ -124,6 +131,10 @@ class Grammar extends BaseGrammar {
 			foreach ($join['conditions'] as $condition)
 			{
 				extract($condition);
+
+				$first = $this->wrap($first);
+
+				$second = $this->wrap($second);
 
 				$clauses[] = "$boolean $first $operator $second";
 			}
@@ -183,6 +194,98 @@ class Grammar extends BaseGrammar {
 	}
 
 	/**
+	 * Compile a nested where clause.
+	 *
+	 * @param  Illuminate\Database\Query\Builder  $query
+	 * @param  array  $where
+	 * @return string
+	 */
+	protected function whereNested(Builder $query, $where)
+	{
+		$nested = $where['query'];
+
+		return '('.substr($this->compileWheres($nested), 6).')';
+	}
+
+	/**
+	 * Compile a basic where clause.
+	 *
+	 * @param  Illuminate\Database\Query\Builder  $query
+	 * @param  array  $where
+	 * @return string
+	 */
+	protected function whereBasic(Builder $query, $where)
+	{
+		$value = $this->parameter($where['value']);
+
+		return $this->wrap($where['column']).' '.$where['boolean'].' '.$value;
+	}
+
+	/**
+	 * Compile a "where in" clause.
+	 *
+	 * @param  Illuminate\Database\Query\Builder  $query
+	 * @param  array  $where
+	 * @return string
+	 */
+	protected function whereIn(Builder $query, $where)
+	{
+		$values = $this->parameterize($where['values']);
+
+		return $this->wrap($where['column']).' in ('.$values.')';
+	}
+
+	/**
+	 * Compile a "where not in" clause.
+	 *
+	 * @param  Illuminate\Database\Query\Builder  $query
+	 * @param  array  $where
+	 * @return string
+	 */
+	protected function whereNotIn(Builder $query, $where)
+	{
+		$values = $this->parameterize($where['values']);
+
+		return $this->wrap($where['column']).' not in ('.$values.')';
+	}
+
+	/**
+	 * Compile a "where null" clause.
+	 *
+	 * @param  Illuminate\Database\Query\Builder  $query
+	 * @param  array  $where
+	 * @return string
+	 */
+	protected function whereNull(Builder $query, $where)
+	{
+		return $this->wrap($where['column']).' is null';
+	}
+
+	/**
+	 * Compile a "where not null" clause.
+	 *
+	 * @param  Illuminate\Database\Query\Builder  $query
+	 * @param  array  $where
+	 * @return string
+	 */
+	protected function whereNotNull(Builder $query, $where)
+	{
+		return $this->wrap($where['column']).' is not null';
+	}
+
+	/**
+	 * Compile a raw where clause.
+	 *
+	 * @param  Illuminate\Database\Query\Builder  $query
+	 * @param  array  $where
+	 * @return string
+	 */
+	protected function whereRaw(Builder $query, $where)
+	{
+		return $where['sql'];
+	}
+
+	/**
 	 * Compile the "group by" portions of the query.
 	 *
 	 * @param  Illuminate\Database\Query\Builder  $query
@@ -215,9 +318,11 @@ class Grammar extends BaseGrammar {
 	 */
 	protected function compileOrders(Builder $query, $orders)
 	{
-		return 'order by '.implode(', ', array_map(function($order)
+		$me = $this;
+
+		return 'order by '.implode(', ', array_map(function($order) use ($me)
 		{
-			return $order['column'].' '.$order['direction'];
+			return $me->wrap($order['column']).' '.$order['direction'];
 		}
 		, $orders));
 	}

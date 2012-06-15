@@ -37,7 +37,7 @@ class Builder {
 	 *
 	 * @var array
 	 */
-	public $columns = array('*');
+	public $columns;
 
 	/**
 	 * Indicates if the query returns distinct results.
@@ -210,11 +210,12 @@ class Builder {
 	/**
 	 * Execute the query and get the first result.
 	 *
+	 * @param  array   $columns
 	 * @return mixed
 	 */
-	public function first()
+	public function first($columns = array('*'))
 	{
-		$results = $this->take(1)->get();
+		$results = $this->take(1)->get($columns);
 
 		return count($results) > 0 ? reset($results) : null;
 	}
@@ -222,10 +223,19 @@ class Builder {
 	/**
 	 * Execute the query as a "select" statement.
 	 *
+	 * @param  array  $columns
 	 * @return array
 	 */
-	public function get()
+	public function get($columns = array('*'))
 	{
+		// If no columns have been specified for the select staement, we will set them
+		// here to either the passed columns of the standard default of retrieving
+		// all of the columns on the table using the wildcard column character.
+		if (is_null($this->columns))
+		{
+			$this->columns = $columns;
+		}
+
 		$results = $this->connection->select($this->toSql(), $this->bindings);
 
 		return $this->processor->processSelect($this, $results);
