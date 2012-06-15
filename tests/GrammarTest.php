@@ -153,6 +153,14 @@ class GrammarTest extends PHPUnit_Framework_TestCase {
 	}
 
 
+	public function testBasicJoins()
+	{
+		$builder = $this->getBuilder();
+		$builder->select('*')->from('users')->join('contacts', 'users.id', '=', 'contacts.id')->leftJoin('photos', 'users.id', '=', 'photos.id');
+		$this->assertEquals('select * from "users" inner join "contacts" on "users"."id" = "contacts"."id" left join "photos" on "users"."id" = "photos"."id"', $builder->toSql());
+	}
+
+
 	public function testComplexJoin()
 	{
 		$builder = $this->getBuilder();

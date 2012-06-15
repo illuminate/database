@@ -208,7 +208,7 @@ class Builder {
 		{
 			$join = new JoinClause($type, $table);
 
-			$join->on($first, $opeartor, $second);
+			$join->on($first, $operator, $second);
 
 			$this->joins[] = $join;
 		}
