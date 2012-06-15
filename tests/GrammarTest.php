@@ -67,6 +67,11 @@ class GrammarTest extends PHPUnit_Framework_TestCase {
 		$builder->select('*')->from('users')->whereIn('id', array(1, 2, 3));
 		$this->assertEquals('select * from "users" where "id" in (?, ?, ?)', $builder->toSql());
 		$this->assertEquals(array(0 => 1, 1 => 2, 2 => 3), $builder->getBindings());
+
+		$builder = $this->getBuilder();
+		$builder->select('*')->from('users')->where('id', '=', 1)->orWhereIn('id', array(1, 2, 3));
+		$this->assertEquals('select * from "users" where "id" = ? or "id" in (?, ?, ?)', $builder->toSql());
+		$this->assertEquals(array(0 => 1, 1 => 1, 2 => 2, 3 => 3), $builder->getBindings());
 	}
 
 
