@@ -157,6 +157,28 @@ class Grammar extends BaseGrammar {
 	 */
 	protected function compileWheres(Builder $query, $wheres)
 	{
+		$sql = array();
+
+		// Each type of where clause has its own compiler function whichi is responsible
+		// for actually creating the where clause SQL. This helps keep the code nice
+		// and maintainable since each clause has a very small function it uses.
+		foreach ($wheres as $where)
+		{
+			$method = "where{$where['type']}";
+
+			$sql[] = $where['boolean'].' '.$this->$method($query, $where);
+		}
+
+		// If we actually have some where clauses, we will strip off the first boolean
+		// opeartor, which is added by the query builder for convenience so we can
+		// avoid checking for the first clause in each of the compiler methods.
+		if (count($sql) > 0)
+		{
+			$sql = implode(' ', $sql);
+
+			return 'where '.preg_replace('/and |or /', '', $sql, 1);
+		}
+
 		return '';
 	}
 
@@ -169,7 +191,7 @@ class Grammar extends BaseGrammar {
 	 */
 	protected function compileGroups(Builder $query, $groups)
 	{
-		return '';
+		return 'group by '.$this->columnize($groups);
 	}
 
 	/**
@@ -193,7 +215,11 @@ class Grammar extends BaseGrammar {
 	 */
 	protected function compileOrders(Builder $query, $orders)
 	{
-		return '';
+		return 'order by '.implode(', ', array_map(function($order)
+		{
+			return $order['column'].' '.$order['direction'];
+		}
+		, $orders));
 	}
 
 	/**
