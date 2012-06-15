@@ -89,6 +89,34 @@ class GrammarTest extends PHPUnit_Framework_TestCase {
 	}
 
 
+	public function testBasicWhereNulls()
+	{
+		$builder = $this->getBuilder();
+		$builder->select('*')->from('users')->whereNull('id');
+		$this->assertEquals('select * from "users" where "id" is null', $builder->toSql());
+		$this->assertEquals(array(), $builder->getBindings());
+
+		$builder = $this->getBuilder();
+		$builder->select('*')->from('users')->where('id', '=', 1)->orWhereNull('id');
+		$this->assertEquals('select * from "users" where "id" = ? or "id" is null', $builder->toSql());
+		$this->assertEquals(array(0 => 1), $builder->getBindings());
+	}
+
+
+	public function testBasicWhereNotNulls()
+	{
+		$builder = $this->getBuilder();
+		$builder->select('*')->from('users')->whereNotNull('id');
+		$this->assertEquals('select * from "users" where "id" is not null', $builder->toSql());
+		$this->assertEquals(array(), $builder->getBindings());
+
+		$builder = $this->getBuilder();
+		$builder->select('*')->from('users')->where('id', '=', 1)->orWhereNotNull('id');
+		$this->assertEquals('select * from "users" where "id" = ? or "id" is not null', $builder->toSql());
+		$this->assertEquals(array(0 => 1), $builder->getBindings());
+	}
+
+
 	public function testLimitsAndOffsets()
 	{
 		$builder = $this->getBuilder();
