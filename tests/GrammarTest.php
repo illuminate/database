@@ -75,6 +75,20 @@ class GrammarTest extends PHPUnit_Framework_TestCase {
 	}
 
 
+	public function testBasicWhereNotIns()
+	{
+		$builder = $this->getBuilder();
+		$builder->select('*')->from('users')->whereNotIn('id', array(1, 2, 3));
+		$this->assertEquals('select * from "users" where "id" not in (?, ?, ?)', $builder->toSql());
+		$this->assertEquals(array(0 => 1, 1 => 2, 2 => 3), $builder->getBindings());
+
+		$builder = $this->getBuilder();
+		$builder->select('*')->from('users')->where('id', '=', 1)->orWhereNotIn('id', array(1, 2, 3));
+		$this->assertEquals('select * from "users" where "id" = ? or "id" not in (?, ?, ?)', $builder->toSql());
+		$this->assertEquals(array(0 => 1, 1 => 1, 2 => 2, 3 => 3), $builder->getBindings());
+	}
+
+
 	public function testLimitsAndOffsets()
 	{
 		$builder = $this->getBuilder();
