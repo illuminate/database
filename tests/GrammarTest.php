@@ -27,6 +27,22 @@ class GrammarTest extends PHPUnit_Framework_TestCase {
 	}
 
 
+	public function testBasicAlias()
+	{
+		$builder = $this->getBuilder();
+		$builder->select('foo as bar')->from('users');
+		$this->assertEquals('select "foo" as "bar" from "users"', $builder->toSql());
+	}
+
+
+	public function testBasicTableWrapping()
+	{
+		$builder = $this->getBuilder();
+		$builder->select('*')->from('public.users');
+		$this->assertEquals('select * from "public"."users"', $builder->toSql());
+	}
+
+
 	public function testLimitsAndOffsets()
 	{
 		$builder = $this->getBuilder();
