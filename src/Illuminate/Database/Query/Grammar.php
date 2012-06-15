@@ -218,7 +218,7 @@ class Grammar extends BaseGrammar {
 	{
 		$value = $this->parameter($where['value']);
 
-		return $this->wrap($where['column']).' '.$where['boolean'].' '.$value;
+		return $this->wrap($where['column']).' '.$where['operator'].' '.$value;
 	}
 
 	/**
