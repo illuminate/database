@@ -537,7 +537,9 @@ class Builder {
 
 		$results = $this->connection->select($this->toSql(), $this->bindings);
 
-		return $this->processor->processSelect($this, $results);
+		$this->processor->processSelect($this, $results);
+
+		return $results;
 	}
 
 	/**
