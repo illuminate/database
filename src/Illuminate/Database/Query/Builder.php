@@ -495,6 +495,18 @@ class Builder {
 	}
 
 	/**
+	 * Execute a query for a single record by ID.
+	 *
+	 * @param  int    $id
+	 * @param  array  $columns
+	 * @return mixed
+	 */
+	public function find($id, $columns = array('*'))
+	{
+		return $this->where('id', '=', $id)->first($columns);
+	}
+
+	/**
 	 * Execute the query and get the first result.
 	 *
 	 * @param  array   $columns
