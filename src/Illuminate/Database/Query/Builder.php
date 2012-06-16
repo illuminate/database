@@ -543,6 +543,105 @@ class Builder {
 	}
 
 	/**
+	 * Execute an aggregate function on the database.
+	 *
+	 * @param  string  $function
+	 * @param  array   $columns
+	 * @return mixed
+	 */
+	public function aggregate($function, $columns = array('*'))
+	{
+		$this->aggregate = compact('function', 'columns');
+
+		$results = $this->get($columns);
+
+		// Once we have executed the query, we will reset the aggregate property so
+		// that more select queries can be executed against the database without
+		// the aggregate value getting in the way when the grammar builds it.
+		$this->aggregate = null;
+
+		$result = (array) $results[0];
+
+		return $result['aggregate'];
+	}
+
+	/**
+	 * Insert a new record into the database.
+	 *
+	 * @param  array  $values
+	 * @return bool
+	 */
+	public function insert(array $values)
+	{
+		if ( ! is_array(reset($values))) $values = array($values);
+
+		$bindings = array();
+
+		// We treat every insert like a batch insert so we can easily insert each
+		// of the records into the database consistently. This just makes it
+		// much easier on the grammar side to just handle one situation.
+		foreach ($values as $record)
+		{
+			$bindings = array_merge($bindings, array_values($record));
+		}
+
+		$sql = $this->grammar->compileInsert($this, $bindings);
+
+		return $this->connection->insert($sql, $bindings);
+	}
+
+	/**
+	 * Insert a new record and get the value of the primary key.
+	 *
+	 * @param  array  $values
+	 * @return int
+	 */
+	public function insertGetId(array $values)
+	{
+		$sql = $this->grammar->compileInsertGetId($this, $values);
+
+		$result = $this->connection->insert($sql, $values);
+
+		return $this->processor->processInsertGetId($this, $result);
+	}
+
+	/**
+	 * Update a record in the database.
+	 *
+	 * @param  array  $values
+	 * @return int
+	 */
+	public function update(array $values)
+	{
+		$values = array_merge((array) $values, $this->bindings);
+
+		$sql = $this->grammar->compileUpdate($this, $values);
+
+		return $this->connection->update($sql, $values);
+	}
+
+	/**
+	 * Delete a record from the database.
+	 *
+	 * @param  array  $values
+	 * @return int
+	 */
+	public function delete($id = null)
+	{
+		// If an ID is passed to the method, we will set the where clause to check
+		// the ID to allow developers to simply and quickly remove a single row
+		// from their database without manually specifying the where clauses.
+		if ( ! is_null($id))
+		{
+			$this->where('id', '=', $id);
+		}
+
+		$sql = $this->grammar->compileDelete($this);
+
+		return $this->connection->delete($sql, $this->bindings);
+	}
+
+	/**
 	 * Get the current query value bindings.
 	 *
 	 * @return array
@@ -561,6 +660,16 @@ class Builder {
 	public function mergeBindings(Builder $query)
 	{
 		$this->bindings = array_merge($this->bindings, $query->bindings);
+	}
+
+	/**
+	 * Get the database connection instance.
+	 *
+	 * @return Illuminate\Database\ConnectionInterface
+	 */
+	public function getConnection()
+	{
+		return $this->connection;
 	}
 
 }
