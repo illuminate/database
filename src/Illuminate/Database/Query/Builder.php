@@ -613,7 +613,7 @@ class Builder {
 	 */
 	public function update(array $values)
 	{
-		$values = array_merge((array) $values, $this->bindings);
+		$values = array_merge($values, $this->bindings);
 
 		$sql = $this->grammar->compileUpdate($this, $values);
 
