@@ -14,4 +14,17 @@ abstract class Processor {
 		return $results;
 	}
 
+	/**
+	 * Process the results of an "insert get ID" query.
+	 *
+	 * @param  Illuminate\Database\Query\Builder  $query
+	 * @param  array   $results
+	 * @param  string  $sequence
+	 * @return array
+	 */
+	public function processInsertGetId(Builder $query, $result, $sequence = null)
+	{
+		return $query->getConnection()->getPdo()->lastInsertId($sequence);
+	}
+
 }

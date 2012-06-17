@@ -593,16 +593,17 @@ class Builder {
 	/**
 	 * Insert a new record and get the value of the primary key.
 	 *
-	 * @param  array  $values
+	 * @param  array   $values
+	 * @param  string  $sequence
 	 * @return int
 	 */
-	public function insertGetId(array $values)
+	public function insertGetId(array $values, $sequence = null)
 	{
 		$sql = $this->grammar->compileInsertGetId($this, $values);
 
 		$result = $this->connection->insert($sql, $values);
 
-		return $this->processor->processInsertGetId($this, $result);
+		return $this->processor->processInsertGetId($this, $result, $sequence);
 	}
 
 	/**
@@ -631,10 +632,7 @@ class Builder {
 		// If an ID is passed to the method, we will set the where clause to check
 		// the ID to allow developers to simply and quickly remove a single row
 		// from their database without manually specifying the where clauses.
-		if ( ! is_null($id))
-		{
-			$this->where('id', '=', $id);
-		}
+		if ( ! is_null($id)) $this->where('id', '=', $id);
 
 		$sql = $this->grammar->compileDelete($this);
 
