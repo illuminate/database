@@ -15,11 +15,11 @@ class MySqlConnection extends Connection {
 	/**
 	 * Get the default post processor instance.
 	 *
-	 * @return Illuminate\Database\Processor
+	 * @return Illuminate\Database\Query\Processor
 	 */
 	protected function getDefaultPostProcessor()
 	{
-		return new Processors\MySqlProcessor;
+		return new Query\Processor;
 	}
 
 }
