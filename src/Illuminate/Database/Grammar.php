@@ -116,7 +116,7 @@ abstract class Grammar {
 	 */
 	public function getValue($expression)
 	{
-		return substr($value, 4);
+		return substr($expression, 4);
 	}
 
 	/**

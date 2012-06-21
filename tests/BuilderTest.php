@@ -181,6 +181,14 @@ class BuilderTest extends PHPUnit_Framework_TestCase {
 	}
 
 
+	public function testRawExpressionsInSelect()
+	{
+		$builder = $this->getBuilder();
+		$builder->select('raw|substr(foo, 6)')->from('users');
+		$this->assertEquals('select substr(foo, 6) from "users"', $builder->toSql());
+	}
+
+
 	protected function getBuilder()
 	{
 		$grammar = new Illuminate\Database\Query\Grammar;
