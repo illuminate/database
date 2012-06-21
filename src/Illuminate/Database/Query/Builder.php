@@ -543,6 +543,50 @@ class Builder {
 	}
 
 	/**
+	 * Retrieve the "count" result of the query.
+	 *
+	 * @param  string  $column
+	 * @return int
+	 */
+	public function count($column = '*')
+	{
+		return $this->aggregate(__FUNCTION__, (array) $column);
+	}
+
+	/**
+	 * Retrieve the minimum value of a given column.
+	 *
+	 * @param  string  $column
+	 * @return mixed
+	 */
+	public function min($column)
+	{
+		return $this->aggregate(__FUNCTION__, (array) $column);
+	}
+
+	/**
+	 * Retrieve the maximum value of a given column.
+	 *
+	 * @param  string  $column
+	 * @return mixed
+	 */
+	public function max($column)
+	{
+		return $this->aggregate(__FUNCTION__, (array) $column);
+	}
+
+	/**
+	 * Retrieve the sum of the values of a given column.
+	 *
+	 * @param  string  $column
+	 * @return mixed
+	 */
+	public function sum($column)
+	{
+		return $this->aggregate(__FUNCTION__, (array) $column);
+	}
+
+	/**
 	 * Execute an aggregate function on the database.
 	 *
 	 * @param  string  $function
