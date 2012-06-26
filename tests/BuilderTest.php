@@ -189,6 +189,16 @@ class BuilderTest extends PHPUnit_Framework_TestCase {
 	}
 
 
+	public function testFindReturnsFirstResultByID()
+	{
+		$builder = $this->getBuilder();
+		$builder->getConnection()->shouldReceive('select')->once()->with('select * from "users" where "id" = ? limit 1', array(1))->andReturn(array(array('foo' => 'bar')));
+		$builder->getProcessor()->shouldReceive('processSelect')->once();
+		$results = $builder->from('users')->find(1);
+		$this->assertEquals(array('foo' => 'bar'), $results);
+	}
+
+
 	protected function getBuilder()
 	{
 		$grammar = new Illuminate\Database\Query\Grammar;

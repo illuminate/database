@@ -617,7 +617,13 @@ class Builder {
 	 */
 	public function insert(array $values)
 	{
-		if ( ! is_array(reset($values))) $values = array($values);
+		// Since every insert is treated like a batch insert, we'll make sure the
+		// bindings are structured in a way that is convenient or building our
+		// insert statement by verifying the elements are actually arrays.
+		if ( ! is_array(reset($values)))
+		{
+			$values = array($values);
+		}
 
 		$bindings = array();
 
@@ -629,6 +635,9 @@ class Builder {
 			$bindings = array_merge($bindings, array_values($record));
 		}
 
+		// Once we have compiled the insert statement SQL we can execute it on a
+		// connection and return the result as a boolean success indicator as
+		// that is the same type of result returned by the raw connections.
 		$sql = $this->grammar->compileInsert($this, $bindings);
 
 		return $this->connection->insert($sql, $bindings);
@@ -712,6 +721,16 @@ class Builder {
 	public function getConnection()
 	{
 		return $this->connection;
+	}
+
+	/**
+	 * Get the database query processor instance.
+	 *
+	 * @return Illuminate\Database\Query\Processor
+	 */
+	public function getProcessor()
+	{
+		return $this->processor;
 	}
 
 }
