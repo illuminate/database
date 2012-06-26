@@ -1,4 +1,8 @@
-<?php namespace Illuminate\Database; use PDO, Closure;
+<?php namespace Illuminate\Database;
+
+use PDO;
+use Closure;
+use Illuminate\Database\Query\Processors\Processor;
 
 abstract class Connection implements ConnectionInterface {
 
@@ -12,14 +16,14 @@ abstract class Connection implements ConnectionInterface {
 	/**
 	 * The query grammar implementation.
 	 *
-	 * @var Illuminate\Database\Query\Grammar
+	 * @var Illuminate\Database\Query\Grammars\Grammar
 	 */
 	protected $queryGrammar;
 
 	/**
 	 * The query post processor implementation.
 	 *
-	 * @var Illuminate\Database\Query\Processor
+	 * @var Illuminate\Database\Query\Processors\Processor
 	 */
 	protected $postProcessor;
 
@@ -56,7 +60,7 @@ abstract class Connection implements ConnectionInterface {
 	/**
 	 * Get the default query grammar instance.
 	 *
-	 * @return Illuminate\Database\Query\Grammar
+	 * @return Illuminate\Database\Query\Grammars\Grammar
 	 */
 	abstract protected function getDefaultQueryGrammar();
 
@@ -73,7 +77,7 @@ abstract class Connection implements ConnectionInterface {
 	/**
 	 * Get the default post processor instance.
 	 *
-	 * @return Illuminate\Database\Query\Processor
+	 * @return Illuminate\Database\Query\Processors\Processor
 	 */
 	abstract protected function getDefaultPostProcessor();
 
@@ -283,7 +287,7 @@ abstract class Connection implements ConnectionInterface {
 	/**
 	 * Get the query grammar used by the connection.
 	 *
-	 * @return Illuminate\Database\Query\Grammar
+	 * @return Illuminate\Database\Query\Grammars\Grammar
 	 */
 	public function getQueryGrammar()
 	{
@@ -293,10 +297,10 @@ abstract class Connection implements ConnectionInterface {
 	/**
 	 * Set the query grammar used by the connection.
 	 *
-	 * @param  Illuminate\Database\Query\Grammar
+	 * @param  Illuminate\Database\Query\Grammars\Grammar
 	 * @return void
 	 */
-	public function setQueryGrammar(Query\Grammar $grammar)
+	public function setQueryGrammar(Query\Grammars\Grammar $grammar)
 	{
 		$this->queryGrammar = $grammar;
 	}
@@ -304,7 +308,7 @@ abstract class Connection implements ConnectionInterface {
 	/**
 	 * Get the query post processor used by the connection.
 	 *
-	 * @return Illuminate\Database\Query\Processor
+	 * @return Illuminate\Database\Query\Processors\Processor
 	 */
 	public function getPostProcessor()
 	{
@@ -314,10 +318,10 @@ abstract class Connection implements ConnectionInterface {
 	/**
 	 * Set the query post processor used by the connection.
 	 *
-	 * @param  Illuminate\Database\Query\Processor
+	 * @param  Illuminate\Database\Query\Processors\Processor
 	 * @return void
 	 */
-	public function setPostProcessor(Query\Processor $processor)
+	public function setPostProcessor(Processor $processor)
 	{
 		$this->postProcessor = $processor;
 	}

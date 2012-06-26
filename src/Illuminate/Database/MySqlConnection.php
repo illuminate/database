@@ -5,7 +5,7 @@ class MySqlConnection extends Connection {
 	/**
 	 * Get the default query grammar instance.
 	 *
-	 * @return Illuminate\Database\Query\Grammars\Grammar
+	 * @return Illuminate\Database\Query\Grammars\Grammars\Grammar
 	 */
 	protected function getDefaultQueryGrammar()
 	{
@@ -15,7 +15,7 @@ class MySqlConnection extends Connection {
 	/**
 	 * Get the default post processor instance.
 	 *
-	 * @return Illuminate\Database\Query\Processor
+	 * @return Illuminate\Database\Query\Processors\Processor
 	 */
 	protected function getDefaultPostProcessor()
 	{

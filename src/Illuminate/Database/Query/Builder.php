@@ -2,6 +2,8 @@
 
 use Closure;
 use Illuminate\Database\ConnectionInterface;
+use Illuminate\Database\Query\Grammars\Grammar;
+use Illuminate\Database\Query\Processors\Processor;
 
 class Builder {
 
@@ -15,14 +17,14 @@ class Builder {
 	/**
 	 * The database query grammar instance.
 	 *
-	 * @var Illuminate\Database\Query\Grammar
+	 * @var Illuminate\Database\Query\Grammars\Grammar
 	 */
 	protected $grammar;
 
 	/**
 	 * The database query post processor instance.
 	 *
-	 * @var Illuminate\Database\Query\Processor
+	 * @var Illuminate\Database\Query\Processors\Processor
 	 */
 	protected $processor;
 
@@ -136,7 +138,7 @@ class Builder {
 	 *
 	 * @param  Illuminate\Database\ConnectionInterface  $connection
 	 * @param  Illuminate\Databaase\Query\Grammar  $grammar
-	 * @param  Illuminate\Database\Query\Processor  $processor
+	 * @param  Illuminate\Database\Query\Processors\Processor  $processor
 	 * @return void
 	 */
 	public function __construct(ConnectionInterface $connection,
@@ -726,7 +728,7 @@ class Builder {
 	/**
 	 * Get the database query processor instance.
 	 *
-	 * @return Illuminate\Database\Query\Processor
+	 * @return Illuminate\Database\Query\Processors\Processor
 	 */
 	public function getProcessor()
 	{
