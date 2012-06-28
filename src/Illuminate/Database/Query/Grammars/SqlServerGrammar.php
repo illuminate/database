@@ -12,7 +12,7 @@ class SqlServerGrammar extends Grammar {
 	 */
 	public function compileSelect(Builder $query)
 	{
-		$components = parent::compileComponents($query);
+		$components = $this->compileComponents($query);
 
 		// If an offset is present on the query, we will need to wrap the query in
 		// a big ANSI offset syntax block. This is very nasty compared to the
