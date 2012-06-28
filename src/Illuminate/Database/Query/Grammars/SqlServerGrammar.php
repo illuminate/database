@@ -96,7 +96,7 @@ class SqlServerGrammar extends Grammar {
 		// row numbers being between the given limit and offset values.
 		$sql = $this->concatenate($components);
 
-		return "select * from ($sql) as temp_table where row_num {$constraint}";
+		return "select * from ($sql) as temp_table where row_num $constraint";
 	}
 
 	/**
