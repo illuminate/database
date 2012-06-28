@@ -1,5 +1,7 @@
 <?php namespace Illuminate\Database\Query\Grammars;
 
+use Illuminate\Database\Query\Builder;
+
 class SQLiteGrammar extends Grammar {
 
 	/**

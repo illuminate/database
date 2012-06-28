@@ -38,6 +38,17 @@ class Grammar extends BaseGrammar {
 	 */
 	public function compileSelect(Builder $query)
 	{
+		return trim($this->concatenate($this->compileComponents($query)));
+	}
+
+	/**
+	 * Compile the components necessary for a select clause.
+	 *
+	 * @param  Illuminate\Database\Query\Builder
+	 * @return array
+	 */
+	protected function compileComponents(Builder $query)
+	{
 		$sql = array();
 
 		foreach ($this->selectComponents as $component)
@@ -53,7 +64,7 @@ class Grammar extends BaseGrammar {
 			}
 		}
 
-		return trim($this->concatenate($sql));
+		return $sql;
 	}
 
 	/**
