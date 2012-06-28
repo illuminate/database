@@ -199,6 +199,34 @@ class BuilderTest extends PHPUnit_Framework_TestCase {
 	}
 
 
+	public function testAggregateFunctions()
+	{
+		$builder = $this->getBuilder();
+		$builder->getConnection()->shouldReceive('select')->once()->with('select count(*) as aggregate from "users"', array())->andReturn(array(array('aggregate' => 1)));
+		$builder->getProcessor()->shouldReceive('processSelect')->once();
+		$results = $builder->from('users')->count();
+		$this->assertEquals(1, $results);
+
+		$builder = $this->getBuilder();
+		$builder->getConnection()->shouldReceive('select')->once()->with('select max("id") as aggregate from "users"', array())->andReturn(array(array('aggregate' => 1)));
+		$builder->getProcessor()->shouldReceive('processSelect')->once();
+		$results = $builder->from('users')->max('id');
+		$this->assertEquals(1, $results);
+
+		$builder = $this->getBuilder();
+		$builder->getConnection()->shouldReceive('select')->once()->with('select min("id") as aggregate from "users"', array())->andReturn(array(array('aggregate' => 1)));
+		$builder->getProcessor()->shouldReceive('processSelect')->once();
+		$results = $builder->from('users')->min('id');
+		$this->assertEquals(1, $results);
+
+		$builder = $this->getBuilder();
+		$builder->getConnection()->shouldReceive('select')->once()->with('select sum("id") as aggregate from "users"', array())->andReturn(array(array('aggregate' => 1)));
+		$builder->getProcessor()->shouldReceive('processSelect')->once();
+		$results = $builder->from('users')->sum('id');
+		$this->assertEquals(1, $results);
+	}
+
+
 	protected function getBuilder()
 	{
 		$grammar = new Illuminate\Database\Query\Grammars\Grammar;
