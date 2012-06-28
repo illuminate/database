@@ -381,6 +381,9 @@ class Grammar extends BaseGrammar {
 
 		$parameters = implode(', ', $value);
 
+		// Once we have successfully generated the proper place-holders we just
+		// need to concatenate all the pieces to create the final, complete
+		// insert statements ready for execution against the connection.
 		return "insert into $table ($columns) values ($parameters)";
 	}
 
@@ -388,10 +391,11 @@ class Grammar extends BaseGrammar {
 	 * Compile an insert and get ID statement into SQL.
 	 *
 	 * @param  Illuminate\Database\Query\Builder  $query
-	 * @param  array  $values
+	 * @param  array   $values
+	 * @param  string  $sequence
 	 * @return string
 	 */
-	public function compileInsertGetId(Builder $query, $values)
+	public function compileInsertGetId(Builder $query, $values, $sequence)
 	{
 		return $this->compileInsert($query, $values);
 	}

@@ -654,7 +654,7 @@ class Builder {
 	 */
 	public function insertGetId(array $values, $sequence = null)
 	{
-		$sql = $this->grammar->compileInsertGetId($this, $values);
+		$sql = $this->grammar->compileInsertGetId($this, $values, $sequence);
 
 		$result = $this->connection->insert($sql, $values);
 
