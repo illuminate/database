@@ -4,7 +4,7 @@ use PDO;
 use Closure;
 use Illuminate\Database\Query\Processors\Processor;
 
-abstract class Connection implements ConnectionInterface {
+class Connection implements ConnectionInterface {
 
 	/**
 	 * The active PDO connection.
