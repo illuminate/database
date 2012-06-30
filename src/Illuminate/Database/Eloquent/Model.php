@@ -1,13 +1,22 @@
 <?php namespace Illuminate\Database\Eloquent;
 
+use Illuminate\Database\Connection;
+
 abstract class Model {
 
 	/**
 	 * The table associated with the model.
 	 *
-	 * @return string
+	 * @var string
 	 */
 	protected $table;
+
+	/**
+	 * The connection for the model.
+	 *
+	 * @var string
+	 */
+	protected $connection;
 
 	/**
 	 * The model's attributes.
@@ -15,6 +24,13 @@ abstract class Model {
 	 * @var array
 	 */
 	protected $attributes;
+
+	/**
+	 * Indicates if the model exists.
+	 *
+	 * @var bool
+	 */
+	public $exists = false;
 
 	/**
 	 * The connections registered with Eloquent.
@@ -127,6 +143,16 @@ abstract class Model {
 	}
 
 	/**
+	 * Get a new query builder for the model's table.
+	 *
+	 * @return Illuminate\Database\Query\Builder
+	 */
+	public function newQuery()
+	{
+		return $this->getConnection()->table($this->getTable());
+	}
+
+	/**
 	 * Get the table associated with the model.
 	 *
 	 * @return string
@@ -145,6 +171,27 @@ abstract class Model {
 	public function setTable($table)
 	{
 		$this->table = $table;
+	}
+
+	/**
+	 * Get the database connection for the model.
+	 *
+	 * @return Illuminate\Database\Connection
+	 */
+	public function getConnection()
+	{
+		return $this->connection ?: static::getDefaultConnection();
+	}
+
+	/**
+	 * Set the connection associated with the model.
+	 *
+	 * @param  string  $name
+	 * @return void
+	 */
+	public function setConnection($name)
+	{
+		$this->connection = static::$connections[$name];
 	}
 
 	/**
