@@ -255,6 +255,20 @@ class BuilderTest extends PHPUnit_Framework_TestCase {
 	}
 
 
+	public function testDeleteMethod()
+	{
+		$builder = $this->getBuilder();
+		$builder->getConnection()->shouldReceive('delete')->once()->with('delete from "users" where "email" = ?', array('foo'))->andReturn(1);
+		$result = $builder->from('users')->where('email', '=', 'foo')->delete();
+		$this->assertEquals(1, $result);
+
+		$builder = $this->getBuilder();
+		$builder->getConnection()->shouldReceive('delete')->once()->with('delete from "users" where "id" = ?', array(1))->andReturn(1);
+		$result = $builder->from('users')->delete(1);
+		$this->assertEquals(1, $result);
+	}
+
+
 	protected function getBuilder()
 	{
 		$grammar = new Illuminate\Database\Query\Grammars\Grammar;
