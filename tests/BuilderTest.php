@@ -237,6 +237,14 @@ class BuilderTest extends PHPUnit_Framework_TestCase {
 	}
 
 
+	public function testInsertMethod()
+	{
+		$builder = $this->getBuilder();
+		$builder->getConnection()->shouldReceive('insert')->once()->with('insert into "users" ("email") values ((?))', array('foo'))->andReturn(true);
+		$result = $builder->from('users')->insert(array('email' => 'foo'));
+	}
+
+
 	protected function getBuilder()
 	{
 		$grammar = new Illuminate\Database\Query\Grammars\Grammar;

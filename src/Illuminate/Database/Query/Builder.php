@@ -640,7 +640,7 @@ class Builder {
 		// Once we have compiled the insert statement SQL we can execute it on a
 		// connection and return the result as a boolean success indicator as
 		// that is the same type of result returned by the raw connections.
-		$sql = $this->grammar->compileInsert($this, $bindings);
+		$sql = $this->grammar->compileInsert($this, $values);
 
 		return $this->connection->insert($sql, $bindings);
 	}
