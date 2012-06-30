@@ -677,6 +677,34 @@ class Builder {
 	}
 
 	/**
+	 * Increment a column's value by a given amount.
+	 *
+	 * @param  string  $column
+	 * @param  int     $amount
+	 * @return int
+	 */
+	public function increment($column, $amount = 1)
+	{
+		$wrapped = $this->grammar->wrap($column);
+
+		return $this->update(array($column => "raw|$wrapped + $amount"));
+	}
+
+	/**
+	 * Decrement a column's value by a given amount.
+	 *
+	 * @param  string  $column
+	 * @param  int     $amount
+	 * @return int
+	 */
+	public function decrement($column, $amount = 1)
+	{
+		$wrapped = $this->grammar->wrap($column);
+
+		return $this->update(array($column => "raw|$wrapped - $amount"));
+	}
+
+	/**
 	 * Delete a record from the database.
 	 *
 	 * @param  array  $values
