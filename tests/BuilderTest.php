@@ -242,6 +242,16 @@ class BuilderTest extends PHPUnit_Framework_TestCase {
 		$builder = $this->getBuilder();
 		$builder->getConnection()->shouldReceive('insert')->once()->with('insert into "users" ("email") values ((?))', array('foo'))->andReturn(true);
 		$result = $builder->from('users')->insert(array('email' => 'foo'));
+		$this->assertTrue($result);
+	}
+
+
+	public function testUpdateMethod()
+	{
+		$builder = $this->getBuilder();
+		$builder->getConnection()->shouldReceive('update')->once()->with('update "users" set "email" = ? where "id" = ?', array('foo', 1))->andReturn(1);
+		$result = $builder->from('users')->where('id', '=', 1)->update(array('email' => 'foo'));
+		$this->assertEquals(1, $result);
 	}
 
 

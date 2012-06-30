@@ -669,11 +669,11 @@ class Builder {
 	 */
 	public function update(array $values)
 	{
-		$values = array_merge($values, $this->bindings);
+		$bindings = array_values(array_merge($values, $this->bindings));
 
 		$sql = $this->grammar->compileUpdate($this, $values);
 
-		return $this->connection->update($sql, $values);
+		return $this->connection->update($sql, $bindings);
 	}
 
 	/**
