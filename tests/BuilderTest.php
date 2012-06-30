@@ -278,12 +278,27 @@ class BuilderTest extends PHPUnit_Framework_TestCase {
 	}
 
 
+	public function testPostgresInsertGetId()
+	{
+		$builder = $this->getPostgresBuilder();
+		$builder->getProcessor()->shouldReceive('processInsertGetId')->once()->with($builder, 'insert into "users" ("email") values ((?)) returning "id"', array('foo'), 'id')->andReturn(1);
+		$result = $builder->from('users')->insertGetId(array('email' => 'foo'), 'id');
+		$this->assertEquals(1, $result);
+	}
+
+
 	protected function getBuilder()
 	{
 		$grammar = new Illuminate\Database\Query\Grammars\Grammar;
-
 		$processor = m::mock('Illuminate\Database\Query\Processors\Processor');
+		return new Builder(m::mock('Illuminate\Database\ConnectionInterface'), $grammar, $processor);
+	}
 
+
+	protected function getPostgresBuilder()
+	{
+		$grammar = new Illuminate\Database\Query\Grammars\PostgresGrammar;
+		$processor = m::mock('Illuminate\Database\Query\Processors\Processor');
 		return new Builder(m::mock('Illuminate\Database\ConnectionInterface'), $grammar, $processor);
 	}
 
