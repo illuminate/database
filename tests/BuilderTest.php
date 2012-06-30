@@ -287,6 +287,22 @@ class BuilderTest extends PHPUnit_Framework_TestCase {
 	}
 
 
+	public function testMySqlWrapping()
+	{
+		$builder = $this->getMySqlBuilder();
+		$builder->select('*')->from('users');
+		$this->assertEquals('select * from `users`', $builder->toSql());
+	}
+
+
+	public function testSQLiteOrderBy()
+	{
+		$builder = $this->getSQLiteBuilder();
+		$builder->select('*')->from('users')->orderBy('email', 'desc');
+		$this->assertEquals('select * from "users" order by "email" collate nocase desc', $builder->toSql());
+	}
+
+
 	protected function getBuilder()
 	{
 		$grammar = new Illuminate\Database\Query\Grammars\Grammar;
@@ -298,6 +314,22 @@ class BuilderTest extends PHPUnit_Framework_TestCase {
 	protected function getPostgresBuilder()
 	{
 		$grammar = new Illuminate\Database\Query\Grammars\PostgresGrammar;
+		$processor = m::mock('Illuminate\Database\Query\Processors\Processor');
+		return new Builder(m::mock('Illuminate\Database\ConnectionInterface'), $grammar, $processor);
+	}
+
+
+	protected function getMySqlBuilder()
+	{
+		$grammar = new Illuminate\Database\Query\Grammars\MySqlGrammar;
+		$processor = m::mock('Illuminate\Database\Query\Processors\Processor');
+		return new Builder(m::mock('Illuminate\Database\ConnectionInterface'), $grammar, $processor);
+	}
+
+
+	protected function getSQLiteBuilder()
+	{
+		$grammar = new Illuminate\Database\Query\Grammars\SQLiteGrammar;
 		$processor = m::mock('Illuminate\Database\Query\Processors\Processor');
 		return new Builder(m::mock('Illuminate\Database\ConnectionInterface'), $grammar, $processor);
 	}
