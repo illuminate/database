@@ -246,6 +246,15 @@ class BuilderTest extends PHPUnit_Framework_TestCase {
 	}
 
 
+	public function testInsertGetIdMethod()
+	{
+		$builder = $this->getBuilder();
+		$builder->getProcessor()->shouldReceive('processInsertGetId')->once()->with($builder, 'insert into "users" ("email") values ((?))', array('foo'), 'id')->andReturn(1);
+		$result = $builder->from('users')->insertGetId(array('email' => 'foo'), 'id');
+		$this->assertEquals(1, $result);
+	}
+
+
 	public function testUpdateMethod()
 	{
 		$builder = $this->getBuilder();

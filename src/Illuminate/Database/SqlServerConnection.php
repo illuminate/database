@@ -1,6 +1,6 @@
 <?php namespace Illuminate\Database;
 
-class MySqlConnection extends Connection {
+class SqlServerConnection extends Connection {
 
 	/**
 	 * Get the default query grammar instance.
@@ -9,7 +9,7 @@ class MySqlConnection extends Connection {
 	 */
 	protected function getDefaultQueryGrammar()
 	{
-		return new Query\Grammars\MySqlGrammar;
+		return new Query\Grammars\SqlServerGrammar;
 	}
 
 }

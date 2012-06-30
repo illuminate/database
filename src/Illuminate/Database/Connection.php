@@ -62,7 +62,10 @@ abstract class Connection implements ConnectionInterface {
 	 *
 	 * @return Illuminate\Database\Query\Grammars\Grammar
 	 */
-	abstract protected function getDefaultQueryGrammar();
+	protected function getDefaultQueryGrammar()
+	{
+		return new Query\Grammars\Grammar;
+	}
 
 	/**
 	 * Set the query post processor to the default implementation.
@@ -79,7 +82,10 @@ abstract class Connection implements ConnectionInterface {
 	 *
 	 * @return Illuminate\Database\Query\Processors\Processor
 	 */
-	abstract protected function getDefaultPostProcessor();
+	protected function getDefaultPostProcessor()
+	{
+		return new Query\Processors\Processor;
+	}
 
 	/**
 	 * Begin a fluent query against a database table.

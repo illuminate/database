@@ -621,7 +621,7 @@ class Builder {
 	{
 		// Since every insert is treated like a batch insert, we'll make sure the
 		// bindings are structured in a way that is convenient or building our
-		// insert statement by verifying the elements are actually arrays.
+		// insert statements by verifying the elements are actually arrays.
 		if ( ! is_array(reset($values)))
 		{
 			$values = array($values);
@@ -656,9 +656,9 @@ class Builder {
 	{
 		$sql = $this->grammar->compileInsertGetId($this, $values, $sequence);
 
-		$result = $this->connection->insert($sql, $values);
+		$values = array_values($values);
 
-		return $this->processor->processInsertGetId($this, $result, $sequence);
+		return $this->processor->processInsertGetId($this, $sql, $values, $sequence);
 	}
 
 	/**
