@@ -71,7 +71,7 @@ class SqlServerGrammar extends Grammar {
 		// add an expression to the select that will give back the rows.
 		$orders = $components['orders'];
 
-		$components['selects'] .= ", row_number() over ({$orders}) as row_num";
+		$components['columns'] .= ", row_number() over ({$orders}) as row_num";
 
 		unset($components['orders']);
 
