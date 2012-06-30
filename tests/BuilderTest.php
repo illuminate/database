@@ -303,6 +303,14 @@ class BuilderTest extends PHPUnit_Framework_TestCase {
 	}
 
 
+	public function testSqlServerLimitsAndOffsets()
+	{
+		$builder = $this->getSqlServerBuilder();
+		$builder->select('*')->from('users')->take(10);
+		$this->assertEquals('select top 10 * from "users"', $builder->toSql());
+	}
+
+
 	protected function getBuilder()
 	{
 		$grammar = new Illuminate\Database\Query\Grammars\Grammar;
@@ -330,6 +338,14 @@ class BuilderTest extends PHPUnit_Framework_TestCase {
 	protected function getSQLiteBuilder()
 	{
 		$grammar = new Illuminate\Database\Query\Grammars\SQLiteGrammar;
+		$processor = m::mock('Illuminate\Database\Query\Processors\Processor');
+		return new Builder(m::mock('Illuminate\Database\ConnectionInterface'), $grammar, $processor);
+	}
+
+
+	protected function getSqlServerBuilder()
+	{
+		$grammar = new Illuminate\Database\Query\Grammars\SqlServerGrammar;
 		$processor = m::mock('Illuminate\Database\Query\Processors\Processor');
 		return new Builder(m::mock('Illuminate\Database\ConnectionInterface'), $grammar, $processor);
 	}

@@ -43,7 +43,7 @@ class SqlServerGrammar extends Grammar {
 		// SQL Server, since it does not have a separate keyword for this.
 		if ($query->limit > 0 and $query->offset <= 0)
 		{
-			$select .= 'top '.$this->limit.' ';
+			$select .= 'top '.$query->limit.' ';
 		}
 
 		return $select.$this->columnize($columns);

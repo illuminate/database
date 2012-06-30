@@ -113,20 +113,6 @@ class Builder {
 	public $offset;
 
 	/**
-	 * The "offset" value of the query.
-	 *
-	 * @var int
-	 */
-	public $skip;
-
-	/**
-	 * The "limit" clause of the query.
-	 *
-	 * @var int
-	 */
-	public $take;
-
-	/**
 	 * All of the available clause operators.
 	 *
 	 * @var array
