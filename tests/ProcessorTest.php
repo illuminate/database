@@ -21,6 +21,7 @@ class ProcessorTest extends PHPUnit_Framework_TestCase {
 		$builder->shouldReceive('getConnection')->andReturn($connection);
 		$processor = new Illuminate\Database\Query\Processors\Processor;
 		$result = $processor->processInsertGetId($builder, 'sql', array('foo'), 'id');
+		$this->assertEquals(1, $result);
 	}
 
 }
