@@ -233,6 +233,17 @@ abstract class Model {
 	}
 
 	/**
+	 * Get an attribute from the model.
+	 *
+	 * @param  string  $key
+	 * @return mixed
+	 */
+	public function getAttribute($key)
+	{
+		return $this->attributes[$key];
+	}
+
+	/**
 	 * Dynamically retrieve attributes on the model.
 	 *
 	 * @param  string  $key
@@ -240,7 +251,7 @@ abstract class Model {
 	 */
 	public function __get($key)
 	{
-		return $this->attributes[$key];
+		return $this->getAttribute($key);
 	}
 
 	/**
@@ -252,7 +263,7 @@ abstract class Model {
 	 */
 	public function __set($key, $value)
 	{
-		$this->attributes[$key] = $value;
+		$this->setAttribute($key, $value);
 	}
 
 	/**
