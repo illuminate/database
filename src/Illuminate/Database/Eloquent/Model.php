@@ -159,7 +159,7 @@ abstract class Model {
 		// the "where" clause of the query to only update this model.
 		if ($this->exists)
 		{
-			$query->where('id', '=', $this->getKey());
+			$query->where($this->getKeyName(), '=', $this->getKey());
 
 			$query->update($this->attributes);
 		}
