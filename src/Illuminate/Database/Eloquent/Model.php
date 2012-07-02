@@ -1,8 +1,16 @@
 <?php namespace Illuminate\Database\Eloquent;
 
+use DateTime;
 use Illuminate\Database\Connection;
 
 abstract class Model {
+
+	/**
+	 * The connection for the model.
+	 *
+	 * @var string
+	 */
+	protected $connection;
 
 	/**
 	 * The table associated with the model.
@@ -12,18 +20,11 @@ abstract class Model {
 	protected $table;
 
 	/**
-	 * The primary key of the model's table.
+	 * The primary key for the model.
 	 *
 	 * @var string
 	 */
 	protected $key = 'id';
-
-	/**
-	 * The connection for the model.
-	 *
-	 * @var string
-	 */
-	protected $connection;
 
 	/**
 	 * The model's attributes.
@@ -148,6 +149,8 @@ abstract class Model {
 	{
 		$query = $this->newQuery();
 
+		$this->updateTimestamps();
+
 		if ($this->exists)
 		{
 			$query->where('id', '=', $this->getKey())->update($this->attributes);
@@ -158,6 +161,21 @@ abstract class Model {
 		}
 
 		return true;
+	}
+
+	/**
+	 * Update the creation and update timestamps.
+	 *
+	 * @return void
+	 */
+	protected function updateTimestamps()
+	{
+		$this->updated_at = new DateTime;
+
+		if ( ! $this->exists)
+		{
+			$this->created_at = $this->updated_at;
+		}
 	}
 
 	/**

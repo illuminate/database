@@ -146,7 +146,7 @@ class Connection implements ConnectionInterface {
 
 			$statement->execute($bindings);
 
-			return $statement->fetchAll($this->fetchMode);
+			return $statement->fetchAll($me->fetchMode);
 		});
 	}
 
