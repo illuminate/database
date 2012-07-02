@@ -28,6 +28,13 @@ class Connection implements ConnectionInterface {
 	protected $postProcessor;
 
 	/**
+	 * The default fetch mode of the connection.
+	 *
+	 * @var int
+	 */
+	protected $fetchMode = PDO::FETCH_ASSOC;
+
+	/**
 	 * All of the queries run against the connection.
 	 *
 	 * @var array
@@ -44,7 +51,12 @@ class Connection implements ConnectionInterface {
 	{
 		$this->pdo = $pdo;
 
+		// We need to initialize the query grammar and the query post processor,
+		// which are both very important parts of the database abstraction.
+		// We will initialize them to their default values right here.
 		$this->useDefaultQueryGrammar();
+
+		$this->useDefaultPostProcessor();
 	}
 
 	/**
@@ -74,7 +86,7 @@ class Connection implements ConnectionInterface {
 	 */
 	public function useDefaultPostProcessor()
 	{
-		$this->queryGrammar = $this->getDefaultPostProcessor();
+		$this->postProcessor = $this->getDefaultPostProcessor();
 	}
 
 	/**
@@ -93,7 +105,7 @@ class Connection implements ConnectionInterface {
 	 * @param  string  $table
 	 * @return Illuminate\Database\Query\Builder
 	 */
-	public function from($table)
+	public function table($table)
 	{
 		$processor = $this->getPostProcessor();
 
@@ -134,7 +146,7 @@ class Connection implements ConnectionInterface {
 
 			$statement->execute($bindings);
 
-			return $statement->fetchAll();
+			return $statement->fetchAll($this->fetchMode);
 		});
 	}
 

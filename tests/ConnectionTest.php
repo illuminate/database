@@ -19,6 +19,15 @@ class ConnectionTest extends PHPUnit_Framework_TestCase {
 	}
 
 
+	public function testSettingDefaultCallsGetDefaultPostProcessor()
+	{
+		$connection = $this->getMockConnection();
+		$connection->expects($this->once())->method('getDefaultPostProcessor')->will($this->returnValue('foo'));
+		$connection->useDefaultPostProcessor();
+		$this->assertEquals('foo', $connection->getPostProcessor());
+	}
+
+
 	public function testSelectOneCallsSelectAndReturnsSingleResult()
 	{
 		$connection = $this->getMockConnection(array('select'));
@@ -138,7 +147,7 @@ class ConnectionTest extends PHPUnit_Framework_TestCase {
 		$conn = $this->getMockConnection();
 		$conn->setQueryGrammar(m::mock('Illuminate\Database\Query\Grammars\Grammar'));
 		$conn->setPostProcessor(m::mock('Illuminate\Database\Query\Processors\Processor'));
-		$builder = $conn->from('users');
+		$builder = $conn->table('users');
 		$this->assertInstanceOf('Illuminate\Database\Query\Builder', $builder);
 		$this->assertEquals('users', $builder->from);
 	}
