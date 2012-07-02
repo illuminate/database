@@ -43,7 +43,8 @@ class ConnectionTest extends PHPUnit_Framework_TestCase {
 		$statement->expects($this->once())->method('execute')->with($this->equalTo(array('foo' => 'bar')));
 		$statement->expects($this->once())->method('fetchAll')->will($this->returnValue(array('boom')));
 		$pdo->expects($this->once())->method('prepare')->with('foo')->will($this->returnValue($statement));
-		$mock = $this->getMockConnection(array(), $pdo);
+		$mock = $this->getMockConnection(array('prepareBindings'), $pdo);
+		$mock->expects($this->once())->method('prepareBindings')->with($this->equalTo(array('foo' => 'bar')))->will($this->returnValue(array('foo' => 'bar')));
 		$results = $mock->select('foo', array('foo' => 'bar'));
 		$this->assertEquals(array('boom'), $results);
 		$log = $mock->getQueryLog();
@@ -86,7 +87,8 @@ class ConnectionTest extends PHPUnit_Framework_TestCase {
 		$statement = $this->getMock('PDOStatement', array('execute'));
 		$statement->expects($this->once())->method('execute')->with($this->equalTo(array('bar')))->will($this->returnValue('foo'));
 		$pdo->expects($this->once())->method('prepare')->with($this->equalTo('foo'))->will($this->returnValue($statement));
-		$mock = $this->getMockConnection(array(), $pdo);
+		$mock = $this->getMockConnection(array('prepareBindings'), $pdo);
+		$mock->expects($this->once())->method('prepareBindings')->with($this->equalTo(array('bar')))->will($this->returnValue(array('bar')));
 		$results = $mock->statement('foo', array('bar'));
 		$this->assertEquals('foo', $results);
 		$log = $mock->getQueryLog();
@@ -103,7 +105,8 @@ class ConnectionTest extends PHPUnit_Framework_TestCase {
 		$statement->expects($this->once())->method('execute')->with($this->equalTo(array('foo' => 'bar')));
 		$statement->expects($this->once())->method('rowCount')->will($this->returnValue(array('boom')));
 		$pdo->expects($this->once())->method('prepare')->with('foo')->will($this->returnValue($statement));
-		$mock = $this->getMockConnection(array(), $pdo);
+		$mock = $this->getMockConnection(array('prepareBindings'), $pdo);
+		$mock->expects($this->once())->method('prepareBindings')->with($this->equalTo(array('foo' => 'bar')))->will($this->returnValue(array('foo' => 'bar')));
 		$results = $mock->update('foo', array('foo' => 'bar'));
 		$this->assertEquals(array('boom'), $results);
 		$log = $mock->getQueryLog();
@@ -150,6 +153,20 @@ class ConnectionTest extends PHPUnit_Framework_TestCase {
 		$builder = $conn->table('users');
 		$this->assertInstanceOf('Illuminate\Database\Query\Builder', $builder);
 		$this->assertEquals('users', $builder->from);
+	}
+
+
+	public function testPrepareBindings()
+	{
+		$date = m::mock('DateTime');
+		$date->shouldReceive('format')->once()->with('foo')->andReturn('bar');
+		$bindings = array('test' => $date);
+		$conn = $this->getMockConnection();
+		$grammar = m::mock('Illuminate\Database\Query\Grammars\Grammar');
+		$grammar->shouldReceive('getDateFormat')->once()->andReturn('foo');
+		$conn->setQueryGrammar($grammar);
+		$result = $conn->prepareBindings($bindings);
+		$this->assertEquals(array('test' => 'bar'), $result);
 	}
 
 

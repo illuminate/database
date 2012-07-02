@@ -2,6 +2,7 @@
 
 use PDO;
 use Closure;
+use DateTime;
 use Illuminate\Database\Query\Processors\Processor;
 
 class Connection implements ConnectionInterface {
@@ -144,7 +145,7 @@ class Connection implements ConnectionInterface {
 			// row from the database table, and may either be an array or object.
 			$statement = $me->getPdo()->prepare($query);
 
-			$statement->execute($bindings);
+			$statement->execute($me->prepareBindings($bindings));
 
 			return $statement->fetchAll($me->fetchMode);
 		});
@@ -197,6 +198,8 @@ class Connection implements ConnectionInterface {
 	{
 		return $this->run($query, $bindings, function($me, $query, $bindings)
 		{
+			$bindings = $me->prepareBindings($bindings);
+
 			return $me->getPdo()->prepare($query)->execute($bindings);
 		});
 	}
@@ -217,10 +220,34 @@ class Connection implements ConnectionInterface {
 			// to execute the statement and then we'll use PDO to fetch the affected.
 			$statement = $me->getPdo()->prepare($query);
 
-			$statement->execute($bindings);
+			$statement->execute($me->prepareBindings($bindings));
 
 			return $statement->rowCount();
 		});
+	}
+
+	/**
+	 * Prepare the query bindings for execution.
+	 *
+	 * @param  array  $bindings
+	 * @return array
+	 */
+	public function prepareBindings(array $bindings)
+	{
+		$grammar = $this->getQueryGrammar();
+
+		foreach ($bindings as $key => $value)
+		{
+			// We need to transform all instances of the DateTime class into an actual
+			// date string. Each query grammar maintains its own date string format
+			// so we'll just ask the grammar for the format to get from the date.
+			if ($value instanceof DateTime)
+			{
+				$bindings[$key] = $value->format($grammar->getDateFormat());
+			}
+		}
+
+		return $bindings;
 	}
 
 	/**
@@ -234,7 +261,7 @@ class Connection implements ConnectionInterface {
 		$this->pdo->beginTransaction();
 
 		// We'll simply execute the given callback within a try / catch block
-		// and if we catch any exceptions we can rollback the transaction
+		// and if we catch any exception we can rollback the transaction
 		// so that none of the changes are persisted to the database.
 		try
 		{
@@ -245,7 +272,7 @@ class Connection implements ConnectionInterface {
 
 		// If we catch an exception, we will roll back so nothing gets messed
 		// up in the database. Then we'll re-throw the exception so it can
-		// be handled how the developer sees fit for their application.
+		// be handled how the developer sees fit for their applications.
 		catch (\Exception $e)
 		{
 			$this->pdo->rollBack();
