@@ -29,6 +29,6 @@ class ProcessorTest extends PHPUnit_Framework_TestCase {
 class ProcessorTestPDOStub extends PDO {
 
 	public function __construct() {}
-	public function lastInsertId() {}
+	public function lastInsertId($sequence = null) {}
 
 }
