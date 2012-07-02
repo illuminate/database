@@ -12,6 +12,13 @@ abstract class Model {
 	protected $table;
 
 	/**
+	 * The primary key of the model's table.
+	 *
+	 * @var string
+	 */
+	protected $key = 'id';
+
+	/**
 	 * The connection for the model.
 	 *
 	 * @var string
@@ -139,7 +146,18 @@ abstract class Model {
 	 */
 	public function save()
 	{
-		//
+		$query = $this->newQuery();
+
+		if ($this->exists)
+		{
+			$query->where('id', '=', $this->getKey())->update($this->attributes);
+		}
+		else
+		{
+			$query->insert($this->attributes);
+		}
+
+		return true;
 	}
 
 	/**
@@ -171,6 +189,26 @@ abstract class Model {
 	public function setTable($table)
 	{
 		$this->table = $table;
+	}
+
+	/**
+	 * Get the value of the model's primary key.
+	 *
+	 * @return mixed
+	 */
+	public function getKey()
+	{
+		return $this->getAttribute($this->getKeyName());
+	}
+
+	/**
+	 * Get the primary key for the model.
+	 *
+	 * @return string
+	 */
+	public function getKeyName()
+	{
+		return $this->key;
 	}
 
 	/**
@@ -240,7 +278,80 @@ abstract class Model {
 	 */
 	public function getAttribute($key)
 	{
-		return $this->attributes[$key];
+		if ($this->hasGetMutator($key))
+		{
+			return $this->{'get'.$this->camelCase($key)}();
+		}
+
+		if (array_key_exists($key, $this->attributes))
+		{
+			return $this->attributes[$key];
+		}
+	}
+
+	/**
+	 * Determine if a get mutator exists for an attribute.
+	 *
+	 * @param  string  $key
+	 * @return bool
+	 */
+	protected function hasGetMutator($key)
+	{
+		return method_exists($this, 'get'.$this->camelCase($key));
+	}
+
+	/**
+	 * Set a given attribute on the model.
+	 *
+	 * @param  string  $key
+	 * @param  mixed   $value
+	 * @return void
+	 */
+	public function setAttribute($key, $value)
+	{
+		// First we will check for the presence of a mutator for the set operation.
+		// This simply lets the developer tweak the attribute as it is set on
+		// the model, such as json_encoding an array of data for storage.
+		if ($this->hasSetMutator($key))
+		{
+			$method = 'set'.$this->camelCase($key);
+
+			$this->attributes[$key] = $this->$method($value);
+		}
+
+		$this->attributes[$key] = $value;
+	}
+
+	/**
+	 * Determine if a set mutator exists for an attribute.
+	 *
+	 * @param  string  $key
+	 * @return bool
+	 */
+	protected function hasSetMutator($key)
+	{
+		return method_exists($this, 'set'.$this->camelCase($key));
+	}
+
+	/**
+	 * Get all of the current attributes on the model.
+	 *
+	 * @return array
+	 */
+	public function getAttributes()
+	{
+		return $this->attributes;
+	}
+
+	/**
+	 * Convert a snake case string to camel case.
+	 *
+	 * @param  string  $value
+	 * @return string
+	 */
+	protected function camelCase($value)
+	{
+		return str_replace(' ', '', ucwords(str_replace('_', ' ', $value));
 	}
 
 	/**
