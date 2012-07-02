@@ -316,7 +316,7 @@ abstract class Model {
 		{
 			$method = 'set'.$this->camelCase($key);
 
-			$this->attributes[$key] = $this->$method($value);
+			return $this->attributes[$key] = $this->$method($value);
 		}
 
 		$this->attributes[$key] = $value;
@@ -351,7 +351,7 @@ abstract class Model {
 	 */
 	protected function camelCase($value)
 	{
-		return str_replace(' ', '', ucwords(str_replace('_', ' ', $value));
+		return str_replace(' ', '', ucwords(str_replace('_', ' ', $value)));
 	}
 
 	/**
