@@ -147,7 +147,7 @@ class Connection implements ConnectionInterface {
 
 			$statement->execute($me->prepareBindings($bindings));
 
-			return $statement->fetchAll($me->fetchMode);
+			return $statement->fetchAll($me->getFetchMode());
 		});
 	}
 
@@ -369,6 +369,16 @@ class Connection implements ConnectionInterface {
 	public function setPostProcessor(Processor $processor)
 	{
 		$this->postProcessor = $processor;
+	}
+
+	/**
+	 * Get the default fetch mode for the connection.
+	 *
+	 * @return int
+	 */
+	public function getFetchMode()
+	{
+		return $this->fetchMode;
 	}
 
 	/**
