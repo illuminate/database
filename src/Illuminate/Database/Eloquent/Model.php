@@ -147,17 +147,29 @@ abstract class Model {
 	 */
 	public function save()
 	{
+		// First we need to create a fresh query instance and touch the creation
+		// and update timestamps on the model, which are maintained by us for
+		// convenience to the developer. Once we've done that we can save.
 		$query = $this->newQuery();
 
 		$this->updateTimestamps();
 
+		// If the model already exists in the database, we can just update our
+		// record that is already in the database using the current ID in
+		// the "where" clause of the query to only update this model.
 		if ($this->exists)
 		{
-			$query->where('id', '=', $this->getKey())->update($this->attributes);
+			$query->where('id', '=', $this->getKey());
+
+			$query->update($this->attributes);
 		}
+
+		// If the model is brand new, we'll insert it into our database and
+		// set the ID attribute on the model to the value of the newly
+		// inserted row's ID, which is typically auto-incremented.
 		else
 		{
-			$query->insert($this->attributes);
+			$this->id = $query->insertGetId($this->attributes);
 		}
 
 		return true;
