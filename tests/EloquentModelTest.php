@@ -111,6 +111,13 @@ class EloquentModelTest extends PHPUnit_Framework_TestCase {
 		EloquentModelStub::clearConnections();
 	}
 
+
+	public function testGetTableReturnsTable()
+	{
+		$model = new EloquentModelStub;
+		$this->assertEquals('stub', $model->getTable());
+	}
+
 }
 
 class EloquentModelStub extends Illuminate\Database\Eloquent\Model {
