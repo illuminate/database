@@ -19,9 +19,7 @@ class Builder extends BaseBuilder {
 	 */
 	public function find($id)
 	{
-		$key = $this->model->getKeyName();
-
-		$this->where($key, '=', $this->model->getKey());
+		$this->where($this->model->getKeyName(), '=', $this->model->getKey());
 
 		return $this->first();
 	}
@@ -40,6 +38,26 @@ class Builder extends BaseBuilder {
 		{
 			return $this->model->newInstance($result);
 		}
+	}
+
+	/**
+	 * Execute the query as a "select" statement.
+	 *
+	 * @param  array  $columns
+	 * @return array
+	 */
+	public function get($columns = array('*'))
+	{
+		$results = parent::get($columns);
+
+		$models = array();
+
+		foreach ($results as $result)
+		{
+			$models[] = $this->model->newInstance($result);
+		}
+
+		return $models;
 	}
 
 	/**

@@ -412,7 +412,9 @@ abstract class Model {
 	 */
 	protected function camelCase($value)
 	{
-		return str_replace(' ', '', ucwords(str_replace('_', ' ', $value)));
+		$value = ucwords(str_replace('_', ' ', $value));
+
+		return str_replace(' ', '', $value);
 	}
 
 	/**
@@ -458,6 +460,37 @@ abstract class Model {
 	public function __unset($key)
 	{
 		unset($this->attributes[$key]);
+	}
+
+	/**
+	 * Handle dynamic method calls into the method.
+	 *
+	 * @param  string  $method
+	 * @param  array   $parameters
+	 * @return mixed
+	 */
+	public function __call($method, $parameters)
+	{
+		$query = $this->newQuery();
+
+		if (method_exists($query, $method))
+		{
+			return call_user_func_array(array($query, $method), $parameters);
+		}
+	}
+
+	/**
+	 * Handle dynamic static method calls into the method.
+	 *
+	 * @param  string  $method
+	 * @param  array   $parameters
+	 * @return mixed
+	 */
+	public static function __callStatic($method, $parameters)
+	{
+		$instance = new static;
+
+		return call_user_func_array(array($instance, $method), $parameters);
 	}
 
 }
