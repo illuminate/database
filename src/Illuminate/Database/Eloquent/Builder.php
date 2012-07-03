@@ -33,16 +33,14 @@ class Builder extends BaseBuilder {
 	 */
 	public function first($columns = array('*'))
 	{
-		$results = $this->get($columns);
-
-		if  (count($results) > 0) return reset($results);
+		return $this->get($columns)->first();
 	}
 
 	/**
 	 * Execute the query as a "select" statement.
 	 *
 	 * @param  array  $columns
-	 * @return array
+	 * @return Illuminate\Database\Eloquent\Collection
 	 */
 	public function get($columns = array('*'))
 	{
@@ -59,7 +57,7 @@ class Builder extends BaseBuilder {
 			$model->exists = true;
 		}
 
-		return $models;
+		return new Collection($models);
 	}
 
 	/**

@@ -231,7 +231,7 @@ abstract class Model {
 		// Once we have determined the keys we can create the query instance as well as
 		// the relationship instances which will retrieve and hyrdate all the models.
 		$foreignKey = $foreignKey ?: $this->getForeignKey();
-		
+
 		$instance = new $related;
 
 		$otherKey = $otherKey ?: $instance->getForeignKey();
