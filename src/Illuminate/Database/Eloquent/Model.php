@@ -339,6 +339,16 @@ abstract class Model {
 	}
 
 	/**
+	 * Clear the array of registered collections.
+	 *
+	 * @return void
+	 */
+	public static function clearConnections()
+	{
+		static::$connections = array();
+	}
+
+	/**
 	 * Get an attribute from the model.
 	 *
 	 * @param  string  $key

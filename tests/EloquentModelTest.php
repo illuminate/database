@@ -96,6 +96,21 @@ class EloquentModelTest extends PHPUnit_Framework_TestCase {
 		$this->assertEquals(1, $model->id);
 	}
 
+
+	public function testNewQueryReturnsEloquentQueryBuilder()
+	{
+		$conn = m::mock('Illuminate\Database\Connection');
+		$grammar = m::mock('Illuminate\Database\Query\Grammars\Grammar');
+		$processor = m::mock('Illuminate\Database\Query\Processors\Processor');
+		$conn->shouldReceive('getQueryGrammar')->once()->andReturn($grammar);
+		$conn->shouldReceive('getPostProcessor')->once()->andReturn($processor);
+		EloquentModelStub::addConnection('main', $conn);
+		$model = new EloquentModelStub;
+		$builder = $model->newQuery();
+		$this->assertInstanceOf('Illuminate\Database\Eloquent\Builder', $builder);
+		EloquentModelStub::clearConnections();
+	}
+
 }
 
 class EloquentModelStub extends Illuminate\Database\Eloquent\Model {
