@@ -65,6 +65,37 @@ class EloquentModelTest extends PHPUnit_Framework_TestCase {
 		$this->assertEquals('foo', $result);
 	}
 
+
+	public function testUpdateProcess()
+	{
+		$model = $this->getMock('EloquentModelStub', array('newQuery', 'updateTimestamps'));
+		$query = m::mock('Illuminate\Database\Eloquent\Builder');
+		$query->shouldReceive('where')->once()->with('id', '=', 1);
+		$query->shouldReceive('update')->once()->with(array('id' => 1, 'name' => 'taylor'));
+		$model->expects($this->once())->method('newQuery')->will($this->returnValue($query));
+		$model->expects($this->once())->method('updateTimestamps');
+
+		$model->id = 1;
+		$model->name = 'taylor';
+		$model->exists = true;
+		$this->assertTrue($model->save());
+	}
+
+
+	public function testInsertProcess()
+	{
+		$model = $this->getMock('EloquentModelStub', array('newQuery', 'updateTimestamps'));
+		$query = m::mock('Illuminate\Database\Eloquent\Builder');
+		$query->shouldReceive('insertGetId')->once()->with(array('name' => 'taylor'))->andReturn(1);
+		$model->expects($this->once())->method('newQuery')->will($this->returnValue($query));
+		$model->expects($this->once())->method('updateTimestamps');
+
+		$model->name = 'taylor';
+		$model->exists = false;
+		$this->assertTrue($model->save());
+		$this->assertEquals(1, $model->id);
+	}
+
 }
 
 class EloquentModelStub extends Illuminate\Database\Eloquent\Model {
