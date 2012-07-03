@@ -208,16 +208,16 @@ abstract class Model {
 		$otherKey = $otherKey ?: $instance->getForeignKey();
 
 		// If no table name was provided, we can guess it by concatenating the two models
-		// with underscores in alphabetical order. The two model names will also get
-		// switched to snake case from their default CamelCase spellings for us.
+		// with underscores in alphabetical order. The two model names are transformed
+		// to snake case from their default CamelCase spellings autmatically for us.
 		if (is_null($table))
 		{
 			$table = $this->joiningTable($related);
 		}
 
 		// Now we are ready to create a new query builder for the related model and a
-		// relationship instance for the relation. The relationship will set each
-		// of the appropriate query constraints and will manage the hydration.
+		// relationship instance for the relation. The relationships will set each
+		// of the appropriate query constraints and entirely manages hydrations.
 		$query = $instance->newQuery();
 
 		return new BelongsToMany($query, $this, $table, $foreignKey, $otherKey);
