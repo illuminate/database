@@ -2,6 +2,10 @@
 
 use DateTime;
 use Illuminate\Database\Connection;
+use Illuminate\Database\Eloquent\Relations\HasOne;
+use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 
 abstract class Model {
 
@@ -125,41 +129,123 @@ abstract class Model {
 	/**
 	 * Define a one-to-one relationship.
 	 *
-	 * @return ?
+	 * @param  string  $related
+	 * @param  string  $foreignKey
+	 * @return Illuminate\Database\Eloquent\Relation\HasOne
 	 */
 	public function hasOne()
 	{
-		//
+		$foreignKey = $foreignKey ?: $this->getForeignKey();
+
+		$instance = new $related;
+
+		return new HasOne($instance->newQuery(), $this, $foreignKey);
 	}
 
 	/**
 	 * Define an inverse one-to-one or many relationship.
 	 *
-	 * @return ?
+	 * @param  string  $related
+	 * @param  string  $foreignKey
+	 * @return Illuminate\Database\Eloquent\Relations\BelongsTo
 	 */
-	public function belongsTo()
+	public function belongsTo($related, $foreignKey = null)
 	{
-		//
+		// If no foreign key was supplied, we can use a backtrace to guess the proper
+		// foreign key name by using the name of the relationship function, which
+		// when combined with an "_id" should conventionally match the column.
+		if (is_null($foreignKey))
+		{
+			list(, $caller) = debug_backtrace(false);
+
+			$foreignKey = "{$caller['function']}_id";
+		}
+
+		// Once we have the foreign key name, we'll just create a new Eloquent query
+		// for the related model and return the relationship instance which will
+		// actually be responsible for retrieving and hydrating the relation.
+		$instance = new $related;
+
+		$query = $instance->newQuery();
+
+		return new BelongsTo($query, $this, $foreignKey);
 	}
 
 	/**
 	 * Define a one-to-many relationship.
 	 *
-	 * @return ?
+	 * @param  string  $related
+	 * @param  string  $foreignKey
+	 * @return Illuminate\Database\Eloquent\Relations\HasMany
 	 */
-	public function hasMany()
+	public function hasMany($related, $foreignKey = null)
 	{
-		//
+		$foreignKey = $foreignKey ?: $this->getForeignKey();
+
+		$instance = new $related;
+
+		return new HasMany($instance->newQuery(), $this, $foreignKey);
 	}
 
 	/**
 	 * Define a many-to-many relationship.
 	 *
-	 * @return ?
+	 * @param  string  $related
+	 * @param  string  $table
+	 * @param  string  $foreignKey
+	 * @param  string  $otherKey
+	 * @return Illuminate\Database\Eloquent\Relations\BelongsToMany
 	 */
-	public function belongsToMany()
+	public function belongsToMany($related, $table, $foreignKey = null, $otherKey = null)
 	{
-		//
+		// First we need to determine the foreign key and "other key" for the relationship.
+		// Once we have determined the keys we can create the query instance as well as
+		// the relationship instances which will retrieve and hyrdate all the models.
+		$foreignKey = $foreignKey ?: $this->getForeignKey();
+		
+		$instance = new $related;
+
+		$otherKey = $otherKey ?: $instance->getForeignKey();
+
+		// If no table name was provided, we can guess it by concatenating the two models
+		// with underscores in alphabetical order. The two model names will also get
+		// switched to snake case from their default CamelCase spellings for us.
+		if (is_null($table))
+		{
+			$table = $this->joiningTable($related);
+		}
+
+		// Now we are ready to create a new query builder for the related model and a
+		// relationship instance for the relation. The relationship will set each
+		// of the appropriate query constraints and will manage the hydration.
+		$query = $instance->newQuery();
+
+		return new BelongsToMany($query, $this, $table, $foreignKey, $otherKey);
+	}
+
+	/**
+	 * Get the joining table name for a many-to-many relation.
+	 *
+	 * @param  string  $related
+	 * @return string
+	 */
+	public function joiningTable($related)
+	{
+		// The joining table name, by convention, is simply the snake cased models
+		// sorted alphabetically and concatenated with an underscore, so we can
+		// just sort the models and join them together to get the table name.
+		$base = $this->snakeCase(static::classBasename($this));
+
+		$related = $this->snakeCase(static::classBasename($related));
+
+		$models = array($related, $base);
+
+		// Now that we have the model names in an array we can just sort them and
+		// use the implode function to join them together with an underscores,
+		// which is typically used by convention within the datbase systems.
+		sort($models);
+
+		return strtolower(implode('_', $models));
 	}
 
 	/**
@@ -277,6 +363,16 @@ abstract class Model {
 	public function getKeyName()
 	{
 		return $this->key;
+	}
+
+	/**
+	 * Get the default foreign key name for the model.
+	 *
+	 * @return string
+	 */
+	public function getForeignKey()
+	{
+		return $this->snakeCase(get_class($this)).'_id';
 	}
 
 	/**
@@ -439,6 +535,33 @@ abstract class Model {
 	}
 
 	/**
+	 * Convert a CamelCase string back to snake case.
+	 *
+	 * @param  string  $value
+	 * @return string
+	 */
+	protected function snakeCase($value)
+	{
+		return preg_replace_callback('/[A-Z]/', function($match)
+		{
+			return '_'.strtolower($match[0]);
+		});
+	}
+
+	/**
+	 * Get the "base name" of the given class or object.
+	 *
+	 * @param  string|object  $class
+	 * @return string
+	 */
+	public static function classBasename($class)
+	{
+		$class = is_object($class) ? get_class($class) : $class;
+
+		return basename(str_replace('\\', '/', $class));
+	}
+
+	/**
 	 * Dynamically retrieve attributes on the model.
 	 *
 	 * @param  string  $key
@@ -498,6 +621,8 @@ abstract class Model {
 		{
 			return call_user_func_array(array($query, $method), $parameters);
 		}
+
+		throw new \BadMethodCallException("Method [$method] does not exist.");
 	}
 
 	/**

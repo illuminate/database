@@ -52,7 +52,7 @@ class Builder extends BaseBuilder {
 
 		foreach ($results as $result)
 		{
-			$models[] = $model = $this->model->newInstance($result);
+			$models[] = $model = $this->model->newInstance((array) $result);
 
 			$model->exists = true;
 		}
