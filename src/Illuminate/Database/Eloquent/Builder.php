@@ -15,13 +15,14 @@ class Builder extends BaseBuilder {
 	 * Find a model by its primary key.
 	 *
 	 * @param  mixed  $id
+	 * @param  array  $columns
 	 * @return Illuminate\Database\Eloquent\Model
 	 */
-	public function find($id)
+	public function find($id, $columns = array('*'))
 	{
-		$this->where($this->model->getKeyName(), '=', $this->model->getKey());
+		$this->where($this->model->getKeyName(), '=', $id);
 
-		return $this->first();
+		return $this->first($columns);
 	}
 
 	/**
@@ -32,12 +33,9 @@ class Builder extends BaseBuilder {
 	 */
 	public function first($columns = array('*'))
 	{
-		$result = parent::first($columns);
+		$results = $this->get($columns);
 
-		if ( ! is_null($result))
-		{
-			return $this->model->newInstance($result);
-		}
+		if  (count($results) > 0) return reset($results);
 	}
 
 	/**
@@ -54,7 +52,9 @@ class Builder extends BaseBuilder {
 
 		foreach ($results as $result)
 		{
-			$models[] = $this->model->newInstance($result);
+			$models[] = $model = $this->model->newInstance($result);
+
+			$model->exists = true;
 		}
 
 		return $models;
