@@ -42,7 +42,11 @@ class Collection implements ArrayAccess, Countable, IteratorAggregate {
 	 */
 	public function toArray()
 	{
-		return array_map(function($value) { return $value->toArray(); }, $this->items);
+		return array_map(function($value)
+		{
+			return $value->toArray();
+
+		}, $this->items);
 	}
 
 	/**

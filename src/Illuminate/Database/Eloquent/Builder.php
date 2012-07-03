@@ -12,6 +12,13 @@ class Builder extends BaseBuilder {
 	protected $model;
 
 	/**
+	 * The relationships that should be eager loaded.
+	 *
+	 * @var array
+	 */
+	protected $eagerLoad = array();
+
+	/**
 	 * Find a model by its primary key.
 	 *
 	 * @param  mixed  $id
@@ -46,15 +53,19 @@ class Builder extends BaseBuilder {
 	{
 		$results = parent::get($columns);
 
+		$connection = $this->model->getConnectionName();
+
 		$models = array();
 
 		foreach ($results as $result)
 		{
-			$models[] = $model = $this->model->newInstance((array) $result);
+			$model = $this->model->newInstance((array) $result);
 
-			$model->setConnection($this->model->getConnectionName());
+			$model->setConnection($connection);
 
 			$model->exists = true;
+
+			$models[] = $model;
 		}
 
 		return new Collection($models);

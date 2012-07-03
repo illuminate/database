@@ -38,6 +38,13 @@ abstract class Model {
 	protected $attributes;
 
 	/**
+	 * The loaded relationships for the model.
+	 *
+	 * @var array
+	 */
+	protected $relations = array();
+
+	/**
 	 * Indicates if the model exists.
 	 *
 	 * @var bool
@@ -512,12 +519,42 @@ abstract class Model {
 	 */
 	public function getAttribute($key)
 	{
-		$value = null;
-
+		// If the key references an attribtue, we can just go ahead and return
+		// the plain attribute value from the model. This allows all of the
+		// attributes to be dynamically accessed through the _get method.
 		if (array_key_exists($key, $this->attributes))
 		{
-			$value = $this->attributes[$key];
+			return $this->getPlainAttribute($key);
 		}
+
+		// If the key already exists in the relationship array, it means the
+		// relationship has already been loaded, so we can just return it
+		// out of here because there is no need to query into it twice.
+		if (array_key_exists($key, $this->relations))
+		{
+			return $this->relations[$key];
+		}
+
+		// If the "attribute" exists as a method on the model, we will just
+		// assume it is a relationship and will load and return results
+		// from the relationship query and hydrate the relationship.
+		if (method_exists($this, $key))
+		{
+			$relations = $this->$key()->getResults();
+
+			return $this->relations[$key] = $relations;
+		}
+	}
+
+	/**
+	 * Get a plain attribute (not a relationship).
+	 *
+	 * @param  string  $key
+	 * @return mixed
+	 */
+	protected function getPlainAttribute($key)
+	{
+		$value = $this->attributes[$key];
 
 		if ($this->hasGetMutator($key))
 		{
