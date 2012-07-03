@@ -465,22 +465,6 @@ abstract class Model {
 	}
 
 	/**
-	 * Get a registered connection instance by name.
-	 *
-	 * @param  string  $name
-	 * @return Illuminate\Database\Connection
-	 */
-	public static function getConnectionInstance($name)
-	{
-		if (isset(static::$connections[$name]))
-		{
-			return static::$connections[$name];
-		}
-
-		throw new \InvalidArgumentException("Connection [$name] isn't registered.");
-	}
-
-	/**
 	 * Get the default connection instance.
 	 *
 	 * @return Illuminate\Database\Connection
