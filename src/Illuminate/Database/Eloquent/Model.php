@@ -234,26 +234,26 @@ abstract class Model {
 	 */
 	public function belongsToMany($related, $table = null, $foreignKey = null, $otherKey = null)
 	{
-		// First we need to determine the foreign key and "other key" for the relationship.
-		// Once we have determined the keys we can create the query instance as well as
-		// the relationship instances which will retrieve and hyrdate all the models.
+		// First, we'll need to determine the foreign key and "other key" for the
+		// relationship. Once we have determined the keys we'll make the query
+		// instance as well as the relationship instances we need for this.
 		$foreignKey = $foreignKey ?: $this->getForeignKey();
 
 		$instance = new $related;
 
 		$otherKey = $otherKey ?: $instance->getForeignKey();
 
-		// If no table name was provided, we can guess it by concatenating the two models
-		// with underscores in alphabetical order. The two model names are transformed
-		// to snake case from their default CamelCase spellings autmatically for us.
+		// If no table name was provided, we can guess it by concatenating the two
+		// models using underscores in alphabetical order. The two model names
+		// are transformed to snake case from their default CamelCase also.
 		if (is_null($table))
 		{
 			$table = $this->joiningTable($related);
 		}
 
-		// Now we are ready to create a new query builder for the related model and the
-		// relationship instance for the relation. The relationships set each of the
-		// of the appropriate query constraint and entirely manages the hydration.
+		// Now we're ready to create a new query builder for the related model and
+		// the relationship instances for the relation. The relations will set
+		// appropriate query constraint and entirely manages the hydrations.
 		$query = $instance->newQuery();
 
 		return new BelongsToMany($query, $this, $table, $foreignKey, $otherKey);
