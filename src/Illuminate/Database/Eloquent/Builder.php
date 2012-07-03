@@ -61,6 +61,19 @@ class Builder extends BaseBuilder {
 	}
 
 	/**
+	 * Set the relationships that should be eaager loaded.
+	 *
+	 * @param  array  $relations
+	 * @return Illuminate\Database\Eloquent\Builder
+	 */
+	public function with(array $relations)
+	{
+		$this->eagerLoad = $relations;
+
+		return $this;
+	}
+
+	/**
 	 * Get the model instance being queried.
 	 *
 	 * @return Illuminate\Database\Eloquent\Model
