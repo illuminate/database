@@ -131,6 +131,16 @@ abstract class Grammar {
 	}
 
 	/**
+	 * Get the format for databsae stored dates.
+	 *
+	 * @return string
+	 */
+	public function getDateFormat()
+	{
+		return 'Y-m-d H:i:s';
+	}
+
+	/**
 	 * Get the grammar's table prefix.
 	 *
 	 * @return string

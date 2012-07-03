@@ -77,9 +77,9 @@ class SqlServerGrammar extends Grammar {
 
 		$start = $query->offset + 1;
 
-		// Next we need to calculate the constraint that should be placed on the
-		// row number to get the correct offset and limit from our query, but
-		// if there is not a limit specified we'll just handle the offset.
+		// Next, we need to calculate the constraint that should be placed on
+		// the row number to get the right offset and limit from our query
+		// but if there is not a limit set we'll just handle the offset.
 		if ($query->limit > 0)
 		{
 			$finish = $query->offset + $query->limit;
@@ -91,9 +91,9 @@ class SqlServerGrammar extends Grammar {
 			$constraint = ">= {$start}";
 		}
 
-		// We're finally ready to build the final SQL query so we'll create a
+		// We are now ready to build the final SQL query, so we will create a
 		// common table expression from the query and get the records with
-		// row numbers being between the given limit and offset values.
+		// row numbers being between each given limit and offset values.
 		$sql = $this->concatenate($components);
 
 		return "select * from ($sql) as temp_table where row_num $constraint";
@@ -121,6 +121,16 @@ class SqlServerGrammar extends Grammar {
 	protected function compileOffset(Builder $query, $offset)
 	{
 		return '';
+	}
+
+	/**
+	 * Get the format for databsae stored dates.
+	 *
+	 * @return string
+	 */
+	public function getDateFormat()
+	{
+		return 'Y-m-d H:i:s.000';
 	}
 
 }

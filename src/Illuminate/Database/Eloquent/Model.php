@@ -198,8 +198,8 @@ abstract class Model {
 		}
 
 		// Once we have the foreign key name, we'll just create a new Eloquent query
-		// for the related model and return the relationship instance which will
-		// actually be responsible for retrieving and hydrating the relation.
+		// for the related model and returns the relationship instance which will
+		// actually be responsible for retrieving and hydrating each relations.
 		$instance = new $related;
 
 		$query = $instance->newQuery();
@@ -251,9 +251,9 @@ abstract class Model {
 			$table = $this->joiningTable($related);
 		}
 
-		// Now we are ready to create a new query builder for the related model and a
-		// relationship instance for the relation. The relationships will set each
-		// of the appropriate query constraints and entirely manages hydrations.
+		// Now we are ready to create a new query builder for the related model and the
+		// relationship instance for the relation. The relationships set each of the
+		// of the appropriate query constraint and entirely manages the hydration.
 		$query = $instance->newQuery();
 
 		return new BelongsToMany($query, $this, $table, $foreignKey, $otherKey);
