@@ -170,8 +170,8 @@ abstract class Model {
 	public function save()
 	{
 		// First we need to create a fresh query instance and touch the creation
-		// and update timestamps on the model, which are maintained by us for
-		// convenience to the developers. Once we've done that we can save.
+		// and update timestamps on the model which are maintained by us for
+		// convenience to the developers. Then we'll just save the model.
 		$query = $this->newQuery();
 
 		$this->updateTimestamps();
