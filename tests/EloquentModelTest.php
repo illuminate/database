@@ -112,10 +112,35 @@ class EloquentModelTest extends PHPUnit_Framework_TestCase {
 	}
 
 
-	public function testGetTableReturnsTable()
+	public function testGetAndSetTableOperations()
 	{
 		$model = new EloquentModelStub;
 		$this->assertEquals('stub', $model->getTable());
+		$model->setTable('foo');
+		$this->assertEquals('foo', $model->getTable());
+	}
+
+
+	public function testGetKeyReturnsValueOfPrimaryKey()
+	{
+		$model = new EloquentModelStub;
+		$model->id = 1;
+		$this->assertEquals(1, $model->getKey());
+		$this->assertEquals('id', $model->getKeyName());
+	}
+
+
+	public function testConnectionManagement()
+	{
+		$conn = m::mock('Illuminate\Database\Connection');
+		EloquentModelStub::addConnection('main', $conn);
+		$model = new EloquentModelStub;
+		$this->assertTrue($model->getConnection() === $conn);
+		$conn2 = m::mock('Illuminate\Database\Connection');
+		EloquentModelStub::addConnection('sub', $conn2);
+		$model = new EloquentModelStub;
+		$model->setConnection('sub');
+		$this->assertTrue($model->getConnection() === $conn2);
 	}
 
 }
