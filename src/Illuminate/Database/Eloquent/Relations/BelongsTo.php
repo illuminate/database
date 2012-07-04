@@ -43,4 +43,14 @@ class BelongsTo extends Relation {
 		$this->query->where($key, '=', $this->parent->$foreign);
 	}
 
+	/**
+	 * Get the results of the relationship.
+	 *
+	 * @return mixed
+	 */
+	public function getResults()
+	{
+		return $this->query->first();
+	}
+
 }

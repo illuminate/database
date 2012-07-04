@@ -66,7 +66,21 @@ abstract class Model {
 	 */
 	public function __construct(array $attributes = array())
 	{
-		$this->attributes = $attributes;
+		$this->fill($attributes);
+	}
+
+	/**
+	 * Fill the model with an array of attributes.
+	 *
+	 * @param  array  $attributes
+	 * @return void
+	 */
+	public function fill(array $attributes)
+	{
+		foreach ($attributes as $key => $value)
+		{
+			$this->$key = $value;
+		}
 	}
 
 	/**

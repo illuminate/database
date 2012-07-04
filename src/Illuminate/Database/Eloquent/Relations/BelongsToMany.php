@@ -51,7 +51,84 @@ class BelongsToMany extends Relation {
 	 */
 	public function addConstraints()
 	{
-		//
+		$this->setSelect()->setJoin()->setWhere();
+	}
+
+	/**
+	 * Get the results of the relationship.
+	 *
+	 * @return mixed
+	 */
+	public function getResults()
+	{
+		return $this->query->get();
+	}
+
+	/**
+	 * Set the select clause for the relation query.
+	 *
+	 * @return Illuminate\Database\Eloquent\Relation\BelongsToMany
+	 */
+	protected function setSelect()
+	{
+		$columns = array($this->query->getModel()->getTable().'.*');
+
+		$this->query->select($columns);
+
+		return $this;
+	}
+
+	/**
+	 * Set the join clause for the relation query.
+	 *
+	 * @return Illuminate\Database\Eloquent\Relation\BelongsToMany
+	 */
+	protected function setJoin()
+	{
+		// We need to join to the intermediate table on the related model's primary
+		// key column with the intermediate tables foreign key for the related
+		// model instance. Then we can set the where for the parent model.
+		$baseTable = $this->query->getModel()->getTable();
+
+		$key = $baseTable.'.'.$this->query->getModel()->getKeyName();
+
+		$this->query->join($this->table, $key, '=', $this->getOtherKey());
+
+		return $this;
+	}
+
+	/**
+	 * Set the where clause for the relation query.
+	 *
+	 * @return Illuminate\Database\Eloquent\Relation\BelongsToMany
+	 */
+	protected function setWhere()
+	{
+		$foreign = $this->getForeignKey();
+
+		$this->query->where($foreign, '=', $this->parent->getKey());
+
+		return $this;
+	}
+
+	/**
+	 * Get the fully qualified foreign key for the relation.
+	 *
+	 * @return string
+	 */
+	protected function getForeignKey()
+	{
+		return $this->table.'.'.$this->foreignKey;
+	}
+
+	/**
+	 * Get the fully qualified "other key" for the relation.
+	 *
+	 * @return string
+	 */
+	protected function getOtherKey()
+	{
+		return $this->table.'.'.$this->otherKey;
 	}
 
 }
