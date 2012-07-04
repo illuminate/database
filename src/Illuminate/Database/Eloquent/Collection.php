@@ -68,7 +68,7 @@ class Collection implements ArrayAccess, Countable, IteratorAggregate {
 	 *
 	 * @return array
 	 */
-	public function getItems()
+	public function all()
 	{
 		return $this->items;
 	}
