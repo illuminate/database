@@ -418,7 +418,12 @@ abstract class Model {
 	 */
 	public function getConnection()
 	{
-		return $this->connection ?: static::getDefaultConnection();
+		if ( ! is_null($this->connectionName))
+		{
+			return static::$connections[$this->connectionName];
+		}
+
+		return static::getDefaultConnection();
 	}
 
 	/**
@@ -440,8 +445,6 @@ abstract class Model {
 	public function setConnection($name)
 	{
 		$this->connectionName = $name;
-
-		$this->connection = static::$connections[$name];
 	}
 
 	/**
