@@ -118,7 +118,7 @@ class Builder extends BaseBuilder {
 
 			// The eager load could have had constrains specified on it. We will put them on the
 			// last eager load segment. This means that for a nested eager load include that
-			// is loading multiple relationships only the last segments is constrained.
+			// is loading multiple relationships only the last segments are constrained.
 			$results[$last] = $constraints;
 		}
 
