@@ -147,7 +147,7 @@ abstract class Model {
 	 * @param  string  $foreignKey
 	 * @return Illuminate\Database\Eloquent\Relation\HasOne
 	 */
-	public function hasOne()
+	public function hasOne($related, $foreignKey = null)
 	{
 		$foreignKey = $foreignKey ?: $this->getForeignKey();
 
@@ -210,7 +210,7 @@ abstract class Model {
 	 * @param  string  $otherKey
 	 * @return Illuminate\Database\Eloquent\Relations\BelongsToMany
 	 */
-	public function belongsToMany($related, $table, $foreignKey = null, $otherKey = null)
+	public function belongsToMany($related, $table = null, $foreignKey = null, $otherKey = null)
 	{
 		// First we need to determine the foreign key and "other key" for the relationship.
 		// Once we have determined the keys we can create the query instance as well as
@@ -559,7 +559,8 @@ abstract class Model {
 		return preg_replace_callback('/[A-Z]/', function($match)
 		{
 			return '_'.strtolower($match[0]);
-		});
+
+		}, $value);
 	}
 
 	/**

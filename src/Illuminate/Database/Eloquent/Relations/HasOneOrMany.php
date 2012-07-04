@@ -1,8 +1,9 @@
 <?php namespace Illuminate\Database\Eloquent\Relations;
 
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Builder;
 
-class HasOneOrMany extends Relation {
+abstract class HasOneOrMany extends Relation {
 
 	/**
 	 * The foreign key of the parent model.
