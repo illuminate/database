@@ -167,7 +167,7 @@ abstract class Model {
 	{
 		// If no foreign key was supplied, we can use a backtrace to guess the proper
 		// foreign key name by using the name of the relationship function, which
-		// when combined with an "_id" should conventionally match the column.
+		// when combined with an "_id" should conventionally match the columns.
 		if (is_null($foreignKey))
 		{
 			list(, $caller) = debug_backtrace(false);
