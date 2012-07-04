@@ -240,7 +240,7 @@ class BuilderTest extends PHPUnit_Framework_TestCase {
 	public function testInsertMethod()
 	{
 		$builder = $this->getBuilder();
-		$builder->getConnection()->shouldReceive('insert')->once()->with('insert into "users" ("email") values ((?))', array('foo'))->andReturn(true);
+		$builder->getConnection()->shouldReceive('insert')->once()->with('insert into "users" ("email") values (?)', array('foo'))->andReturn(true);
 		$result = $builder->from('users')->insert(array('email' => 'foo'));
 		$this->assertTrue($result);
 	}
@@ -249,7 +249,7 @@ class BuilderTest extends PHPUnit_Framework_TestCase {
 	public function testInsertGetIdMethod()
 	{
 		$builder = $this->getBuilder();
-		$builder->getProcessor()->shouldReceive('processInsertGetId')->once()->with($builder, 'insert into "users" ("email") values ((?))', array('foo'), 'id')->andReturn(1);
+		$builder->getProcessor()->shouldReceive('processInsertGetId')->once()->with($builder, 'insert into "users" ("email") values (?)', array('foo'), 'id')->andReturn(1);
 		$result = $builder->from('users')->insertGetId(array('email' => 'foo'), 'id');
 		$this->assertEquals(1, $result);
 	}
@@ -281,7 +281,7 @@ class BuilderTest extends PHPUnit_Framework_TestCase {
 	public function testPostgresInsertGetId()
 	{
 		$builder = $this->getPostgresBuilder();
-		$builder->getProcessor()->shouldReceive('processInsertGetId')->once()->with($builder, 'insert into "users" ("email") values ((?)) returning "id"', array('foo'), 'id')->andReturn(1);
+		$builder->getProcessor()->shouldReceive('processInsertGetId')->once()->with($builder, 'insert into "users" ("email") values (?) returning "id"', array('foo'), 'id')->andReturn(1);
 		$result = $builder->from('users')->insertGetId(array('email' => 'foo'), 'id');
 		$this->assertEquals(1, $result);
 	}
