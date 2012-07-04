@@ -253,7 +253,7 @@ class Grammar extends BaseGrammar {
 	 * @param  array  $where
 	 * @return string
 	 */
-	public function whereExists(Builder $query, $where)
+	protected function whereExists(Builder $query, $where)
 	{
 		return 'exists ('.$this->compileSelect($where['query']).')';
 	}
@@ -265,7 +265,7 @@ class Grammar extends BaseGrammar {
 	 * @param  array  $where
 	 * @return string
 	 */
-	public function whereNotExists(Builder $query, $where)
+	protected function whereNotExists(Builder $query, $where)
 	{
 		return 'not exists ('.$this->compileSelect($where['query']).')';
 	}
@@ -296,6 +296,34 @@ class Grammar extends BaseGrammar {
 		$values = $this->parameterize($where['values']);
 
 		return $this->wrap($where['column']).' not in ('.$values.')';
+	}
+
+	/**
+	 * Compile a where in sub-select clause.
+	 *
+	 * @param  Illuminate\Database\Query\Builder  $query
+	 * @param  array  $where
+	 * @return string
+	 */
+	protected function whereInSub(Builder $query, $where)
+	{
+		$select = $this->compileSelect($where['query']);
+
+		return $this->wrap($where['column']).' in ('.$select.')';
+	}
+
+	/**
+	 * Compile a where not in sub-select clause.
+	 *
+	 * @param  Illuminate\Database\Query\Builder  $query
+	 * @param  array  $where
+	 * @return string
+	 */
+	protected function whereNotInSub(Builder $query, $where)
+	{
+		$select = $this->compileSelect($where['query']);
+
+		return $this->wrap($where['column']).' not in ('.$select.')';
 	}
 
 	/**

@@ -407,14 +407,22 @@ class Builder {
 	 * Add a "where in" clause to the query.
 	 *
 	 * @param  string  $column
-	 * @param  array   $values
+	 * @param  mixed   $values
 	 * @param  string  $boolean
 	 * @param  bool    $not
 	 * @return Illuminate\Database\Query\Builder
 	 */
-	public function whereIn($column, array $values, $boolean = 'and', $not = false)
+	public function whereIn($column, $values, $boolean = 'and', $not = false)
 	{
 		$type = $not ? 'NotIn' : 'In';
+
+		// If the value of the where in clause is actually a Closure, we will assume that
+		// the developer is using a full sub-select for this "in" statement, and will
+		// execute those Closures so we can re-constructure the full sub-selects.
+		if ($values instanceof Closure)
+		{
+			return $this->whereInSub($column, $values, $boolean, $not);
+		}
 
 		$this->wheres[] = compact('type', 'column', 'values', 'boolean');
 
@@ -427,11 +435,11 @@ class Builder {
 	 * Add an "or where in" clause to the query.
 	 *
 	 * @param  string  $column
-	 * @param  array   $values
+	 * @param  mixed   $values
 	 * @param  mixed   $value
 	 * @return Illuminate\Database\Query\Builder
 	 */
-	public function orWhereIn($column, array $values)
+	public function orWhereIn($column, $values)
 	{
 		return $this->whereIn($column, $values, 'or');
 	}
@@ -440,11 +448,11 @@ class Builder {
 	 * Add a "where not in" clause to the query.
 	 *
 	 * @param  string  $column
-	 * @param  array   $values
+	 * @param  mixed   $values
 	 * @param  string  $boolean
 	 * @return Illuminate\Database\Query\Builder
 	 */
-	public function whereNotIn($column, array $values, $boolean = 'and')
+	public function whereNotIn($column, $values, $boolean = 'and')
 	{
 		return $this->whereIn($column, $values, $boolean, true);
 	}
@@ -453,13 +461,40 @@ class Builder {
 	 * Add an "or where not in" clause to the query.
 	 *
 	 * @param  string  $column
-	 * @param  array   $values
+	 * @param  mixed   $values
 	 * @return Illuminate\Database\Query\Builder
 	 */
-	public function orWhereNotIn($column, array $values)
+	public function orWhereNotIn($column, $values)
 	{
 		return $this->whereNotIn($column, $values, 'or');
 	}	
+
+	/**
+	 * Add a where in with a sub-select to the query.
+	 *
+	 * @param  string   $column
+	 * @param  Closure  $callback
+	 * @param  string   $boolean
+	 * @param  bool     $not
+	 * @return Illuminate\Database\Query\Builder
+	 */
+	protected function whereInSub($column, Closure $callback, $boolean, $not)
+	{
+		$type = $not ? 'NotInSub' : 'InSub';
+
+		// To create the exists sub-select, we will actually create a query and call the
+		// provided callback with the query so the developer may set any of the query
+		// conditions they want for the in clause, then we'll put it in this array.
+		call_user_func($callback, $query = $this->newQuery());
+
+		$this->wheres[] = compact('type', 'column', 'query', 'boolean');
+
+		$this->mergeBindings($query);
+
+		return $this;
+
+		return $this;
+	}
 
 	/**
 	 * Add a "where null" clause to the query.

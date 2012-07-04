@@ -89,6 +89,26 @@ class BuilderTest extends PHPUnit_Framework_TestCase {
 	}
 
 
+	public function testSubSelectWhereIns()
+	{
+		$builder = $this->getBuilder();
+		$builder->select('*')->from('users')->whereIn('id', function($q)
+		{
+			$q->select('id')->from('users')->where('age', '>', 25)->take(3);
+		});
+		$this->assertEquals('select * from "users" where "id" in (select "id" from "users" where "age" > ? limit 3)', $builder->toSql());
+		$this->assertEquals(array(25), $builder->getBindings());
+
+		$builder = $this->getBuilder();
+		$builder->select('*')->from('users')->whereNotIn('id', function($q)
+		{
+			$q->select('id')->from('users')->where('age', '>', 25)->take(3);
+		});
+		$this->assertEquals('select * from "users" where "id" not in (select "id" from "users" where "age" > ? limit 3)', $builder->toSql());
+		$this->assertEquals(array(25), $builder->getBindings());
+	}
+
+
 	public function testBasicWhereNulls()
 	{
 		$builder = $this->getBuilder();
