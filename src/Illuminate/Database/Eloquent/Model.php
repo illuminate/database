@@ -17,13 +17,6 @@ abstract class Model {
 	protected $connection;
 
 	/**
-	 * The name of the currently used connection.
-	 *
-	 * @var string
-	 */
-	protected $connectionName;
-
-	/**
 	 * The table associated with the model.
 	 *
 	 * @var string
@@ -418,9 +411,9 @@ abstract class Model {
 	 */
 	public function getConnection()
 	{
-		if ( ! is_null($this->connectionName))
+		if ( ! is_null($this->connection))
 		{
-			return static::$connections[$this->connectionName];
+			return static::$connections[$this->connection];
 		}
 
 		return static::getDefaultConnection();
@@ -433,7 +426,7 @@ abstract class Model {
 	 */
 	public function getConnectionName()
 	{
-		return $this->connectionName ?: static::$defaultConnection;
+		return $this->connection ?: static::$defaultConnection;
 	}
 
 	/**
@@ -444,7 +437,7 @@ abstract class Model {
 	 */
 	public function setConnection($name)
 	{
-		$this->connectionName = $name;
+		$this->connection = $name;
 	}
 
 	/**
