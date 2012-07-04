@@ -198,7 +198,7 @@ class Builder {
 
 		// If the column is just a string, we can assume the join simply has a
 		// basic "on" clause with a single condition. So we will just build
-		// the join clause instance and auto set the simple join clause. 
+		// the join clause instance and auto set the simple join clauses. 
 		else
 		{
 			$join = new JoinClause($type, $table);
@@ -245,8 +245,8 @@ class Builder {
 		}
 
 		// If the given operator is not found in the list of valid operators we will
-		// assume that the develoepr is just short-cutting the '=' operator and
-		// we will set the operator to '=' and set the value appropriately.
+		// assume that the develoepr is just short-cutting the '=' operators and
+		// we will set the operators to '=' and set the values appropriately.
 		if ( ! in_array($operator, $this->operators))
 		{
 			list($value, $operator) = array($operator, '=');
