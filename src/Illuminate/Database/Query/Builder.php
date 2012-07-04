@@ -238,7 +238,7 @@ class Builder {
 	{
 		// If the columns is actually a Closure instance, we will assume the developer
 		// wants to begin a nested where statement which is wrapped in parenthesis.
-		// We'll add that Closure to the query and return back out immediately.
+		// We'll add that Closure to the query then return back out immediately.
 		if ($column instanceof Closure)
 		{
 			return $this->whereNested($column, $boolean);
@@ -252,9 +252,17 @@ class Builder {
 			list($value, $operator) = array($operator, '=');
 		}
 
+		// If the value is a Closure, it means the developer is performing an entire
+		// sub-select within the query and we will need to compile the sub-select
+		// within the where clause to get the appropriate query record results.
+		if ($value instanceof Closure)
+		{
+			return $this->whereSub($column, $operator, $value, $boolean);
+		}
+
 		// Now that we are working with just a simple query we can put the elements
 		// in our array and add the query binding to our array of bindings that
-		// will be bound to the SQL statements when it is finally executed.
+		// will be bound to each SQL statements when it is finally executed.
 		$type = 'Basic';
 
 		$this->wheres[] = compact('type', 'column', 'operator', 'value', 'boolean');
@@ -288,7 +296,7 @@ class Builder {
 	{
 		$type = 'Nested';
 
-		$query = new Builder($this->connection, $this->grammar, $this->processor);
+		$query = $this->newQuery();
 
 		// To handle nested queries we actually will create a brand new query instance
 		// and pass it off to the Closure that we have. The Closure can then just
@@ -297,17 +305,102 @@ class Builder {
 
 		call_user_func($callback, $query);
 
-		if ( ! is_null($query->wheres))
-		{
-			$this->wheres[] = compact('type', 'query', 'boolean');
-		}
+		$this->wheres[] = compact('type', 'query', 'boolean');
 
 		// Once we have let the Closure do its things we can gather the bindings on
 		// the nested query builder and merge them into our bindings since they
-		// need to be extracted out of the child and assigend to our array.
+		// need to get extracted out of the child and assigend to our array.
 		$this->mergeBindings($query);
 
 		return $this;
+	}
+
+	/**
+	 * Add a full sub-select to the query.
+	 *
+	 * @param  string   $column
+	 * @param  string   $operator
+	 * @param  Closure  $callback
+	 * @param  string   $boolean
+	 * @return Illuminate\Database\Query\Builder
+	 */
+	protected function whereSub($column, $operator, Closure $callback, $boolean)
+	{
+		$type = 'Sub';
+
+		$query = $this->newQuery();
+
+		// Once we have the query instance we can simply execute it so it can add all
+		// of the sub-select's conditions to itself, and then we can cache it off 
+		// in the array of where clauses for the "main" parent query instance.
+		call_user_func($callback, $query);
+
+		$this->wheres[] = compact('type', 'column', 'operator', 'query', 'boolean');
+
+		$this->mergeBindings($query);
+
+		return $this;
+	}
+
+	/**
+	 * Add an exists clause to the query.
+	 *
+	 * @param  Closure  $callback
+	 * @param  string   $boolean
+	 * @param  bool     $not
+	 * @return Illuminate\Database\Query\Builder
+	 */
+	public function whereExists(Closure $callback, $boolean = 'and', $not = false)
+	{
+		$type = $not ? 'NotExists' : 'Exists';
+
+		$query = $this->newQuery();
+
+		// Similar to the sub-select clause, we will create a new query instance so
+		// the developer may cleanly specify the entire exists query and we will
+		// compile the whole thing in the grammar and insert it into the SQL.
+		call_user_func($callback, $query);
+
+		$this->wheres[] = compact('type', 'operator', 'query', 'boolean');
+
+		$this->mergeBindings($query);
+
+		return $this;
+	}
+
+	/**
+	 * Add an or exists clause to the query.
+	 *
+	 * @param  Closure  $callback
+	 * @param  bool     $not
+	 * @return Illuminate\Database\Query\Builder
+	 */
+	public function orWhereExists(Closure $callback, $not = false)
+	{
+		return $this->whereExists($callback, 'or', $not);
+	}
+
+	/**
+	 * Add a where not exists clause to the query.
+	 *
+	 * @param  Closure  $calback
+	 * @param  string   $boolean
+	 * @return Illuminate\Database\Query\Builder
+	 */
+	public function whereNotExists(Closure $callback, $boolean = 'and')
+	{
+		return $this->whereExists($callback, $boolean, true);
+	}
+
+	/**
+	 * Add a where not exists clause to the query.
+	 *
+	 * @param  Closure  $calback
+	 * @return Illuminate\Database\Query\Builder
+	 */
+	public function orWhereNotExists(Closure $callback)
+	{
+		return $this->orWhereExists($callback, true);
 	}
 
 	/**
@@ -706,6 +799,16 @@ class Builder {
 		$sql = $this->grammar->compileDelete($this);
 
 		return $this->connection->delete($sql, $this->bindings);
+	}
+
+	/**
+	 * Get a new instance of the query builder.
+	 *
+	 * @return Illuminate\Database\Query\Builder
+	 */
+	protected function newQuery()
+	{
+		return new Builder($this->connection, $this->grammar, $this->processor);
 	}
 
 	/**

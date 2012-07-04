@@ -219,6 +219,20 @@ class Grammar extends BaseGrammar {
 	}
 
 	/**
+	 * Compile a where condition with a sub-select.
+	 *
+	 * @param  Illuminate\Database\Query\Builder $query
+	 * @param  array   $where
+	 * @return string
+	 */
+	protected function whereSub(Builder $query, $where)
+	{
+		$select = $this->compileSelect($where['query']);
+
+		return $this->wrap($where['column']).' '.$where['operator']." ($select)";
+	}
+
+	/**
 	 * Compile a basic where clause.
 	 *
 	 * @param  Illuminate\Database\Query\Builder  $query
@@ -230,6 +244,30 @@ class Grammar extends BaseGrammar {
 		$value = $this->parameter($where['value']);
 
 		return $this->wrap($where['column']).' '.$where['operator'].' '.$value;
+	}
+
+	/**
+	 * Compile a where exists clause.
+	 *
+	 * @param  Illuminate\Database\Query\Builder  $query
+	 * @param  array  $where
+	 * @return string
+	 */
+	public function whereExists(Builder $query, $where)
+	{
+		return 'exists ('.$this->compileSelect($where['query']).')';
+	}
+
+	/**
+	 * Compile a where exists clause.
+	 *
+	 * @param  Illuminate\Database\Query\Builder  $query
+	 * @param  array  $where
+	 * @return string
+	 */
+	public function whereNotExists(Builder $query, $where)
+	{
+		return 'not exists ('.$this->compileSelect($where['query']).')';
 	}
 
 	/**

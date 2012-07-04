@@ -162,6 +162,50 @@ class BuilderTest extends PHPUnit_Framework_TestCase {
 	}
 
 
+	public function testFullSubSelects()
+	{
+		$builder = $this->getBuilder();
+		$builder->select('*')->from('users')->where('email', '=', 'foo')->orWhere('id', '=', function($q)
+		{
+			$q->select('raw|max(id)')->from('users')->where('email', '=', 'bar');
+		});
+		$this->assertEquals('select * from "users" where "email" = ? or "id" = (select max(id) from "users" where "email" = ?)', $builder->toSql());
+		$this->assertEquals(array(0 => 'foo', 1 => 'bar'), $builder->getBindings());
+	}
+
+
+	public function testWhereExists()
+	{
+		$builder = $this->getBuilder();
+		$builder->select('*')->from('orders')->whereExists(function($q)
+		{
+			$q->select('*')->from('products')->where('products.id', '=', 'raw|"orders"."id"');
+		});
+		$this->assertEquals('select * from "orders" where exists (select * from "products" where "products"."id" = "orders"."id")', $builder->toSql());
+
+		$builder = $this->getBuilder();
+		$builder->select('*')->from('orders')->whereNotExists(function($q)
+		{
+			$q->select('*')->from('products')->where('products.id', '=', 'raw|"orders"."id"');
+		});
+		$this->assertEquals('select * from "orders" where not exists (select * from "products" where "products"."id" = "orders"."id")', $builder->toSql());
+
+		$builder = $this->getBuilder();
+		$builder->select('*')->from('orders')->where('id', '=', 1)->orWhereExists(function($q)
+		{
+			$q->select('*')->from('products')->where('products.id', '=', 'raw|"orders"."id"');
+		});
+		$this->assertEquals('select * from "orders" where "id" = ? or exists (select * from "products" where "products"."id" = "orders"."id")', $builder->toSql());
+
+		$builder = $this->getBuilder();
+		$builder->select('*')->from('orders')->where('id', '=', 1)->orWhereNotExists(function($q)
+		{
+			$q->select('*')->from('products')->where('products.id', '=', 'raw|"orders"."id"');
+		});
+		$this->assertEquals('select * from "orders" where "id" = ? or not exists (select * from "products" where "products"."id" = "orders"."id")', $builder->toSql());
+	}
+
+
 	public function testBasicJoins()
 	{
 		$builder = $this->getBuilder();

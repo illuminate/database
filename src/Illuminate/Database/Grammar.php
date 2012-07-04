@@ -34,7 +34,7 @@ abstract class Grammar {
 
 		// If the value being wrapped has a column alias we will need to separate out
 		// the pieces so we can wrap each of the segments of the expression on its
-		// own, and then join them both back together with the "as" connectors.
+		// own, and then joins them both back together with the "as" connectors.
 		if (strpos(strtolower($value), ' as ') !== false)
 		{
 			$segments = explode(' ', $value);
