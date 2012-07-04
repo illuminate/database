@@ -22,7 +22,7 @@ class Collection implements ArrayAccess, Countable, IteratorAggregate {
 	 */
 	public function __construct(array $items)
 	{
-		$this->items = $results;
+		$this->items = $items;
 	}
 
 	/**

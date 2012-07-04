@@ -395,7 +395,7 @@ class Grammar extends BaseGrammar {
 		// Once we have successfully generated the proper place-holders we just
 		// need to concatenate all the pieces to create the final, complete
 		// insert statements ready for execution against the connection.
-		return "insert into $table ($columns) values ($parameters)";
+		return "insert into $table ($columns) values $parameters";
 	}
 
 	/**
