@@ -17,6 +17,13 @@ abstract class Model {
 	protected $connection;
 
 	/**
+	 * The name of the currently used connection.
+	 *
+	 * @var string
+	 */
+	protected $connectionName;
+
+	/**
 	 * The table associated with the model.
 	 *
 	 * @var string
@@ -109,6 +116,21 @@ abstract class Model {
 		$model->save();
 
 		return $model;
+	}
+
+	/**
+	 * Begin querying the model on a given connection.
+	 *
+	 * @param  string  $connection
+	 * @return Illuminate\Database\Eloquent\Builder
+	 */
+	public static function on($connection)
+	{
+		$instance = new static;
+
+		$instance->setConnection($connection);
+
+		return $instance->newQuery();
 	}
 
 	/**
@@ -400,6 +422,16 @@ abstract class Model {
 	}
 
 	/**
+	 * Get the current connection name for the model.
+	 *
+	 * @return string
+	 */
+	public function getConnectionName()
+	{
+		return $this->connectionName ?: static::$defaultConnection;
+	}
+
+	/**
 	 * Set the connection associated with the model.
 	 *
 	 * @param  string  $name
@@ -407,6 +439,8 @@ abstract class Model {
 	 */
 	public function setConnection($name)
 	{
+		$this->connectionName = $name;
+
 		$this->connection = static::$connections[$name];
 	}
 
@@ -425,6 +459,22 @@ abstract class Model {
 		}
 
 		static::$connections[$name] = $connection;
+	}
+
+	/**
+	 * Get a registered connection instance by name.
+	 *
+	 * @param  string  $name
+	 * @return Illuminate\Database\Connection
+	 */
+	public static function getConnectionInstance($name)
+	{
+		if (isset(static::$connections[$name]))
+		{
+			return static::$connections[$name];
+		}
+
+		throw new \InvalidArgumentException("Connection [$name] isn't registered.");
 	}
 
 	/**

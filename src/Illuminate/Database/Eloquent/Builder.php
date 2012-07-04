@@ -54,6 +54,8 @@ class Builder extends BaseBuilder {
 		{
 			$models[] = $model = $this->model->newInstance((array) $result);
 
+			$model->setConnection($this->model->getConnectionName());
+
 			$model->exists = true;
 		}
 
