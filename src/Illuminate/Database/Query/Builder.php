@@ -847,6 +847,34 @@ class Builder {
 	}
 
 	/**
+	 * Merge an array of where clauses and bindings.
+	 *
+	 * @param  array  $wheres
+	 * @param  array  $bindings
+	 * @return void
+	 */
+	public function mergeWheres($wheres, $bindings)
+	{
+		array_merge($this->wheres, (array) $wheres);
+
+		array_merge($this->bindings, (array) $bindings);
+	}
+
+	/**
+	 * Get a copy of the where clauses and bindings in an array.
+	 *
+	 * @return array
+	 */
+	public function getAndResetWheres()
+	{
+		$values = array($this->wheres, $this->bindings);
+
+		list($this->wheres, $this->bindings) = array(null, array());
+
+		return $values;
+	}
+
+	/**
 	 * Get the current query value bindings.
 	 *
 	 * @return array

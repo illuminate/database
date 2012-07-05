@@ -94,13 +94,21 @@ abstract class Model {
 	 * Create a new instance of the given model.
 	 *
 	 * @param  array  $attributes
+	 * @param  bool   $exists
 	 * @return Illuminate\Database\Eloquent\Model
 	 */
-	public function newInstance(array $attributes = array())
+	public function newInstance(array $attributes = array(), $exists = false)
 	{
+		// This method just provides a convenient way for us to generate fresh model
+		// instances of the current model. It is particularly useful during the
+		// hydration of new objects by the Eloquent query builder instance.
 		$class = get_class($this);
 
-		return new $class($attributes);
+		$model = new $class($attributes);
+
+		$model->exists = $exists;
+
+		return $model;
 	}
 
 	/**
@@ -126,6 +134,9 @@ abstract class Model {
 	 */
 	public static function on($connection)
 	{
+		// First we will just create a fresh instance of this model, and then we can
+		// set the connection on the model so that it is be used for the queries
+		// we execute, as well as being set on any relationship we retrieve.
 		$instance = new static;
 
 		$instance->setConnection($connection);

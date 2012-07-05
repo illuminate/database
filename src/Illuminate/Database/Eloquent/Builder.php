@@ -1,5 +1,6 @@
 <?php namespace Illuminate\Database\Eloquent;
 
+use Closure;
 use Illuminate\Database\Query\Builder as BaseBuilder;
 
 class Builder extends BaseBuilder {
@@ -59,16 +60,94 @@ class Builder extends BaseBuilder {
 
 		foreach ($results as $result)
 		{
-			$model = $this->model->newInstance((array) $result);
+			$model = $this->model->newInstance((array) $result, true);
 
 			$model->setConnection($connection);
-
-			$model->exists = true;
 
 			$models[] = $model;
 		}
 
+		if (count($models) > 0)
+		{
+			$models = $this->eagerLoadRelations($models);
+		}
+
 		return new Collection($models);
+	}
+
+	/**
+	 * Eager load the relationships for the models.
+	 *
+	 * @param  array  $models
+	 * @return array
+	 */
+	protected function eagerLoadRelations(array $models)
+	{
+		foreach ($this->eagerLoad as $relation => $constraints)
+		{
+			// For nested eager loads we'll skip loading them here and they will be set as an
+			// eager load on the query to retrieve the relation so that they will be eager
+			// loaded on that query, because that is where they get hydrated as models.
+			if (strpos($relation, '.') === false)
+			{
+				$models = $this->eagerLoadRelation($models, $relation, $constraints);
+			}
+		}
+
+		return $models;
+	}
+
+	/**
+	 * Eager load a given relationship for the models.
+	 *
+	 * @param  array    $models
+	 * @param  string   $relation
+	 * @param  Closure  $constraints
+	 * @return array
+	 */
+	protected function eagerLoadRelation(array $models, $relation, Closure $constraints)
+	{
+		$query = $this->query->getModel()->$relation();
+
+		$query->with($this->nestedRelations($relation));
+
+		list($wheres, $bindings) = $query->getAndResetWheres();
+
+		$query->addEagerConstraints($models);
+
+		$query->mergeWheres($wheres, $bindings);
+
+		call_user_func($constraints, $query);
+
+		$models = $query->initializeRelation($models, $relation);
+
+		$results = $query->get();
+
+		return $query->eagerlyMatch($relation, $models, $results);
+	}
+
+	/**
+	 * Get the deeply nested relations for a given top-level relation.
+	 *
+	 * @param  string  $relation
+	 * @return array
+	 */
+	protected function nestedRelations($relation)
+	{
+		$nested = array();
+
+		// We are basically looking for any relationships that are nested deeper than
+		// the given top-level relationship. We will just check for any relations
+		// that start with the given top relation and adds them to our arrays.
+		foreach ($this->eagerLoad as $name => $constraints)
+		{
+			if (strpos($name, $relation) === 0)
+			{
+				$nested[substr($name, strlen($relation.'.'))] = $constraints;
+			}
+		}
+
+		return $nested;
 	}
 
 	/**
@@ -123,6 +202,16 @@ class Builder extends BaseBuilder {
 		}
 
 		return $results;
+	}
+
+	/**
+	 * Get the relationships being eagerly laoded.
+	 *
+	 * @return array
+	 */
+	public function getEagerLoads()
+	{
+		return $this->eagerLoad;
 	}
 
 	/**
