@@ -97,18 +97,29 @@ abstract class Model {
 	 * @param  bool   $exists
 	 * @return Illuminate\Database\Eloquent\Model
 	 */
-	public function newInstance(array $attributes = array(), $exists = false)
+	public function newInstance($attributes = array(), $exists = false)
 	{
 		// This method just provides a convenient way for us to generate fresh model
 		// instances of the current model. It is particularly useful during the
 		// hydration of new objects by the Eloquent query builder instance.
 		$class = get_class($this);
 
-		$model = new $class($attributes);
+		$model = new $class((array) $attributes);
 
 		$model->exists = $exists;
 
 		return $model;
+	}
+
+	/**
+	 * Create a new model instance that is existing.
+	 *
+	 * @param  array  $attributes
+	 * @return Illuminate\Database\Eloquent\Model
+	 */
+	public function newExisting($attributes = array())
+	{
+		return $this->newInstance($attributes, true);
 	}
 
 	/**

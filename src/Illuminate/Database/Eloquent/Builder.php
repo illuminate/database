@@ -2,6 +2,7 @@
 
 use Closure;
 use Illuminate\Database\Query\Builder as BaseBuilder;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 
 class Builder extends BaseBuilder {
 
@@ -52,21 +53,30 @@ class Builder extends BaseBuilder {
 	 */
 	public function get($columns = array('*'))
 	{
+		// First we will simply get the raw reuslts from the query builder which we
+		// can use to popular an array of Eloquent models. We will pass columns
+		// that should be selected too, which is typically just everything.
 		$results = parent::get($columns);
 
 		$connection = $this->model->getConnectionName();
 
 		$models = array();
 
+		// Once we have the results we can spin through them and instantiate a new
+		// model instance for each record we retrieved from the database. We'll
+		// also set the proper connection name for the model after creating.
 		foreach ($results as $result)
 		{
-			$model = $this->model->newInstance((array) $result, true);
+			$model = $this->model->newExisting($result);
 
 			$model->setConnection($connection);
 
 			$models[] = $model;
 		}
 
+		// If we actually found models we will also eager load any relationships
+		// that have been specified as needing to be eager loaded. This will
+		// solve the n + 1 query problem for the developers conveniently.
 		if (count($models) > 0)
 		{
 			$models = $this->eagerLoadRelations($models);
