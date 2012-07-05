@@ -53,6 +53,27 @@ class Builder extends BaseBuilder {
 	 */
 	public function get($columns = array('*'))
 	{
+		$models = $this->getModels($columns);
+
+		// If we actually found models we will also eager load any relationships
+		// that have been specified as needing to be eager loaded. This will
+		// solve the n + 1 query problem for the developers conveniently.
+		if (count($models) > 0)
+		{
+			$models = $this->eagerLoadRelations($models);
+		}
+
+		return new Collection($models);
+	}
+
+	/**
+	 * Get the hydrated models without eager loading.
+	 *
+	 * @param  array  $columns
+	 * @return array
+	 */
+	public function getModels($columns = array('*'))
+	{
 		// First we will simply get the raw reuslts from the query builder which we
 		// can use to popular an array of Eloquent models. We will pass columns
 		// that should be selected too, which are typically just everything.
@@ -67,22 +88,15 @@ class Builder extends BaseBuilder {
 		// also set the proper connection names for the model after creating.
 		foreach ($results as $result)
 		{
-			$model = $this->model->newExisting($result);
+			$models[] = $model = $this->model->newExisting($result);
 
 			$model->setConnection($connection);
-
-			$models[] = $model;
 		}
 
-		// If we actually found models we will also eager load any relationships
-		// that have been specified as needing to be eager loaded. This will
-		// solve the n + 1 query problem for the developers conveniently.
-		if (count($models) > 0)
-		{
-			$models = $this->eagerLoadRelations($models);
-		}
-
-		return new Collection($models);
+		// Now that we have created the models we can just return them, as this
+		// method is kept separate from eager loadings in case they need to
+		// be used by a relationship individually when loading the model.
+		return $models;
 	}
 
 	/**
