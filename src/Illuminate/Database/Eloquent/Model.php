@@ -614,6 +614,29 @@ abstract class Model {
 	}
 
 	/**
+	 * Get a specified relationship.
+	 *
+	 * @param  string  $relation
+	 * @return mixed
+	 */
+	public function getRelation($relation)
+	{
+		return $this->relationships[$relation];
+	}
+
+	/**
+	 * Set the specific relationship in the model.
+	 *
+	 * @param  string  $relation
+	 * @param  mixed   $value
+	 * @return void
+	 */
+	public function setRelation($relation, $value)
+	{
+		$this->relationships[$relation] = $value;
+	}
+
+	/**
 	 * Convert a snake case string to camel case.
 	 *
 	 * @param  string  $value

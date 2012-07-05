@@ -50,4 +50,25 @@ abstract class HasOneOrMany extends Relation {
 		$this->query->whereIn($this->foreignKey, $this->getKeys($results));
 	}
 
+	/**
+	 * Build model dictionary keyed by the relation's foreign key.
+	 *
+	 * @param  array  $reuslts
+	 * @return array
+	 */
+	protected function buildDictionary(array $results)
+	{
+		$dictionary = array();
+
+		// First we will create a dictionary of models keyed by the foreign key of the
+		// relationship as this will allow us to quickly access all of the related
+		// models without having to do nested looping which will be quite slow.
+		foreach ($results as $result)
+		{
+			$dictionary[$result->{$this->foreignKey}][] = $result;
+		}
+
+		return $dictionary;
+	}
+
 }

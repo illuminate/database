@@ -29,4 +29,29 @@ class HasMany extends HasOneOrMany {
 		return $models;
 	}
 
+	/**
+	 * Match the eagerly loaded results to their parents.
+	 *
+	 * @param  array   $models
+	 * @param  array   $results
+	 * @param  string  $relation
+	 * @return array
+	 */
+	public function match(array $models, array $results, $relation)
+	{
+		$dictionary = $this->buildDictionary($results);
+
+		// Once we have the dictionary we can simply spin through the parent models to
+		// link them up with their children using the keyed dictionary to make the
+		// matching very convenient and easy work. Then we'll just return them.
+		foreach ($models as $model)
+		{
+			$key = $model->getKey();
+
+			$model->setRelation($relation, $dictionary[$key]);
+		}
+
+		return $models;
+	}
+
 }
