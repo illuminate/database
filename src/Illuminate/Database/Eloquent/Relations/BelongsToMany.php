@@ -56,6 +56,17 @@ class BelongsToMany extends Relation {
 	}
 
 	/**
+	 * Set the constraints for an eager load of the relation.
+	 *
+	 * @param  array  $models
+	 * @return void
+	 */
+	public function addEagerConstraints(array $models)
+	{
+		$this->query->whereIn($this->getForeignKey(), $this->getKeys($results));
+	}
+
+	/**
 	 * Get the results of the relationship.
 	 *
 	 * @return mixed
@@ -119,7 +130,7 @@ class BelongsToMany extends Relation {
 	 * @param  string  $relation
 	 * @return void
 	 */
-	public function initializeRelation(array $models, $relation)
+	public function initRelation(array $models, $relation)
 	{
 		foreach ($models as $model)
 		{

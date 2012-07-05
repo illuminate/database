@@ -62,7 +62,7 @@ abstract class Relation {
 	 * @param  string  $relation
 	 * @return void
 	 */
-	abstract public function initializeRelation(array $models, $relation)
+	abstract public function initRelation(array $models, $relation)
 
 	/**
 	 * Match the eagerly loaded results to their parents.
@@ -72,7 +72,7 @@ abstract class Relation {
 	 * @param  string  $relation
 	 * @return array
 	 */
-	abstract public function eagerlyMatch(array $models, array $results, $relation)
+	abstract public function match(array $models, array $results, $relation)
 
 	/**
 	 * Get the results of the relationship.
@@ -80,6 +80,21 @@ abstract class Relation {
 	 * @return mixed
 	 */
 	abstract public function getResults();
+
+	/**
+	 * Get all of the primary keys for an array of models.
+	 *
+	 * @param  array  $models
+	 * @return array
+	 */
+	protected function getKeys(array $models)
+	{
+		return array_values(array_map(function($value)
+		{
+			return $value->getKey()
+
+		}, $models));
+	}
 
 	/**
 	 * Get the underlying query for the relation.

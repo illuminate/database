@@ -123,9 +123,9 @@ class Builder extends BaseBuilder {
 		// do all they wish to the queriea, even specifying limits, orders, etc.
 		call_user_func($constraints, $instance);
 
-		$models = $instance->initializeRelation($models, $relation);
+		$models = $instance->initRelation($models, $relation);
 
-		return $instance->eagerlyMatch($relation, $models, $instance->get());
+		return $instance->match($relation, $models, $instance->get());
 	}
 
 	/**
