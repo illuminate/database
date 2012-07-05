@@ -625,6 +625,17 @@ abstract class Model {
 	}
 
 	/**
+	 * Set the array of model attributes. No checking is done.
+	 *
+	 * @param  array  $attributes
+	 * @return void
+	 */
+	public function setAttribute(array $attributes)
+	{
+		$this->attributes = $attributes;
+	}
+
+	/**
 	 * Get a specified relationship.
 	 *
 	 * @param  string  $relation
