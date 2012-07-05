@@ -173,7 +173,32 @@ class BelongsToMany extends Relation {
 	 */
 	public function match(array $models, array $results, $relation)
 	{
-		//
+		// First we'll build a dictionary of child models keyed by the foreign key
+		// of the relation so that we can easily and quickly match them to the
+		// parents without having a possibly slow inner loop for each one.
+		$foreign = $this->foreignKey;
+
+		$dictionary = array();
+
+		foreach ($results as $result)
+		{
+			$dictionary[$result->pivot->$foreign][] = $result;
+		}
+
+		// Once we have a nice dictionary of child objects we can easily match the
+		// children back to their parents using the dictionary and the keys on
+		// the parent models. Then we will return the hydrated models back.
+		foreach ($models as $model)
+		{
+			$key = $model->getKey();
+
+			if (isset($dictionary[$key]))
+			{
+				$model->setRelation($relation, $dictionary[$key]);
+			}
+		}
+
+		return $models;
 	}
 
 	/**
