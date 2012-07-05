@@ -64,7 +64,7 @@ class Builder extends BaseBuilder {
 
 		// Once we have the results we can spin through them and instantiate a new
 		// model instance for each record we retrieved from the database. We'll
-		// also set the proper connection name for the model after creating.
+		// also set the proper connection names for the model after creating.
 		foreach ($results as $result)
 		{
 			$model = $this->model->newExisting($result);
