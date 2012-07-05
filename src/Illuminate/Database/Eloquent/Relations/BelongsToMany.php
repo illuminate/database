@@ -27,6 +27,13 @@ class BelongsToMany extends Relation {
 	protected $otherKey;
 
 	/**
+	 * The pivot table columns to retrieve.
+	 *
+	 * @var array
+	 */
+	protected $pivotColumns = array();
+
+	/**
 	 * Create a new has many relationship instance.
 	 *
 	 * @param  Illuminate\Database\Eloquent\Builder  $query
@@ -96,6 +103,8 @@ class BelongsToMany extends Relation {
 	protected function setSelect()
 	{
 		$columns = array($this->query->getModel()->getTable().'.*');
+
+		$columns = array_merge($columns, $this->pivotColumns, $this->getBothKeys());
 
 		$this->query->select($columns);
 
@@ -175,7 +184,7 @@ class BelongsToMany extends Relation {
 	{
 		// First we'll build a dictionary of child models keyed by the foreign key
 		// of the relation so that we can easily and quickly match them to the
-		// parents without having a possibly slow inner loop for each one.
+		// parents without having a possibly slow inner loops for each one.
 		$foreign = $this->foreignKey;
 
 		$dictionary = array();
@@ -251,6 +260,19 @@ class BelongsToMany extends Relation {
 	}
 
 	/**
+	 * Set the columns on the pivot table to retrieve.
+	 *
+	 * @param  array  $columns
+	 * @return Illuminate\Database\Eloquent\Relations\BelongsToMany
+	 */
+	public function with($columns)
+	{
+		$this->pivotColumns = $columns;
+
+		return $this;
+	}
+
+	/**
 	 * Get the fully qualified foreign key for the relation.
 	 *
 	 * @return string
@@ -268,6 +290,16 @@ class BelongsToMany extends Relation {
 	protected function getOtherKey()
 	{
 		return $this->table.'.'.$this->otherKey;
+	}
+
+	/**
+	 * Get both of the relation keys in an array.
+	 *
+	 * @return array
+	 */
+	protected function getBothKeys()
+	{
+		return array($this->getForeignKey(), $this->getOtherKey());
 	}
 
 }
