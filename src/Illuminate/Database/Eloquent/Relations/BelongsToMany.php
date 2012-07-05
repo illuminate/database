@@ -235,7 +235,7 @@ class BelongsToMany extends Relation {
 		{
 			$values = $this->cleanPivotAttributes($model);
 
-			$pivot = $this->createPivot($values);
+			$pivot = $this->newExistingPivot($values);
 
 			$model->setRelation('pivot', $pivot);
 		}
