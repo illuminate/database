@@ -113,6 +113,23 @@ class BelongsToMany extends Relation {
 	}
 
 	/**
+	 * Initialize the relation on a set of models.
+	 *
+	 * @param  array   $models
+	 * @param  string  $relation
+	 * @return void
+	 */
+	public function initializeRelation(array $models, $relation)
+	{
+		foreach ($models as $model)
+		{
+			$model->setRelation($relation, array());
+		}
+
+		return $models;
+	}
+
+	/**
 	 * Get the fully qualified foreign key for the relation.
 	 *
 	 * @return string

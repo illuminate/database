@@ -12,4 +12,21 @@ class HasMany extends HasOneOrMany {
 		return $this->query->get();
 	}
 
+	/**
+	 * Initialize the relation on a set of models.
+	 *
+	 * @param  array   $models
+	 * @param  string  $relation
+	 * @return void
+	 */
+	public function initializeRelation(array $models, $relation)
+	{
+		foreach ($models as $model)
+		{
+			$model->setRelation($relation, array());
+		}
+
+		return $models;
+	}
+
 }

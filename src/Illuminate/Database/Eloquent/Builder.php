@@ -119,15 +119,13 @@ class Builder extends BaseBuilder {
 		$instance->mergeWheres($wheres, $bindings);
 
 		// We allow the developers to specify constraints on eager loads so we'll just
-		// call the constraint Closure, passing along the query so they can simply
-		// do all they wish to the queriea, even specifying limit, orders, etc.
+		// call the constraints Closure, passing along the query so they can simply
+		// do all they wish to the queriea, even specifying limits, orders, etc.
 		call_user_func($constraints, $instance);
 
 		$models = $instance->initializeRelation($models, $relation);
 
-		$results = $instance->get();
-
-		return $instance->eagerlyMatch($relation, $models, $results);
+		return $instance->eagerlyMatch($relation, $models, $instance->get());
 	}
 
 	/**

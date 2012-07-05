@@ -45,6 +45,23 @@ class BelongsTo extends Relation {
 	}
 
 	/**
+	 * Initialize the relation on a set of models.
+	 *
+	 * @param  array   $models
+	 * @param  string  $relation
+	 * @return void
+	 */
+	public function initializeRelation(array $models, $relation)
+	{
+		foreach ($models as $model)
+		{
+			$model->setRelation($relation, null);
+		}
+
+		return $models;
+	}
+
+	/**
 	 * Get the results of the relationship.
 	 *
 	 * @return mixed
