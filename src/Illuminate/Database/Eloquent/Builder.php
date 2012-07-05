@@ -55,7 +55,7 @@ class Builder extends BaseBuilder {
 	{
 		// First we will simply get the raw reuslts from the query builder which we
 		// can use to popular an array of Eloquent models. We will pass columns
-		// that should be selected too, which is typically just everything.
+		// that should be selected too, which are typically just everything.
 		$results = parent::get($columns);
 
 		$connection = $this->model->getConnectionName();
