@@ -104,11 +104,21 @@ class BelongsToMany extends Relation {
 	{
 		$columns = array($this->query->getModel()->getTable().'.*');
 
-		$columns = array_merge($columns, $this->pivotColumns, $this->getBothKeys());
+		$columns = array_merge($columns, $this->getPivotColumns());
 
 		$this->query->select($columns);
 
 		return $this;
+	}
+
+	/**
+	 * Get the pivot columns for the relation.
+	 *
+	 * @return array
+	 */
+	protected function getPivotColumns()
+	{
+		return array($this->pivotColumns, $this->getBothKeys());
 	}
 
 	/**
@@ -218,8 +228,6 @@ class BelongsToMany extends Relation {
 	 */
 	protected function hydratePivotRelation(array $models)
 	{
-		$conn = $this->parent->getConnectionName();
-
 		// To hydrate the pivot relationship, we will just gather the pivot attributes
 		// and create a new Pivot model, which is basically a dynamic model that we
 		// will set the attributes, table, and connections on so it they be used.
@@ -227,7 +235,7 @@ class BelongsToMany extends Relation {
 		{
 			$values = $this->cleanPivotAttributes($model);
 
-			$pivot = new Pivot($values, $this->table, $conn);
+			$pivot = $this->createPivot($values);
 
 			$model->setRelation('pivot', $pivot);
 		}
@@ -257,6 +265,31 @@ class BelongsToMany extends Relation {
 		}
 
 		return $values;
+	}
+
+	/**
+	 * Create a new pivot model instance.
+	 *
+	 * @param  array  $attributes
+	 * @param  bool   $exists
+	 * @return Illuminate\Database\Eloquent\Relation\Pivot
+	 */
+	protected function newPivot(array $attributes = array(), $exists = false)
+	{
+		$connection = $this->parent->getConnectionName();
+
+		return new Pivot($attributes, $this->table, $connection, $exists);
+	}
+
+	/**
+	 * Create a new existing pivot model instance.
+	 *
+	 * @param  array  $attributes
+	 * @return Illuminate\Database\Eloquent\Relations\Pivot
+	 */
+	protected function newExistingPivot(array $attributes = array())
+	{
+		return $this->newPivot($attributes, true);
 	}
 
 	/**
