@@ -107,23 +107,40 @@ class Builder extends BaseBuilder {
 	 */
 	protected function eagerLoadRelation(array $models, $relation, Closure $constraints)
 	{
+		// First we will simply get the relationship instances from the top-level model.
+		// Then we can set the necessary constraints on that instance to get all of
+		// the models for the eager load querys, hydrating those on each parent.
+		$instance = $this->getRelation($relation);
+
+		list($wheres, $bindings) = $instance->getAndResetWheres();
+
+		$instance->addEagerConstraints($models);
+
+		$instance->mergeWheres($wheres, $bindings);
+
+		// We allow the developers to specify constraints on eager loads so we'll just
+		// call the constraint Closure, passing along the query so they can simply
+		// do all they wish to the queriea, even specifying limit, orders, etc.
+		call_user_func($constraints, $instance);
+
+		$models = $instance->initializeRelation($models, $relation);
+
+		$results = $instance->get();
+
+		return $instance->eagerlyMatch($relation, $models, $results);
+	}
+
+	/**
+	 * Get the relation instance for the given relation name.
+	 *
+	 * @param  string  $relation
+	 * @return Illuminate\Database\Eloquent\Relations\Relation
+	 */
+	protected function getRelation($relation)
+	{
 		$query = $this->query->getModel()->$relation();
 
-		$query->with($this->nestedRelations($relation));
-
-		list($wheres, $bindings) = $query->getAndResetWheres();
-
-		$query->addEagerConstraints($models);
-
-		$query->mergeWheres($wheres, $bindings);
-
-		call_user_func($constraints, $query);
-
-		$models = $query->initializeRelation($models, $relation);
-
-		$results = $query->get();
-
-		return $query->eagerlyMatch($relation, $models, $results);
+		return $query->with($this->nestedRelations($relation));
 	}
 
 	/**

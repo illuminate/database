@@ -82,6 +82,16 @@ abstract class Relation {
 	abstract public function getResults();
 
 	/**
+	 * Get the underlying query for the relation.
+	 *
+	 * @return Illuminate\Database\Eloquent\Builder
+	 */
+	public function getQuery()
+	{
+		return $this->query;
+	}
+
+	/**
 	 * Handle dynamic method calls to the relationship.
 	 *
 	 * @param  string  $method
