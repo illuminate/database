@@ -20,9 +20,20 @@ class Collection implements ArrayAccess, Countable, IteratorAggregate {
 	 * @param  array  $items
 	 * @return void
 	 */
-	public function __construct(array $items)
+	public function __construct(array $items = array())
 	{
 		$this->items = $items;
+	}
+
+	/**
+	 * Add an item to the collection.
+	 *
+	 * @param  mixed  $item
+	 * @return void
+	 */
+	public function add($item)
+	{
+		$this->items[] = $item;
 	}
 
 	/**

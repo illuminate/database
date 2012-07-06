@@ -2,6 +2,7 @@
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Collection;
 
 class BelongsTo extends Relation {
 
@@ -22,9 +23,9 @@ class BelongsTo extends Relation {
 	 */
 	public function __construct(Builder $query, Model $parent, $foreignKey)
 	{
-		parent::__construct($query, $parent);
-
 		$this->foreignKey = $foreignKey;
+
+		parent::__construct($query, $parent);
 	}
 
 	/**
@@ -39,9 +40,7 @@ class BelongsTo extends Relation {
 		// of the related model matching on the foreign key thats on the parent.
 		$key = $this->related->getKeyName();
 
-		$foreign = $this->parent->{$this->foreignKey};
-
-		$this->query->where($key, '=', $this->parent->$foreign);
+		$this->query->where($key, '=', $this->parent->{$this->foreignKey});
 	}
 
 	/**
@@ -85,6 +84,44 @@ class BelongsTo extends Relation {
 		foreach ($models as $model)
 		{
 			$model->setRelation($relation, null);
+		}
+
+		return $models;
+	}
+
+	/**
+	 * Match the eagerly loaded results to their parents.
+	 *
+	 * @param  array   $models
+	 * @param  Illuminate\Database\Eloquent\Collection  $results
+	 * @param  string  $relation
+	 * @return array
+	 */
+	public function match(array $models, Collection $results, $relation)
+	{
+		$foreign = $this->foreignKey;
+
+		// First we will get to build a dictionary of the child models by their primary
+		// key of the relationship, then we can easily match the children back onto
+		// the parents using that dictionary and the primary key of the children.
+		$key = $this->related->getKeyName();
+
+		$dictionary = array();
+
+		foreach ($results as $result)
+		{
+			$dictionary[$result->getKey()] = $result;
+		}
+
+		// Once we have the dictionary constructed, we can loop through all the parents
+		// and match back onto their children using the keys of the dictionary and
+		// the primary key of the children to map them onto the right instance.
+		foreach ($models as $model)
+		{
+			if (isset($dictionary[$model->$foreign]))
+			{
+				$model->setRelation($relation, $dictionary[$model->$foreign]);
+			}
 		}
 
 		return $models;

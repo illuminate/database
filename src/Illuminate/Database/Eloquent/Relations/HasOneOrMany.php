@@ -2,6 +2,7 @@
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Collection;
 
 abstract class HasOneOrMany extends Relation {
 
@@ -22,9 +23,9 @@ abstract class HasOneOrMany extends Relation {
 	 */
 	public function __construct(Builder $query, Model $parent, $foreignKey)
 	{
-		parent::__construct($query, $parent);
-
 		$this->foreignKey = $foreignKey;
+
+		parent::__construct($query, $parent);
 	}
 
 	/**
@@ -47,16 +48,16 @@ abstract class HasOneOrMany extends Relation {
 	 */
 	public function addEagerConstraints(array $models)
 	{
-		$this->query->whereIn($this->foreignKey, $this->getKeys($results));
+		$this->query->whereIn($this->foreignKey, $this->getKeys($models));
 	}
 
 	/**
 	 * Build model dictionary keyed by the relation's foreign key.
 	 *
-	 * @param  array  $reuslts
+	 * @param  Illuminate\Database\Eloquent\Collection  $reuslts
 	 * @return array
 	 */
-	protected function buildDictionary(array $results)
+	protected function buildDictionary(Collection $results)
 	{
 		$dictionary = array();
 

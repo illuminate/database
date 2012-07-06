@@ -35,7 +35,7 @@ abstract class Model {
 	 *
 	 * @var array
 	 */
-	protected $attributes;
+	protected $attributes = array();
 
 	/**
 	 * The loaded relationships for the model.
@@ -630,7 +630,7 @@ abstract class Model {
 	 * @param  array  $attributes
 	 * @return void
 	 */
-	public function setAttribute(array $attributes)
+	public function setAttributes(array $attributes)
 	{
 		$this->attributes = $attributes;
 	}
@@ -643,7 +643,7 @@ abstract class Model {
 	 */
 	public function getRelation($relation)
 	{
-		return $this->relationships[$relation];
+		return $this->relations[$relation];
 	}
 
 	/**
@@ -655,7 +655,7 @@ abstract class Model {
 	 */
 	public function setRelation($relation, $value)
 	{
-		$this->relationships[$relation] = $value;
+		$this->relations[$relation] = $value;
 	}
 
 	/**
@@ -679,11 +679,11 @@ abstract class Model {
 	 */
 	protected function snakeCase($value)
 	{
-		return preg_replace_callback('/[A-Z]/', function($match)
+		return trim(preg_replace_callback('/[A-Z]/', function($match)
 		{
 			return '_'.strtolower($match[0]);
 
-		}, $value);
+		}, $value), '_');
 	}
 
 	/**

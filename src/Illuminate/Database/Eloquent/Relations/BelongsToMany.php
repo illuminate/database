@@ -2,6 +2,7 @@
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Collection;
 
 class BelongsToMany extends Relation {
 
@@ -45,11 +46,10 @@ class BelongsToMany extends Relation {
 	 */
 	public function __construct(Builder $query, Model $parent, $table, $foreignKey, $otherKey)
 	{
-		parent::__construct($query, $parent);
-
 		$this->table = $table;
 		$this->otherKey = $otherKey;
 		$this->foreignKey = $foreignKey;
+		parent::__construct($query, $parent);
 	}
 
 	/**
@@ -69,7 +69,7 @@ class BelongsToMany extends Relation {
 	 */
 	public function getResults()
 	{
-		return $this->query->get();
+		return $this->get();
 	}
 
 	/**
@@ -82,11 +82,11 @@ class BelongsToMany extends Relation {
 	{
 		$models = $this->query->getModels($columns);
 
-		$this->hydratePivotTable($models);
+		$this->hydratePivotRelation($models);
 
-		// If we actually found models we will also eager load any relationships
-		// that have been specified as needing to be eager loaded. This will
-		// solve the n + 1 query problem for the developers conveniently.
+		// If we actually found models we will also eager load any relationships that
+		// have been specified as needing to be eager loaded. This will solve the
+		// n+1 query problem for the developers and also increase performance.
 		if (count($models) > 0)
 		{
 			$models = $this->query->eagerLoadRelations($models);
@@ -104,9 +104,7 @@ class BelongsToMany extends Relation {
 	{
 		$columns = array($this->query->getModel()->getTable().'.*');
 
-		$columns = array_merge($columns, $this->getPivotColumns());
-
-		$this->query->select($columns);
+		$this->query->select(array_merge($columns, $this->getPivotColumns()));
 
 		return $this;
 	}
@@ -118,7 +116,17 @@ class BelongsToMany extends Relation {
 	 */
 	protected function getPivotColumns()
 	{
-		return array($this->pivotColumns, $this->getBothKeys());
+		$pivot = array();
+
+		// We need to alias all of the pivot columns with the "pivot_" prefix so we
+		// can easily extract them out of the models and put them into the pivot
+		// relationships when they are retrieved and hydrated into the models.
+		foreach ($this->pivotColumns as $column)
+		{
+			$pivot[] = $column.' as pivot_'.$column;
+		}
+
+		return array_merge($pivot, $this->getBothKeys());
 	}
 
 	/**
@@ -162,7 +170,7 @@ class BelongsToMany extends Relation {
 	 */
 	public function addEagerConstraints(array $models)
 	{
-		$this->query->whereIn($this->getForeignKey(), $this->getKeys($results));
+		$this->query->whereIn($this->getForeignKey(), $this->getKeys($models));
 	}
 
 	/**
@@ -176,7 +184,7 @@ class BelongsToMany extends Relation {
 	{
 		foreach ($models as $model)
 		{
-			$model->setRelation($relation, array());
+			$model->setRelation($relation, new Collection);
 		}
 
 		return $models;
@@ -186,11 +194,11 @@ class BelongsToMany extends Relation {
 	 * Match the eagerly loaded results to their parents.
 	 *
 	 * @param  array   $models
-	 * @param  array   $results
+	 * @param  Illuminate\Database\Eloquent\Collection  $results
 	 * @param  string  $relation
 	 * @return array
 	 */
-	public function match(array $models, array $results, $relation)
+	public function match(array $models, Collection $results, $relation)
 	{
 		// First we'll build a dictionary of child models keyed by the foreign key
 		// of the relation so that we can easily and quickly match them to the
@@ -213,7 +221,9 @@ class BelongsToMany extends Relation {
 
 			if (isset($dictionary[$key]))
 			{
-				$model->setRelation($relation, $dictionary[$key]);
+				$collection = new Collection($dictionary[$key]);
+
+				$model->setRelation($relation, $collection);
 			}
 		}
 
@@ -263,7 +273,7 @@ class BelongsToMany extends Relation {
 			{
 				$values[substr($key, 6)] = $value;
 
-				unset($model[$key]);
+				unset($model->$key);
 			}
 		}
 
@@ -335,7 +345,11 @@ class BelongsToMany extends Relation {
 	 */
 	protected function getBothKeys()
 	{
-		return array($this->getForeignKey(), $this->getOtherKey());
+		return array_map(function($value)
+		{
+			return $value.' as pivot_'.$value;
+
+		}, array($this->foreignKey, $this->otherKey));
 	}
 
 }

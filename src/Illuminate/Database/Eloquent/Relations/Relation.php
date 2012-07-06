@@ -2,6 +2,7 @@
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Collection;
 
 abstract class Relation {
 
@@ -38,6 +39,8 @@ abstract class Relation {
 		$this->query = $query;
 		$this->parent = $parent;
 		$this->related = $query->getModel();
+
+		$this->addConstraints();
 	}
 
 	/**
@@ -62,17 +65,17 @@ abstract class Relation {
 	 * @param  string  $relation
 	 * @return void
 	 */
-	abstract public function initRelation(array $models, $relation)
+	abstract public function initRelation(array $models, $relation);
 
 	/**
 	 * Match the eagerly loaded results to their parents.
 	 *
 	 * @param  array   $models
-	 * @param  array   $results
+	 * @param  Illuminate\Database\Eloquent\Collection  $results
 	 * @param  string  $relation
 	 * @return array
 	 */
-	abstract public function match(array $models, array $results, $relation)
+	abstract public function match(array $models, Collection $results, $relation);
 
 	/**
 	 * Get the results of the relationship.
@@ -91,7 +94,7 @@ abstract class Relation {
 	{
 		return array_values(array_map(function($value)
 		{
-			return $value->getKey()
+			return $value->getKey();
 
 		}, $models));
 	}

@@ -293,6 +293,8 @@ class Connection implements ConnectionInterface {
 	 */
 	protected function run($query, $bindings, Closure $callback)
 	{
+		var_dump($query);
+		var_dump($bindings);
 		$start = microtime(true);
 
 		// To execute the statement, we'll simply call the callback, which will actually

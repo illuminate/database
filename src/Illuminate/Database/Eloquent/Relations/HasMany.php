@@ -1,5 +1,7 @@
 <?php namespace Illuminate\Database\Eloquent\Relations;
 
+use Illuminate\Database\Eloquent\Collection;
+
 class HasMany extends HasOneOrMany {
 
 	/**
@@ -23,7 +25,7 @@ class HasMany extends HasOneOrMany {
 	{
 		foreach ($models as $model)
 		{
-			$model->setRelation($relation, array());
+			$model->setRelation($relation, new Collection);
 		}
 
 		return $models;
@@ -33,11 +35,11 @@ class HasMany extends HasOneOrMany {
 	 * Match the eagerly loaded results to their parents.
 	 *
 	 * @param  array   $models
-	 * @param  array   $results
+	 * @param  Illuminate\Database\Eloquent\Collection  $results
 	 * @param  string  $relation
 	 * @return array
 	 */
-	public function match(array $models, array $results, $relation)
+	public function match(array $models, Collection $results, $relation)
 	{
 		$dictionary = $this->buildDictionary($results);
 
@@ -48,7 +50,7 @@ class HasMany extends HasOneOrMany {
 		{
 			$key = $model->getKey();
 
-			$model->setRelation($relation, $dictionary[$key]);
+			$model->setRelation($relation, new Collection($dictionary[$key]));
 		}
 
 		return $models;

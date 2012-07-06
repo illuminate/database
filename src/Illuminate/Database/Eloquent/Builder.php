@@ -105,7 +105,7 @@ class Builder extends BaseBuilder {
 	 * @param  array  $models
 	 * @return array
 	 */
-	protected function eagerLoadRelations(array $models)
+	public function eagerLoadRelations(array $models)
 	{
 		foreach ($this->eagerLoad as $relation => $constraints)
 		{
@@ -149,7 +149,12 @@ class Builder extends BaseBuilder {
 
 		$models = $instance->initRelation($models, $relation);
 
-		return $instance->match($relation, $models, $instance->get());
+		$results = $instance->get();
+
+		// Once we have the results, we just match those back up to their parent models
+		// using the relationship instance. Then we just return the finished arrays
+		// of models that have been eagerly hydrated and are readied for return.
+		return $instance->match($models, $results, $relation);
 	}
 
 	/**
@@ -160,9 +165,19 @@ class Builder extends BaseBuilder {
 	 */
 	protected function getRelation($relation)
 	{
-		$query = $this->query->getModel()->$relation();
+		$query = $this->getModel()->$relation();
 
-		return $query->with($this->nestedRelations($relation));
+		// If there are nosted relationships set on the query, we will put those onto
+		// the query instance so that they can be handled after this relationship
+		// is loaded. In this way they'll all trickle down as they are loaded.
+		$nested = $this->nestedRelations($relation);
+
+		if (count($nested) > 0)
+		{
+			$query->getQuery()->with($nested);
+		}
+
+		return $query;
 	}
 
 	/**
@@ -180,7 +195,7 @@ class Builder extends BaseBuilder {
 		// that start with the given top relation and adds them to our arrays.
 		foreach ($this->eagerLoad as $name => $constraints)
 		{
-			if (strpos($name, $relation) === 0)
+			if (strpos($name, $relation) === 0 and $name !== $relation)
 			{
 				$nested[substr($name, strlen($relation.'.'))] = $constraints;
 			}
@@ -227,6 +242,7 @@ class Builder extends BaseBuilder {
 			// We need to separate out any nested includes. This allows the developer to load deep
 			// relatoinships using dots without specifying each level of the relationship with
 			// its own key in the array. We will only set original constraints on the last.
+
 			foreach (explode('.', $relation) as $segment)
 			{
 				$progress[] = $segment;
