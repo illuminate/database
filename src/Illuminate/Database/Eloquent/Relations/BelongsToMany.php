@@ -311,11 +311,11 @@ class BelongsToMany extends Relation {
 	 * @param  array  $columns
 	 * @return Illuminate\Database\Eloquent\Relations\BelongsToMany
 	 */
-	public function with($columns)
+	public function withPivot($columns)
 	{
 		$this->pivotColumns = $columns;
 
-		return $this;
+		return $this->setSelect();
 	}
 
 	/**
