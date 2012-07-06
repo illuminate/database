@@ -227,7 +227,7 @@ class BelongsToMany extends Relation {
 
 		// Now that we should have the children models totally matched up to their
 		// parents, we can just return the array of models. Eager loading them
-		// helps the developer avoid tons of queries (n + 1 query problem).
+		// helps the developer avoid tons of queries (n + 1 query problems).
 		return $models;
 	}
 
