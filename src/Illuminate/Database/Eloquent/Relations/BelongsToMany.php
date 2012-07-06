@@ -216,10 +216,8 @@ class BelongsToMany extends Relation {
 		// children back to their parents using the dictionary and the keys on
 		// the parent models. Then we will return the hydrated models back.
 		foreach ($models as $model)
-		{
-			$key = $model->getKey();
-
-			if (isset($dictionary[$key]))
+		{;
+			if (isset($dictionary[$key = $model->getKey()]))
 			{
 				$collection = new Collection($dictionary[$key]);
 
