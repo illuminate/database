@@ -149,4 +149,14 @@ class Collection implements ArrayAccess, ArrayableInterface, Countable, Iterator
 		unset($this->attributes[$key]);
 	}
 
+	/**
+	 * Convert the collection to its string representation.
+	 *
+	 * @return string
+	 */
+	public function __toString()
+	{
+		return $this->toJson();
+	}
+
 }

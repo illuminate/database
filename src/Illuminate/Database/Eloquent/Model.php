@@ -581,6 +581,16 @@ abstract class Model implements ArrayableInterface {
 	}
 
 	/**
+	 * Conver the model instance to JSON.
+	 *
+	 * @return string
+	 */
+	public function toJson()
+	{
+		return json_encode($this->toArray());
+	}
+
+	/**
 	 * Convert the model instance to an array.
 	 *
 	 * @return array
@@ -881,6 +891,16 @@ abstract class Model implements ArrayableInterface {
 		$instance = new static;
 
 		return call_user_func_array(array($instance, $method), $parameters);
+	}
+
+	/**
+	 * Conver the model to its string representation.
+	 *
+	 * @return string
+	 */
+	public function __toString()
+	{
+		return $this->toJson();
 	}
 
 }
