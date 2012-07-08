@@ -659,6 +659,16 @@ class Builder {
 	}
 
 	/**
+	 * Determine if any rows exist for the current query.
+	 *
+	 * @return bool
+	 */
+	public function exists()
+	{
+		return $this->count() > 0;
+	}
+
+	/**
 	 * Retrieve the "count" result of the query.
 	 *
 	 * @param  string  $column

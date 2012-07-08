@@ -282,6 +282,12 @@ class BuilderTest extends PHPUnit_Framework_TestCase {
 		$this->assertEquals(1, $results);
 
 		$builder = $this->getBuilder();
+		$builder->getConnection()->shouldReceive('select')->once()->with('select count(*) as aggregate from "users"', array())->andReturn(array(array('aggregate' => 1)));
+		$builder->getProcessor()->shouldReceive('processSelect')->once();
+		$results = $builder->from('users')->exists();
+		$this->assertTrue($results);
+
+		$builder = $this->getBuilder();
 		$builder->getConnection()->shouldReceive('select')->once()->with('select max("id") as aggregate from "users"', array())->andReturn(array(array('aggregate' => 1)));
 		$builder->getProcessor()->shouldReceive('processSelect')->once();
 		$results = $builder->from('users')->max('id');
