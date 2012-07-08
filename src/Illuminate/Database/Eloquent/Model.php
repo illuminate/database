@@ -97,14 +97,12 @@ abstract class Model {
 	 * @param  bool   $exists
 	 * @return Illuminate\Database\Eloquent\Model
 	 */
-	public function newInstance($attributes = array(), $exists = false)
+	public static function newInstance($attributes = array(), $exists = false)
 	{
 		// This method just provides a convenient way for us to generate fresh model
 		// instances of the current model. It is particularly useful during the
 		// hydration of new objects by the Eloquent query builder instance.
-		$class = get_class($this);
-
-		$model = new $class((array) $attributes);
+		$model = new static((array) $attributes);
 
 		$model->exists = $exists;
 
@@ -156,6 +154,17 @@ abstract class Model {
 	}
 
 	/**
+	 * Get all of the models from the database.
+	 *
+	 * @param  array  $columns
+	 * @return Illuminate\Database\Eloquent\Collection
+	 */
+	public static function all($columns = array('*'))
+	{
+		return static::newInstance()->newQuery()->get($columns);
+	}
+
+	/**
 	 * Find a model by its primary key.
 	 *
 	 * @param  mixed  $id
@@ -164,9 +173,7 @@ abstract class Model {
 	 */
 	public static function find($id, $columns = array('*'))
 	{
-		$instance = new static;
-
-		return $instance->newQuery()->find($id, $columns);
+		return static::newInstance()->newQuery()->find($id, $columns);
 	}
 
 	/**
