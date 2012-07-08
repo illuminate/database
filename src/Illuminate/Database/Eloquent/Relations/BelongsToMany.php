@@ -116,17 +116,19 @@ class BelongsToMany extends Relation {
 	 */
 	protected function getPivotColumns()
 	{
-		$pivot = array();
+		$defaults = array('id', 'created_at', 'updated_at');
+
+		$pivot = array_merge($defaults, $this->pivotColumns);
 
 		// We need to alias all of the pivot columns with the "pivot_" prefix so we
 		// can easily extract them out of the models and put them into the pivot
 		// relationships when they are retrieved and hydrated into the models.
-		foreach ($this->pivotColumns as $column)
+		foreach ($pivot as $column)
 		{
-			$pivot[] = $column.' as pivot_'.$column;
+			$pivot[] = $this->table.'.'.$column.' as pivot_'.$column;
 		}
 
-		return array_merge($pivot, $this->getBothKeys());
+		return $pivot;
 	}
 
 	/**
