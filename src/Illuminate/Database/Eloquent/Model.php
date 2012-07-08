@@ -45,6 +45,20 @@ abstract class Model {
 	protected $relations = array();
 
 	/**
+	 * The attributes that should be hidden for arrays.
+	 *
+	 * @var array
+	 */
+	protected $hidden = array();
+
+	/**
+	 * The attributes that are mass assignable.
+	 *
+	 * @var array
+	 */
+	protected $fillable = array();
+
+	/**
 	 * Indicates if the model exists.
 	 *
 	 * @var bool
@@ -522,6 +536,16 @@ abstract class Model {
 	public static function clearConnections()
 	{
 		static::$connections = array();
+	}
+
+	/**
+	 * Convert the model instance to an array.
+	 *
+	 * @return array
+	 */
+	public function toArray()
+	{
+
 	}
 
 	/**
