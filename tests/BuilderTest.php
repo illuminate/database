@@ -273,6 +273,16 @@ class BuilderTest extends PHPUnit_Framework_TestCase {
 	}
 
 
+	public function testPluckMethodReturnsSingleColumn()
+	{
+		$builder = $this->getBuilder();
+		$builder->getConnection()->shouldReceive('select')->once()->with('select "foo" from "users" where "id" = ? limit 1', array(1))->andReturn(array(array('foo' => 'bar')));
+		$builder->getProcessor()->shouldReceive('processSelect')->once()->with($builder, array(array('foo' => 'bar')));
+		$results = $builder->from('users')->where('id', '=', 1)->pluck('foo');
+		$this->assertEquals('bar', $results);	
+	}
+
+
 	public function testAggregateFunctions()
 	{
 		$builder = $this->getBuilder();
