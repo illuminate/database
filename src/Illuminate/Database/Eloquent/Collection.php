@@ -5,7 +5,7 @@ use ArrayAccess;
 use ArrayIterator;
 use IteratorAggregate;
 
-class Collection implements ArrayAccess, Countable, IteratorAggregate {
+class Collection implements ArrayAccess, ArrayableInterface, Countable, IteratorAggregate {
 
 	/**
 	 * The items contained in the collection.

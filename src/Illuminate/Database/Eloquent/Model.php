@@ -7,7 +7,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 
-abstract class Model {
+abstract class Model implements ArrayableInterface {
 
 	/**
 	 * The connection for the model.
@@ -587,7 +587,40 @@ abstract class Model {
 	 */
 	public function toArray()
 	{
+		$attributes = array_diff_key($this->attributes, array_flip($this->hidden));
 
+		return array_merge($attributes, $this->relationsToArray());
+	}
+
+	/**
+	 * Get the model's relationships in array form.
+	 *
+	 * @return array
+	 */
+	public function relationsToArray()
+	{
+		$attributes = array();
+
+		foreach ($this->relations as $key => $value)
+		{
+			// If the value implements the Arrayable interface we can just call the
+			// toArray method on the instance, which will conver both models and
+			// collections to their proper array form and we'll set the value.
+			if ($value instanceof ArrayableInterface)
+			{
+				$attributes[$key] = $value->toArray();
+			}
+
+			// If the value is null, we'll still go ahead and set it in our list of
+			// attributes since null is used to represent empty relationships if
+			// if it a has one or belongs to type relationships on the models.
+			elseif (is_null($value))
+			{
+				$attributes[$key] = $value;
+			}
+		}
+
+		return $attributes;		
 	}
 
 	/**

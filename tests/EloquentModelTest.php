@@ -143,6 +143,25 @@ class EloquentModelTest extends PHPUnit_Framework_TestCase {
 		$this->assertTrue($model->getConnection() === $conn2);
 	}
 
+
+	public function testToArray()
+	{
+		$model = new EloquentModelStub;
+		$model->name = 'foo';
+		$model->age = null;
+		$model->setRelation('names', new Illuminate\Database\Eloquent\Collection(array(
+			new EloquentModelStub(array('bar' => 'baz')), new EloquentModelStub(array('bam' => 'boom'))
+		)));
+		$model->setRelation('partner', new EloquentModelStub(array('name' => 'abby')));
+		$array = $model->toArray();
+
+		$this->assertTrue(is_array($array));
+		$this->assertEquals('foo', $array['name']);
+		$this->assertEquals('baz', $array['names'][0]['bar']);
+		$this->assertEquals('boom', $array['names'][1]['bam']);
+		$this->assertEquals('abby', $array['partner']['name']);
+	}
+
 }
 
 class EloquentModelStub extends Illuminate\Database\Eloquent\Model {
