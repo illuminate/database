@@ -455,6 +455,48 @@ abstract class Model {
 	}
 
 	/**
+	 * Get the hidden attributes for the model.
+	 *
+	 * @return array
+	 */
+	public function getHidden()
+	{
+		return $this->hidden;
+	}
+
+	/**
+	 * Set the hidden attributes for the model.
+	 *
+	 * @param  array  $hidden
+	 * @return void
+	 */
+	public function setHidden(array $hidden)
+	{
+		$this->hidden = $hidden;
+	}
+
+	/**
+	 * Get the fillable attributes for the model.
+	 *
+	 * @return array
+	 */
+	public function getFillable()
+	{
+		return $this->fillable;
+	}
+
+	/**
+	 * Set the fillable attributes for the model.
+	 *
+	 * @param  array  $fillable
+	 * @return void
+	 */
+	public function setFillable(array $fillable)
+	{
+		$this->fillable = $fillable;
+	}
+
+	/**
 	 * Get the database connection for the model.
 	 *
 	 * @return Illuminate\Database\Connection
