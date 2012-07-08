@@ -149,6 +149,8 @@ class EloquentModelTest extends PHPUnit_Framework_TestCase {
 		$model = new EloquentModelStub;
 		$model->name = 'foo';
 		$model->age = null;
+		$model->password = 'password1';
+		$model->setHidden(array('password'));
 		$model->setRelation('names', new Illuminate\Database\Eloquent\Collection(array(
 			new EloquentModelStub(array('bar' => 'baz')), new EloquentModelStub(array('bam' => 'boom'))
 		)));
@@ -160,6 +162,7 @@ class EloquentModelTest extends PHPUnit_Framework_TestCase {
 		$this->assertEquals('baz', $array['names'][0]['bar']);
 		$this->assertEquals('boom', $array['names'][1]['bam']);
 		$this->assertEquals('abby', $array['partner']['name']);
+		$this->assertFalse(isset($array['password']));
 	}
 
 }
