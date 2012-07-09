@@ -165,6 +165,17 @@ class EloquentModelTest extends PHPUnit_Framework_TestCase {
 		$this->assertFalse(isset($array['password']));
 	}
 
+
+	public function testFillable()
+	{
+		$model = new EloquentModelStub;
+		$model->setFillable(array('name', 'age'));
+		$model->fill(array('name' => 'foo', 'age' => 'bar', 'password' => 'baz'));
+		$this->assertFalse(isset($model->password));
+		$this->assertEquals('foo', $model->name);
+		$this->assertEquals('bar', $model->age);
+	}
+
 }
 
 class EloquentModelStub extends Illuminate\Database\Eloquent\Model {

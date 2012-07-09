@@ -88,7 +88,9 @@ class Builder extends BaseBuilder {
 		// also set the proper connection names for the model after creating.
 		foreach ($results as $result)
 		{
-			$models[] = $model = $this->model->newExisting($result);
+			$models[] = $model = $this->model->newExisting();
+
+			$model->setAttributes((array) $result);
 
 			$model->setConnection($connection);
 		}

@@ -100,7 +100,13 @@ abstract class Model implements ArrayableInterface {
 	{
 		foreach ($attributes as $key => $value)
 		{
-			$this->$key = $value;
+			// The deveeloper may choose to place some attributes in the "fillable"
+			// array, which means only those attributes may be set through mass
+			// assignment to the model, and all others will just be ignored.
+			if ($this->isFillable($key))
+			{
+				$this->$key = $value;
+			}
 		}
 	}
 
@@ -494,6 +500,17 @@ abstract class Model implements ArrayableInterface {
 	public function setFillable(array $fillable)
 	{
 		$this->fillable = $fillable;
+	}
+
+	/**
+	 * Determine if the given attribute may be mass assigned.
+	 *
+	 * @param  string  $key
+	 * @return bool
+	 */
+	public function isFillable($key)
+	{
+		return empty($this->fillable) or in_array($key, $this->fillable);
 	}
 
 	/**
