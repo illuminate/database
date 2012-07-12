@@ -29,6 +29,13 @@ class Connection implements ConnectionInterface {
 	protected $postProcessor;
 
 	/**
+	 * The event dispatcher instance.
+	 *
+	 * @var Illuminate\Events\Dispatcher
+	 */
+	protected $events;
+
+	/**
 	 * The default fetch mode of the connection.
 	 *
 	 * @var int
@@ -52,7 +59,7 @@ class Connection implements ConnectionInterface {
 	{
 		$this->pdo = $pdo;
 
-		// We need to initialize the query grammar and the query post processor,
+		// We need to initialize the query grammar and the query post processor
 		// which are both very important parts of the database abstraction.
 		// We will initialize them to their default values right here.
 		$this->useDefaultQueryGrammar();
@@ -314,8 +321,15 @@ class Connection implements ConnectionInterface {
 	 * @param  array   $bindings
 	 * @return void
 	 */
-	protected function logQuery($query, $bindings, $time)
+	public function logQuery($query, $bindings, $time = null)
 	{
+		if (isset($this->events))
+		{
+			$parameters = compact('query', 'bindings', 'time');
+
+			$this->events->fire('illuminate.query', func_get_args());
+		}
+
 		$this->queryLog[] = compact('query', 'bindings', 'time');
 	}
 
@@ -369,6 +383,27 @@ class Connection implements ConnectionInterface {
 	public function setPostProcessor(Processor $processor)
 	{
 		$this->postProcessor = $processor;
+	}
+
+	/**
+	 * Get the event dispatcher used by the connection.
+	 *
+	 * @return Illuminate\Events\Dispatcher
+	 */
+	public function getEventDispatcher()
+	{
+		return $this->events;
+	}
+
+	/**
+	 * Set the event dispatcher instance on the connection.
+	 *
+	 * @param  Illuminate\Events\Dispatcher
+	 * @return void
+	 */
+	public function setEventDispatcher(\Illuminate\Events\Dispatcher $events)
+	{
+		$this->events = $events;
 	}
 
 	/**
