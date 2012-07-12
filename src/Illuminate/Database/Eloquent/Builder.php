@@ -231,20 +231,21 @@ class Builder extends BaseBuilder {
 
 		foreach ($relations as $relation => $constraints)
 		{
-			// If the "relation" value is actually a numeric key, we can assume that no constraints
-			// have been specified for the eager load, and we will just attach an empty Closure
-			// to the eager load so that we can treat all constraints as having eager loads.
+			// If the "relation" value is actually a numeric key, we can assume that no
+			// constraints have been specified for the eager load and we'll just put
+			// an empty Closure with the loader so that we can treat all the same.
 			if (is_numeric($relation))
 			{
-				list($relation, $constraints) = array($constraints, function() {});
+				$f = function() {};
+
+				list($relation, $constraints) = array($constraints, $f);
 			}
 
 			$progress = array();
 
-			// We need to separate out any nested includes. This allows the developer to load deep
-			// relatoinships using dots without specifying each level of the relationship with
-			// its own key in the array. We will only set original constraints on the last.
-
+			// We need to separate out any nested includes. Which allows the developers
+			// to load deep relatoinships using "dots" without stating each level of
+			// the relationship with its own key in the array of eager load names.
 			foreach (explode('.', $relation) as $segment)
 			{
 				$progress[] = $segment;
@@ -252,9 +253,9 @@ class Builder extends BaseBuilder {
 				$results[$last = implode('.', $progress)] = function() {};
 			}
 
-			// The eager load could have had constrains specified on it. We will put them on the
-			// last eager load segment. This means that for a nested eager load include that
-			// is loading multiple relationships only the last segments are constrained.
+			// The eager load could have had constrains specified on it. We'll put them
+			// on the last eager load segment, which means that for the nested eager
+			// load include only the final segments will get constrained queries.
 			$results[$last] = $constraints;
 		}
 
