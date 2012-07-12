@@ -18,7 +18,7 @@
         "psr-0": {"Illuminate\\Database": "src/"}
     },
     "suggest": {
-        "illuminate/events": "Allows for listening of database query events."
+        "illuminate/events": "Allows for catching of database query events."
     },
     "minimum-stability": "dev"
 }
