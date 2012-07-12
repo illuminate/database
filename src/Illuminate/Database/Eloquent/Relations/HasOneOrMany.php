@@ -32,7 +32,7 @@ abstract class HasOneOrMany extends Relation {
 	 * Create a new instance of the related model.
 	 *
 	 * @param  array  $attributes
-	 * @return Illuminate\Database\Eloquent\Model
+	 * @return mixed
 	 */
 	public function create(array $attributes)
 	{

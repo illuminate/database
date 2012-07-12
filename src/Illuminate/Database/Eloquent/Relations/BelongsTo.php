@@ -32,13 +32,13 @@ class BelongsTo extends Relation {
 	 * Update the parent model on the relationship.
 	 *
 	 * @param  array  $attributes
-	 * @return Illuminate\Database\Eloquent\Model
+	 * @return mixed
 	 */
 	public function update(array $attributes)
 	{
 		$instance = $this->getResults();
 
-		$instance->fill($attributes)->save();
+		return $instance->fill($attributes)->save();
 	}
 
 	/**

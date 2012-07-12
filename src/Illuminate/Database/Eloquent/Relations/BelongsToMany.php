@@ -1,5 +1,6 @@
 <?php namespace Illuminate\Database\Eloquent\Relations;
 
+use DateTime;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Collection;
@@ -50,6 +51,61 @@ class BelongsToMany extends Relation {
 		$this->otherKey = $otherKey;
 		$this->foreignKey = $foreignKey;
 		parent::__construct($query, $parent);
+	}
+
+	/**
+	 * Attach a model to the parent.
+	 *
+	 * @param  mixed  $id
+	 * @param  array  $attributes
+	 * @return void
+	 */
+	public function attach($id, array $attributes = array())
+	{
+		$foreign = $this->foreignKey;
+
+		// When attaching models in a many to many relationship, we need to set the
+		// keys on the pivot table, including both the foreign key and the other
+		// associated key before saving so it will automatically link models.
+		$query = $this->query->newQuery()->from($this->table);
+
+		$attributes[$foreign] = $this->parent->getKey();
+
+		$attributes[$this->otherKey] = $id;
+
+		// Since all Eloquent models are timestamped, we will set the creation and
+		// update timestamps on the pivot record so they will be initialized on
+		// the record like all of the other pivot table records on the table.
+		$attributes['created_at'] = new DateTime;
+
+		$attributes['updated_at'] = new DateTime;
+
+		return $query->insert($attributes);
+	}
+
+	/**
+	 * Detach models from the relationship.
+	 *
+	 * @param  int|array  $ids
+	 * @return int
+	 */
+	public function detach($ids = array())
+	{
+		$query = $this->query->newQuery()->from($this->table);
+
+		$query->where($this->foreignKey, '=', $this->parent->getKey());
+
+		// If associated IDs were passed to the method we will onyl delete those
+		// associations, otherwise all of the association ties will be broken.
+		// We'll return the numbers of affected rows when we do the deletes.
+		$ids = (array) $ids;
+
+		if (count($ids) > 0)
+		{
+			$query->whereIn($this->otherKey, $ids);
+		}
+
+		return $query->delete();
 	}
 
 	/**
