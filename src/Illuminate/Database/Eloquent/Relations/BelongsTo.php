@@ -29,6 +29,30 @@ class BelongsTo extends Relation {
 	}
 
 	/**
+	 * Update the parent model on the relationship.
+	 *
+	 * @param  array  $attributes
+	 * @return Illuminate\Database\Eloquent\Model
+	 */
+	public function update(array $attributes)
+	{
+		$instance = $this->getResults();
+
+		$instance->fill($attributes)->save();
+	}
+
+	/**
+	 * Perform an update on the parent model without retrieving it.
+	 *
+	 * @param  array  $attributes
+	 * @return int
+	 */
+	public function fastUpdate(array $attributes)
+	{
+		return $this->query->update($attributes);
+	}
+
+	/**
 	 * Set the base constraints on the relation query.
 	 *
 	 * @return void

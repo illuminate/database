@@ -94,7 +94,7 @@ abstract class Model implements ArrayableInterface {
 	 * Fill the model with an array of attributes.
 	 *
 	 * @param  array  $attributes
-	 * @return void
+	 * @return Illuminate\Database\Eloquent\Model
 	 */
 	public function fill(array $attributes)
 	{
@@ -108,6 +108,8 @@ abstract class Model implements ArrayableInterface {
 				$this->$key = $value;
 			}
 		}
+
+		return $this;
 	}
 
 	/**

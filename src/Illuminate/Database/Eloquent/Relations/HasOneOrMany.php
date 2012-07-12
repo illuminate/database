@@ -29,6 +29,21 @@ abstract class HasOneOrMany extends Relation {
 	}
 
 	/**
+	 * Create a new instance of the related model.
+	 *
+	 * @param  array  $attributes
+	 * @return Illuminate\Database\Eloquent\Model
+	 */
+	public function create(array $attributes)
+	{
+		$foreign = array($this->foreignKey => $this->parent->getKey());
+
+		$instance = $this->related->newInstance(array_merge($attributes, $foreign));
+
+		return $instance->save();
+	}
+
+	/**
 	 * Set the base constraints on the relation query.
 	 *
 	 * @return void
