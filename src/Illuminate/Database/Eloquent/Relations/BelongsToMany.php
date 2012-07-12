@@ -66,7 +66,7 @@ class BelongsToMany extends Relation {
 
 		// When attaching models in a many to many relationship, we need to set the
 		// keys on the pivot table, including both the foreign key and the other
-		// associated key before saving so it will automatically link models.
+		// associated keys before saving so it will automatically link models.
 		$query = $this->query->newQuery()->from($this->table);
 
 		$attributes[$foreign] = $this->parent->getKey();
