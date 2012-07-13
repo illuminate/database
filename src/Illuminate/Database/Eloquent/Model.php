@@ -245,7 +245,7 @@ abstract class Model implements ArrayableInterface {
 		{
 			list(, $caller) = debug_backtrace(false);
 
-			$foreignKey = "{$caller['function']}_id";
+			$foreignKey = $this->snakeCase($caller['function']).'_id';
 		}
 
 		// Once we have the foreign key name, we'll just create a new Eloquent query
@@ -575,6 +575,11 @@ abstract class Model implements ArrayableInterface {
 	 */
 	public static function getDefaultConnection()
 	{
+		if (is_null(static::$defaultConnection))
+		{
+			throw new \RuntimeException("No default connection is registered.");
+		}
+
 		return static::$connections[static::$defaultConnection];
 	}
 
@@ -597,6 +602,8 @@ abstract class Model implements ArrayableInterface {
 	public static function clearConnections()
 	{
 		static::$connections = array();
+
+		static::$defaultConnection = null;
 	}
 
 	/**

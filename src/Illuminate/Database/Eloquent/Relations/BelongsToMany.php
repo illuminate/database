@@ -379,7 +379,7 @@ class BelongsToMany extends Relation {
 	 *
 	 * @return string
 	 */
-	protected function getForeignKey()
+	public function getForeignKey()
 	{
 		return $this->table.'.'.$this->foreignKey;
 	}
@@ -389,7 +389,7 @@ class BelongsToMany extends Relation {
 	 *
 	 * @return string
 	 */
-	protected function getOtherKey()
+	public function getOtherKey()
 	{
 		return $this->table.'.'.$this->otherKey;
 	}
@@ -406,6 +406,16 @@ class BelongsToMany extends Relation {
 			return $value.' as pivot_'.$value;
 
 		}, array($this->foreignKey, $this->otherKey));
+	}
+
+	/**
+	 * Get the intermediate table for the relationship.
+	 *
+	 * @return string
+	 */
+	public function getTable()
+	{
+		return $this->table;
 	}
 
 }

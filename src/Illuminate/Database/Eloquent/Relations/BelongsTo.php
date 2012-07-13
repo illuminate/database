@@ -138,8 +138,8 @@ class BelongsTo extends Relation {
 		}
 
 		// Once we have the dictionary constructed, we can loop through all the parents
-		// and match back onto their children using the keys of the dictionary and
-		// the primary key of the children to map them onto the right instance.
+		// and match back onto their children using these keys of the dictionary and
+		// the primary key of the children to map them onto the correct instances.
 		foreach ($models as $model)
 		{
 			if (isset($dictionary[$model->$foreign]))
@@ -159,6 +159,16 @@ class BelongsTo extends Relation {
 	public function getResults()
 	{
 		return $this->query->first();
+	}
+
+	/**
+	 * Get the foreign key of the relationship.
+	 *
+	 * @return string
+	 */
+	public function getForeignKey()
+	{
+		return $this->foreignKey;
 	}
 
 }

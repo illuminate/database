@@ -110,6 +110,16 @@ abstract class Relation {
 	}
 
 	/**
+	 * Get the parent model of the relation.
+	 *
+	 * @return Illuminate\Database\Eloquent\Model
+	 */
+	public function getParent()
+	{
+		return $this->parent;
+	}
+
+	/**
 	 * Handle dynamic method calls to the relationship.
 	 *
 	 * @param  string  $method

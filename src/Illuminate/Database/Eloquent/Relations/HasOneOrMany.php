@@ -87,4 +87,14 @@ abstract class HasOneOrMany extends Relation {
 		return $dictionary;
 	}
 
+	/**
+	 * Get the foreign key for the relationship.
+	 *
+	 * @return string
+	 */
+	public function getForeignKey()
+	{
+		return $this->foreignKey;
+	}
+
 }

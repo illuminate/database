@@ -7,6 +7,7 @@ class EloquentModelTest extends PHPUnit_Framework_TestCase {
 	public function tearDown()
 	{
 		m::close();
+		EloquentModelStub::clearConnections();
 	}
 
 
@@ -176,6 +177,86 @@ class EloquentModelTest extends PHPUnit_Framework_TestCase {
 		$this->assertEquals('bar', $model->age);
 	}
 
+
+	public function testHasOneCreatesProperRelation()
+	{
+		$model = new EloquentModelStub;
+		$this->addMockConnection($model);
+		$relation = $model->hasOne('EloquentModelSaveStub');
+		$this->assertEquals('eloquent_model_stub_id', $relation->getForeignKey());
+		EloquentModelStub::clearConnections();
+
+		$model = new EloquentModelStub;
+		$this->addMockConnection($model);
+		$relation = $model->hasOne('EloquentModelSaveStub', 'foo');
+		$this->assertEquals('foo', $relation->getForeignKey());
+		$this->assertTrue($relation->getParent() === $model);
+		$this->assertTrue($relation->getQuery()->getModel() instanceof EloquentModelSaveStub);
+	}
+
+
+	public function testHasManyCreatesProperRelation()
+	{
+		$model = new EloquentModelStub;
+		$this->addMockConnection($model);
+		$relation = $model->hasMany('EloquentModelSaveStub');
+		$this->assertEquals('eloquent_model_stub_id', $relation->getForeignKey());
+		EloquentModelStub::clearConnections();
+
+		$model = new EloquentModelStub;
+		$this->addMockConnection($model);
+		$relation = $model->hasMany('EloquentModelSaveStub', 'foo');
+		$this->assertEquals('foo', $relation->getForeignKey());
+		$this->assertTrue($relation->getParent() === $model);
+		$this->assertTrue($relation->getQuery()->getModel() instanceof EloquentModelSaveStub);
+	}
+
+
+	public function testBelongsToCreatesProperRelation()
+	{
+		$model = new EloquentModelStub;
+		$this->addMockConnection($model);
+		$relation = $model->belongsToStub();
+		$this->assertEquals('belongs_to_stub_id', $relation->getForeignKey());
+		$this->assertTrue($relation->getParent() === $model);
+		$this->assertTrue($relation->getQuery()->getModel() instanceof EloquentModelSaveStub);
+		EloquentModelStub::clearConnections();
+
+		$model = new EloquentModelStub;
+		$this->addMockConnection($model);
+		$relation = $model->belongsToExplicitKeyStub();
+		$this->assertEquals('foo', $relation->getForeignKey());
+	}
+
+
+	public function testBelongsToManyCreatesProperRelation()
+	{
+		$model = new EloquentModelStub;
+		$this->addMockConnection($model);
+		$relation = $model->belongsToMany('EloquentModelSaveStub');
+		$this->assertEquals('eloquent_model_save_stub_eloquent_model_stub.eloquent_model_stub_id', $relation->getForeignKey());
+		$this->assertEquals('eloquent_model_save_stub_eloquent_model_stub.eloquent_model_save_stub_id', $relation->getOtherKey());
+		$this->assertTrue($relation->getParent() === $model);
+		$this->assertTrue($relation->getQuery()->getModel() instanceof EloquentModelSaveStub);
+		EloquentModelStub::clearConnections();
+
+		$model = new EloquentModelStub;
+		$this->addMockConnection($model);
+		$relation = $model->belongsToMany('EloquentModelSaveStub', 'table', 'foreign', 'other');
+		$this->assertEquals('table.foreign', $relation->getForeignKey());
+		$this->assertEquals('table.other', $relation->getOtherKey());
+		$this->assertTrue($relation->getParent() === $model);
+		$this->assertTrue($relation->getQuery()->getModel() instanceof EloquentModelSaveStub);
+	}
+
+
+	protected function addMockConnection($model)
+	{
+		$model->addConnection('main', m::mock('Illuminate\Database\Connection'));
+		$model->getConnection()->shouldReceive('getQueryGrammar')->andReturn(m::mock('Illuminate\Database\Query\Grammars\Grammar'));
+		$model->getConnection()->shouldReceive('getPostProcessor')->andReturn(m::mock('Illuminate\Database\Query\Processors\Processor'));
+	}
+
 }
 
 class EloquentModelStub extends Illuminate\Database\Eloquent\Model {
@@ -188,10 +269,18 @@ class EloquentModelStub extends Illuminate\Database\Eloquent\Model {
 	{
 		return json_encode($value);
 	}
+	public function belongsToStub()
+	{
+		return $this->belongsTo('EloquentModelSaveStub');
+	}
+	public function belongsToExplicitKeyStub()
+	{
+		return $this->belongsTo('EloquentModelSaveStub', 'foo');
+	}
 }
 
 class EloquentModelSaveStub extends Illuminate\Database\Eloquent\Model {
-	protected $table = 'stub';
+	protected $table = 'save_stub';
 	public function save() { $_SERVER['__eloquent.saved'] = true; }
 }
 
