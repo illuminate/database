@@ -179,12 +179,14 @@ class BelongsToMany extends Relation {
 		// We need to alias all of the pivot columns with the "pivot_" prefix so we
 		// can easily extract them out of the models and put them into the pivot
 		// relationships when they are retrieved and hydrated into the models.
+		$columns = array();
+
 		foreach ($pivot as $column)
 		{
-			$pivot[] = $this->table.'.'.$column.' as pivot_'.$column;
+			$columns[] = $this->table.'.'.$column.' as pivot_'.$column;
 		}
 
-		return $pivot;
+		return $columns;
 	}
 
 	/**
