@@ -459,7 +459,9 @@ abstract class Model implements ArrayableInterface {
 	 */
 	public function getForeignKey()
 	{
-		return $this->snakeCase(get_class($this)).'_id';
+		$class = basename(str_replace('\\', '/', get_class($this)));
+
+		return $this->snakeCase($class).'_id';
 	}
 
 	/**
