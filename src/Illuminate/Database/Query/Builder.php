@@ -864,7 +864,7 @@ class Builder {
 	 *
 	 * @return Illuminate\Database\Query\Builder
 	 */
-	protected function newQuery()
+	public function newQuery()
 	{
 		return new Builder($this->connection, $this->grammar, $this->processor);
 	}
