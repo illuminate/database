@@ -31,6 +31,13 @@ abstract class Model implements ArrayableInterface {
 	protected $key = 'id';
 
 	/**
+	 * Indicates if the IDs are auto-incrementing.
+	 *
+	 * @var bool
+	 */
+	protected $incrementing = true;
+
+	/**
 	 * The model's attributes.
 	 *
 	 * @var array
@@ -364,7 +371,9 @@ abstract class Model implements ArrayableInterface {
 		// inserted row's ID, which is typically auto-incremented.
 		else
 		{
-			$this->id = $query->insertGetId($this->attributes);
+			$id = $query->insertGetId($this->attributes);
+
+			if ($this->incrementing) $this->id = $id;
 		}
 
 		return true;
@@ -515,6 +524,27 @@ abstract class Model implements ArrayableInterface {
 	public function isFillable($key)
 	{
 		return empty($this->fillable) or in_array($key, $this->fillable);
+	}
+
+	/**
+	 * Get the value indicating whether the IDs are incrementing.
+	 *
+	 * @return bool
+	 */
+	public function getIncrementing()
+	{
+		return $this->incrementing;
+	}
+
+	/**
+	 * Set whether IDs are incrementing.
+	 *
+	 * @param  bool  $value
+	 * @return void
+	 */
+	public function setIncrementing($value)
+	{
+		$this->incrementing = $value;
 	}
 
 	/**
