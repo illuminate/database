@@ -59,9 +59,9 @@ class Connection implements ConnectionInterface {
 	{
 		$this->pdo = $pdo;
 
-		// We need to initialize a query grammar and the query post processor
+		// We need to initialize a query grammar and the query post processors
 		// which are both very important parts of the database abstractions.
-		// We will initialize them to their default values to get started.
+		// We will initialize them to their default value to get started.
 		$this->useDefaultQueryGrammar();
 
 		$this->useDefaultPostProcessor();
