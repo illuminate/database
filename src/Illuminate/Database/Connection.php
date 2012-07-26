@@ -59,9 +59,9 @@ class Connection implements ConnectionInterface {
 	{
 		$this->pdo = $pdo;
 
-		// We need to initialize the query grammar and the query post processor
-		// which are both very important parts of the database abstraction.
-		// We will initialize them to their default values right here.
+		// We need to initialize a query grammar and the query post processor
+		// which are both very important parts of the database abstractions.
+		// We will initialize them to their default values to get started.
 		$this->useDefaultQueryGrammar();
 
 		$this->useDefaultPostProcessor();
@@ -149,7 +149,7 @@ class Connection implements ConnectionInterface {
 		{
 			// For select statements, we'll simply execute the query and return an array
 			// of the database result set. Each element in the array will be a single
-			// row from the database table, and may either be an array or object.
+			// row from the database table, and may either be an array or objects.
 			$statement = $me->getPdo()->prepare($query);
 
 			$statement->execute($me->prepareBindings($bindings));
