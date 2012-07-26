@@ -13,6 +13,13 @@ class Builder {
 	protected $connection;
 
 	/**
+	 * The schema grammar instance.
+	 *
+	 * @var Illuminate\Database\Schema\Grammars\Grammar
+	 */
+	protected $grammar;
+
+	/**
 	 * The commands that have been generated.
 	 *
 	 * @var array
@@ -28,6 +35,7 @@ class Builder {
 	 */
 	public function __construct(Connection $connection, Grammar $grammar)
 	{
+		$this->grammar = $grammar;
 		$this->connection = $connection;
 	}
 
