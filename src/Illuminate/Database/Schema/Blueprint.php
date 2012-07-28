@@ -161,7 +161,7 @@ class Blueprint {
 	 */
 	public function date($column)
 	{
-		//
+		return $this->addColumn('date', $column);
 	}
 
 	/**
@@ -172,7 +172,7 @@ class Blueprint {
 	 */
 	public function dateTime($column)
 	{
-		//
+		return $this->addColumn('dateTime', $column);
 	}
 
 	/**
@@ -183,7 +183,7 @@ class Blueprint {
 	 */
 	public function time($column)
 	{
-		//
+		return $this->addColumn('time', $column);
 	}
 
 	/**
@@ -194,17 +194,19 @@ class Blueprint {
 	 */
 	public function timestamp($column)
 	{
-		//
+		return $this->addColumn('timestamp', $column);
 	}
 
 	/**
 	 * Add creation and update timestamps to the table.
 	 *
-	 * @return Illuminate\Support\Fluent
+	 * @return void
 	 */
 	public function timestamps()
 	{
-		//
+		$this->timestamp('created_at');
+
+		$this->timestamp('updated_at');
 	}
 
 	/**
@@ -215,7 +217,7 @@ class Blueprint {
 	 */
 	public function binary($column)
 	{
-		//
+		return $this->addColumn('binary', $column);
 	}
 
 	/**
