@@ -103,8 +103,10 @@ class Builder {
 	 *
 	 * @return void
 	 */
-	public function flush()
+	public function flush($dryRun = false)
 	{
+		if ($dryRun) return $this->toSql();
+
 		foreach ($this->blueprints as $blueprint)
 		{
 			$this->run($blueprint);
@@ -112,27 +114,31 @@ class Builder {
 	}
 
 	/**
-	 * Run the given blueprint against the database.
+	 * Get all of the SQL for the created blueprints.
 	 *
-	 * @param  Illuminate\Database\Schema\Blueprint  $blueprint
-	 * @return void
+	 * @return array
 	 */
-	public function run(Blueprint $blueprint)
+	public function toSql()
 	{
-		$sql = $this->grammar->toSql($blueprint);
+		$me = $this;
 
-		// Run the SQL...
+		return array_merge(array_map(function($blueprint) use ($me)
+		{
+			return $me->run($blueprint, true);
+
+		}, $this->blueprints));
 	}
 
 	/**
-	 * Get the SQL that will be run by the blueprint.
+	 * Run the given blueprint against the database.
 	 *
 	 * @param  Illuminate\Database\Schema\Blueprint  $blueprint
-	 * @return array
+	 * @param  bool  $dryRun
+	 * @return array|null
 	 */
-	public function toSql(Blueprint $blueprint)
+	public function run(Blueprint $blueprint, $dryRun = false)
 	{
-		return $this->grammar->toSql($blueprint);
+		return $blueprint->build($this->connection, $this->grammar, $dryRun);
 	}
 
 	/**
