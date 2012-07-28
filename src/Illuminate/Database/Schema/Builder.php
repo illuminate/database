@@ -20,11 +20,11 @@ class Builder {
 	protected $grammar;
 
 	/**
-	 * The commands that have been generated.
+	 * The blueprints that have been generated.
 	 *
 	 * @var array
 	 */
-	protected $commands = array();
+	protected $blueprints = array();
 
 	/**
 	 * Create a new database Schema manager.
@@ -44,11 +44,11 @@ class Builder {
 	 *
 	 * @param  string   $table
 	 * @param  Closure  $callback
-	 * @return Illuminate\Database\Schema\CommandSet
+	 * @return Illuminate\Database\Schema\Blueprint
 	 */
 	public function table($table, Closure $callback)
 	{
-		return $this->createCommandSet($callback)->table($table);
+		return $this->createBlueprint($table, $callback);
 	}
 
 	/**
@@ -56,22 +56,22 @@ class Builder {
 	 *
 	 * @param  string   $table
 	 * @param  Closure  $callback
-	 * @return Illuminate\Database\Schema\CommandSet
+	 * @return Illuminate\Database\Schema\Blueprint
 	 */
 	public function create($table, Closure $callback)
 	{
-		return $this->createCommandSet($callback)->table($table)->create();
+		return $this->createBlueprint($table, $callback)->create();
 	}
 
 	/**
 	 * Drop a table from the schema.
 	 *
 	 * @param  string  $table
-	 * @return Illuminate\Database\Schema\CommandSet
+	 * @return Illuminate\Database\Schema\Blueprint
 	 */
 	public function drop($table)
 	{
-		return $this->createCommandSet()->drop($table);
+		return $this->createBlueprint($table)->drop();
 	}
 
 	/**
@@ -79,48 +79,62 @@ class Builder {
 	 *
 	 * @param  string  $from
 	 * @param  string  $to
-	 * @return Illuminate\Database\Schema\CommandSet
+	 * @return Illuminate\Database\Schema\Blueprint
 	 */
 	public function rename($from, $to)
 	{
-		return $this->createCommandSet()->rename($from, $to);
+		return $this->createBlueprint($from)->rename($to);
 	}
 
 	/**
-	 * Create a new command set with a Closure.
+	 * Run the blueprints that have been created.
 	 *
-	 * @param  Closure  $callback
-	 * @return Illuminate\Database\Schema\CommandSet
-	 */
-	protected function createCommandSet(Closure $callback = null)
-	{
-		$this->commands[] = $commands = new CommandSet($callback);
-
-		return $commands;
-	}
-
-	/**
-	 * Run the given command set against the database.
-	 *
-	 * @param  Illuminate\Database\Schema\CommandSet  $commands
 	 * @return void
 	 */
-	public function run(CommandSet $commands)
+	public function flush()
 	{
-		$sql = $this->grammar->toSql($commands);
+		foreach ($this->blueprints as $blueprint)
+		{
+			$this->run($blueprint);
+		}
+	}
+
+	/**
+	 * Run the given blueprint against the database.
+	 *
+	 * @param  Illuminate\Database\Schema\Blueprint  $blueprint
+	 * @return void
+	 */
+	public function run(Blueprint $blueprint)
+	{
+		$sql = $this->grammar->toSql($blueprint);
 
 		// Run the SQL...
 	}
 
 	/**
-	 * Get the SQL that will be run by the command set.
+	 * Get the SQL that will be run by the blueprint.
 	 *
-	 * @param  Illuminate\Database\Schema\CommandSet  $commands
+	 * @param  Illuminate\Database\Schema\Blueprint  $blueprint
 	 * @return array
 	 */
-	public function toSql(CommandSet $commands)
+	public function toSql(Blueprint $blueprint)
 	{
-		return $this->grammar->toSql($commands);
+		return $this->grammar->toSql($blueprint);
+	}
+
+	/**
+	 * Create a new command set with a Closure.
+	 *
+	 * @param  string   $table
+	 * @param  Closure  $callback
+	 * @return Illuminate\Database\Schema\Blueprint
+	 */
+	protected function createBlueprint($table, Closure $callback = null)
+	{
+		$this->blueprints[] = $blueprint = new Blueprint($table, $callback);
+
+		return $blueprint;
 	}
 
 	/**
