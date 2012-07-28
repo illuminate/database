@@ -180,6 +180,19 @@ class ConnectionTest extends PHPUnit_Framework_TestCase {
 	}
 
 
+	public function testDryRunOnlyLogsQueries()
+	{
+		$connection = $this->getMockConnection();
+		$connection->dryRun(function($connection)
+		{
+			$connection->select('foo bar', array('baz'));
+		});
+		$queries = $connection->getQueryLog();
+		$this->assertEquals('foo bar', $queries[0]['query']);
+		$this->assertEquals(array('baz'), $queries[0]['bindings']);
+	}
+
+
 	protected function getMockConnection($methods = array(), $pdo = null)
 	{
 		$pdo = $pdo ?: new MockPDO;

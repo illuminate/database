@@ -50,6 +50,13 @@ class Connection implements ConnectionInterface {
 	protected $queryLog = array();
 
 	/**
+	 * Indicates if the connection is in a "dry run".
+	 *
+	 * @var bool
+	 */
+	protected $dryRun = false;
+
+	/**
 	 * Create a new database connection instance.
 	 *
 	 * @param  PDO   $pdo
@@ -147,6 +154,8 @@ class Connection implements ConnectionInterface {
 	{
 		return $this->run($query, $bindings, function($me, $query, $bindings)
 		{
+			if ($me->isDryRun()) return array();
+
 			// For select statements, we'll simply execute the query and return an array
 			// of the database result set. Each element in the array will be a single
 			// row from the database table, and may either be an array or objects.
@@ -205,6 +214,8 @@ class Connection implements ConnectionInterface {
 	{
 		return $this->run($query, $bindings, function($me, $query, $bindings)
 		{
+			if ($me->isDryRun()) return true;
+
 			$bindings = $me->prepareBindings($bindings);
 
 			return $me->getPdo()->prepare($query)->execute($bindings);
@@ -222,6 +233,8 @@ class Connection implements ConnectionInterface {
 	{
 		return $this->run($query, $bindings, function($me, $query, $bindings)
 		{
+			if ($me->isDryRun()) return 0;
+
 			// For update or delete statements, we want to get the number of rows affected
 			// by the statement and return that back to the developer. We'll first need
 			// to execute the statement and then we'll use PDO to fetch the affected.
@@ -288,6 +301,21 @@ class Connection implements ConnectionInterface {
 		}
 
 		return $result;
+	}
+
+	/**
+	 * Execute the given callback in "dry run" mode.
+	 *
+	 * @param  Closure  $callback
+	 * @return void
+	 */
+	public function dryRun(Closure $callback)
+	{
+		$this->dryRun = true;
+
+		$callback($this);
+
+		$this->dryRun = false;
 	}
 
 	/**
@@ -404,6 +432,16 @@ class Connection implements ConnectionInterface {
 	public function setEventDispatcher(\Illuminate\Events\Dispatcher $events)
 	{
 		$this->events = $events;
+	}
+
+	/**
+	 * Determine if the connection in a "dry run".
+	 *
+	 * @return bool
+	 */
+	public function isDryRun()
+	{
+		return $this->dryRun === true;
 	}
 
 	/**

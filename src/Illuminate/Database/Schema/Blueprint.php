@@ -72,6 +72,42 @@ class Blueprint {
 	}
 
 	/**
+	 * Specify the primary key(s) for the table.
+	 *
+	 * @param  string|array  $columns
+	 * @param  string  $name
+	 * @return Illuminate\Support\Fluent
+	 */
+	public function primary($columns, $name = null)
+	{
+		return $this->addIndex('primary', $columns, $name);
+	}
+
+	/**
+	 * Specify a unique index for the table.
+	 *
+	 * @param  string|array  $columns
+	 * @param  string  $name
+	 * @return Illuminate\Support\Fluent
+	 */
+	public function unique($columns, $name = null)
+	{
+		return $this->addIndex('unique', $columns, $name);
+	}
+
+	/**
+	 * Specify an index for the table.
+	 *
+	 * @param  string|array  $columns
+	 * @param  string  $name
+	 * @return Illuminate\Support\Fluent
+	 */
+	public function index($columns, $name = null)
+	{
+		return $this->addIndex('unique', $columns, $name);
+	}
+
+	/**
 	 * Create a new auto-incrementing column on the table.
 	 *
 	 * @param  string  $column
@@ -218,6 +254,43 @@ class Blueprint {
 	public function binary($column)
 	{
 		return $this->addColumn('binary', $column);
+	}
+
+	/**
+	 * Add a new index to the blueprint.
+	 *
+	 * @param  string  $type
+	 * @param  string|array  $columns
+	 * @param  string  $name
+	 * @return Illuminate\Support\Fluent
+	 */
+	protected function addIndex($type, $columns, $name)
+	{
+		$columns = (array) $columns;
+
+		// If no name was specified for the index, we will create one using a basic
+		// convention of the table name, followed by the columns, followed by an
+		// index type, such as primary or index, which makes the index unique.
+		if (is_null($name))
+		{
+			$name = $this->createIndexName($type, $columns);
+		}
+
+		return $this->addCommand($type, compact('name', 'columns'));
+	}
+
+	/**
+	 * Create a default index name for the table.
+	 *
+	 * @param  string  $type
+	 * @param  array   $columns
+	 * @return string
+	 */
+	protected function createIndexName($type, array $columns)
+	{
+		$table = str_replace(array('-', '.'), '_', $this->table);
+
+		return strtolower($table.'_'.implode('_', $columns).'_'.$type);
 	}
 
 	/**
