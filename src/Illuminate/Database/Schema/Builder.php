@@ -109,7 +109,7 @@ class Builder {
 
 		foreach ($this->blueprints as $blueprint)
 		{
-			$this->run($blueprint);
+			$this->build($blueprint);
 		}
 	}
 
@@ -124,7 +124,7 @@ class Builder {
 
 		return array_merge(array_map(function($blueprint) use ($me)
 		{
-			return $me->run($blueprint, true);
+			return $me->build($blueprint, true);
 
 		}, $this->blueprints));
 	}
@@ -136,7 +136,7 @@ class Builder {
 	 * @param  bool  $dryRun
 	 * @return array|null
 	 */
-	public function run(Blueprint $blueprint, $dryRun = false)
+	public function build(Blueprint $blueprint, $dryRun = false)
 	{
 		return $blueprint->build($this->connection, $this->grammar, $dryRun);
 	}
