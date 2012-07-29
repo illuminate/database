@@ -180,10 +180,10 @@ class ConnectionTest extends PHPUnit_Framework_TestCase {
 	}
 
 
-	public function testDryRunOnlyLogsQueries()
+	public function testPretendOnlyLogsQueries()
 	{
 		$connection = $this->getMockConnection();
-		$connection->dryRun(function($connection)
+		$connection->pretend(function($connection)
 		{
 			$connection->select('foo bar', array('baz'));
 		});

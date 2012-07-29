@@ -54,7 +54,7 @@ class Connection implements ConnectionInterface {
 	 *
 	 * @var bool
 	 */
-	protected $dryRun = false;
+	protected $pretending = false;
 
 	/**
 	 * Create a new database connection instance.
@@ -154,7 +154,7 @@ class Connection implements ConnectionInterface {
 	{
 		return $this->run($query, $bindings, function($me, $query, $bindings)
 		{
-			if ($me->isDryRun()) return array();
+			if ($me->pretending()) return array();
 
 			// For select statements, we'll simply execute the query and return an array
 			// of the database result set. Each element in the array will be a single
@@ -214,7 +214,7 @@ class Connection implements ConnectionInterface {
 	{
 		return $this->run($query, $bindings, function($me, $query, $bindings)
 		{
-			if ($me->isDryRun()) return true;
+			if ($me->pretending()) return true;
 
 			$bindings = $me->prepareBindings($bindings);
 
@@ -233,7 +233,7 @@ class Connection implements ConnectionInterface {
 	{
 		return $this->run($query, $bindings, function($me, $query, $bindings)
 		{
-			if ($me->isDryRun()) return 0;
+			if ($me->pretending()) return 0;
 
 			// For update or delete statements, we want to get the number of rows affected
 			// by the statement and return that back to the developer. We'll first need
@@ -309,13 +309,13 @@ class Connection implements ConnectionInterface {
 	 * @param  Closure  $callback
 	 * @return void
 	 */
-	public function dryRun(Closure $callback)
+	public function pretend(Closure $callback)
 	{
-		$this->dryRun = true;
+		$this->pretending = true;
 
 		$callback($this);
 
-		$this->dryRun = false;
+		$this->pretending = false;
 	}
 
 	/**
@@ -439,9 +439,9 @@ class Connection implements ConnectionInterface {
 	 *
 	 * @return bool
 	 */
-	public function isDryRun()
+	public function pretending()
 	{
-		return $this->dryRun === true;
+		return $this->pretending === true;
 	}
 
 	/**
