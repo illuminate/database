@@ -20,13 +20,6 @@ class Builder {
 	protected $grammar;
 
 	/**
-	 * The blueprints that have been generated.
-	 *
-	 * @var array
-	 */
-	protected $blueprints = array();
-
-	/**
 	 * Create a new database Schema manager.
 	 *
 	 * @param  Illuminate\Database\Connection  $connection
@@ -48,7 +41,7 @@ class Builder {
 	 */
 	public function table($table, Closure $callback)
 	{
-		return $this->createBlueprint($table, $callback);
+		$this->build($this->createBlueprint($table, $callback));
 	}
 
 	/**
@@ -60,11 +53,7 @@ class Builder {
 	 */
 	public function create($table, Closure $callback)
 	{
-		$blueprint = $this->createBlueprint($table, $callback);
-
-		$blueprint->create();
-
-		return $blueprint;
+		$this->build($this->createBlueprint($table, $callback)->create());
 	}
 
 	/**
@@ -75,11 +64,7 @@ class Builder {
 	 */
 	public function drop($table)
 	{
-		$blueprint = $this->createBlueprint($table);
-
-		$blueprint->drop();
-
-		return $blueprint;
+		$this->build($this->createBlueprint($table)->drop());
 	}
 
 	/**
@@ -91,54 +76,18 @@ class Builder {
 	 */
 	public function rename($from, $to)
 	{
-		$blueprint = $this->createBlueprint($from);
-
-		$blueprint->rename($to);
-
-		return $blueprint;
+		$this->build($this->createBlueprint($from)->rename($to));
 	}
 
 	/**
-	 * Run the blueprints that have been created.
-	 *
-	 * @return void
-	 */
-	public function flush($dryRun = false)
-	{
-		if ($dryRun) return $this->toSql();
-
-		foreach ($this->blueprints as $blueprint)
-		{
-			$this->build($blueprint);
-		}
-	}
-
-	/**
-	 * Get all of the SQL for the created blueprints.
-	 *
-	 * @return array
-	 */
-	public function toSql()
-	{
-		$me = $this;
-
-		return array_merge(array_map(function($blueprint) use ($me)
-		{
-			return $me->build($blueprint, true);
-
-		}, $this->blueprints));
-	}
-
-	/**
-	 * Run the given blueprint against the database.
+	 * Execute the blueprint to build / modify the table.
 	 *
 	 * @param  Illuminate\Database\Schema\Blueprint  $blueprint
-	 * @param  bool  $dryRun
-	 * @return array|null
+	 * @return void
 	 */
-	public function build(Blueprint $blueprint, $dryRun = false)
+	protected function build(Blueprint $blueprint)
 	{
-		return $blueprint->build($this->connection, $this->grammar, $dryRun);
+		$blueprint->build($this->connection, $this->grammar);
 	}
 
 	/**
@@ -150,9 +99,7 @@ class Builder {
 	 */
 	protected function createBlueprint($table, Closure $callback = null)
 	{
-		$this->blueprints[] = $blueprint = new Blueprint($table, $callback);
-
-		return $blueprint;
+		return new Blueprint($table, $callback);
 	}
 
 	/**

@@ -41,6 +41,18 @@ class Blueprint {
 	}
 
 	/**
+	 * Execute the blueprint against the database.
+	 *
+	 * @param  Illuminate\Database\Connection  $connection
+	 * @param  Illuminate\Database\Schema\Grammars\Grammar $grammar
+	 * @return void
+	 */
+	public function build(Connection $connection, Grammar $grammar)
+	{
+		//
+	}
+
+	/**
 	 * Indicate that the table needs to be created.
 	 *
 	 * @return Illuminate\Support\Fluent
