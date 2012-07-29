@@ -2,6 +2,8 @@
 
 use Closure;
 use Illuminate\Support\Fluent;
+use Illuminate\Database\Connection;
+use Illuminate\Database\Schema\Grammars\Grammar;
 
 class Blueprint {
 
@@ -48,6 +50,31 @@ class Blueprint {
 	 * @return void
 	 */
 	public function build(Connection $connection, Grammar $grammar)
+	{
+		$this->addImpliedCommands();
+
+		foreach ($this->commands as $command)
+		{
+			$method = 'compile'.ucfirst($command->name);
+
+			// Each type of command has a corresponding compiler function on the schema
+			// grammar which is used to build the necessary SQL statements to build
+			// the blueprint element, so we'll just call that compiler function.
+			$statements = $grammar->$method($this, $command);
+
+			foreach ((array) $statements as $statement)
+			{
+				$connection->statement($statement);
+			}
+		}
+	}
+
+	/**
+	 * Add the commands that are implied by the blueprint.
+	 *
+	 * @return void
+	 */
+	protected function addImpliedCommands()
 	{
 		//
 	}
