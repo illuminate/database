@@ -307,15 +307,22 @@ class Connection implements ConnectionInterface {
 	 * Execute the given callback in "dry run" mode.
 	 *
 	 * @param  Closure  $callback
-	 * @return void
+	 * @return array
 	 */
 	public function pretend(Closure $callback)
 	{
 		$this->pretending = true;
 
+		$this->queryLog = array();
+
+		// Basically to make the database connection "pretend", we will just return
+		// the default values for all the query methods, then we will return an
+		// array of queries that were "executed" within the Closure callback.
 		$callback($this);
 
 		$this->pretending = false;
+
+		return $this->queryLog;
 	}
 
 	/**
@@ -462,16 +469,6 @@ class Connection implements ConnectionInterface {
 	public function getQueryLog()
 	{
 		return $this->queryLog;
-	}
-
-	/**
-	 * Clear the connection query log.
-	 *
-	 * @return void
-	 */
-	public function clearQueryLog()
-	{
-		$this->queryLog = array();
 	}
 
 }

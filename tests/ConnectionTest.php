@@ -183,11 +183,10 @@ class ConnectionTest extends PHPUnit_Framework_TestCase {
 	public function testPretendOnlyLogsQueries()
 	{
 		$connection = $this->getMockConnection();
-		$connection->pretend(function($connection)
+		$queries = $connection->pretend(function($connection)
 		{
 			$connection->select('foo bar', array('baz'));
 		});
-		$queries = $connection->getQueryLog();
 		$this->assertEquals('foo bar', $queries[0]['query']);
 		$this->assertEquals(array('baz'), $queries[0]['bindings']);
 	}
