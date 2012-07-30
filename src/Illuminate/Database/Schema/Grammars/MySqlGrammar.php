@@ -21,7 +21,9 @@ class MySqlGrammar extends Grammar {
 	 */
 	public function compileCreate(Blueprint $blueprint, Fluent $command)
 	{
-		//
+		$columns = implode(', ', $this->compileColumns($blueprint));
+
+		return 'create table '.$this->wrapTable($blueprint)." ($columns)";
 	}
 
 	/**
@@ -33,7 +35,11 @@ class MySqlGrammar extends Grammar {
 	 */
 	public function compileAdd(Blueprint $blueprint, Fluent $command)
 	{
-		//
+		$columns = $this->prefixArray('add', $this->compileColumns($blueprint));
+
+		$table = $this->wrapTable($blueprint);
+
+		return 'alter table '.$table.' '.implode(', ', $columns);
 	}
 
 }
