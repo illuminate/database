@@ -76,7 +76,61 @@ class Blueprint {
 	 */
 	protected function addImpliedCommands()
 	{
-		//
+		if (count($this->columns) > 0 and $this->creating())
+		{
+			array_unshift($this->commands, $this->createCommand('add'));
+		}
+
+		$this->addFluentIndexes();
+	}
+
+	/**
+	 * Add the index commands fluently specified on columns.
+	 *
+	 * @return void
+	 */
+	protected function addFluentIndexes()
+	{
+		foreach ($this->columns as $column)
+		{
+			foreach (array('primary', 'unique', 'index') as $index)
+			{
+				// If the index has been specified on the given column, but is simply
+				// equal to "true" (boolean), no name has been specified for this
+				// index, so we will simply call the index methods without one.
+				if ($column->$index === true)
+				{
+					$this->$index($column->name);
+
+					continue 2;
+				}
+
+				// If the index has been specified on the column and it is something
+				// other than boolean true, we will assume a name was provided on
+				// the index specification, and pass in the name to the method.
+				elseif (isset($column->$index))
+				{
+					$this->$index($column->name, $column->$index);
+
+					continue 2;
+				}
+			}
+		}
+	}
+
+	/**
+	 * Determine if the blueprint has a create command.
+	 *
+	 * @return bool
+	 */
+	protected function creating()
+	{
+		foreach ($this->commands as $command)
+		{
+			if ($command->name == 'create') return true;
+		}
+
+		return false;
 	}
 
 	/**
@@ -358,11 +412,21 @@ class Blueprint {
 	 */
 	protected function addCommand($name, array $parameters = array())
 	{
-		$attributes = array_merge(compact('name'), $parameters);
-
-		$this->commands[] = $command = new Fluent($attributes);
+		$this->commands[] = $command = $this->createCommand($name, $parameters);
 
 		return $command;
+	}
+
+	/**
+	 * Create a new Fluent command.
+	 *
+	 * @param  string  $name
+	 * @param  array   $parameters
+	 * @return Illuminate\Support\Fluent
+	 */
+	protected function createCommand($name, array $parameters = array())
+	{
+		return new Fluent(array_merge(compact('name'), $parameters));
 	}
 
 	/**
