@@ -12,4 +12,14 @@ class MySqlConnection extends Connection {
 		return new Query\Grammars\MySqlGrammar;
 	}
 
+	/**
+	 * Get the default schema grammar instance.
+	 *
+	 * @return Illuminate\Database\Schema\Grammars\Grammar
+	 */
+	protected function getDefaultSchemaGrammar()
+	{
+		return new Schema\Grammars\MySqlGrammar;
+	}
+
 }

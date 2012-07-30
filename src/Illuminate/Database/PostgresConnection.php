@@ -13,6 +13,16 @@ class PostgresConnection extends Connection {
 	}
 
 	/**
+	 * Get the default schema grammar instance.
+	 *
+	 * @return Illuminate\Database\Schema\Grammars\Grammar
+	 */
+	protected function getDefaultSchemaGrammar()
+	{
+		return new Schema\Grammars\PostgresGrammar;
+	}
+
+	/**
 	 * Get the default post processor instance.
 	 *
 	 * @return Illuminate\Database\Query\Processors\Processor

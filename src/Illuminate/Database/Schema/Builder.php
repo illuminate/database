@@ -23,13 +23,12 @@ class Builder {
 	 * Create a new database Schema manager.
 	 *
 	 * @param  Illuminate\Database\Connection  $connection
-	 * @param  Illuminate\Database\Schema\Grammars\Grammar  $grammar
 	 * @return void
 	 */
-	public function __construct(Connection $connection, Grammar $grammar)
+	public function __construct(Connection $connection)
 	{
-		$this->grammar = $grammar;
 		$this->connection = $connection;
+		$this->grammar = $connection->getSchemaGrammar();
 	}
 
 	/**

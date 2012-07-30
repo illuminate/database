@@ -1,6 +1,8 @@
 <?php namespace Illuminate\Database\Schema\Grammars;
 
-abstract class Grammar {
+use Illuminate\Database\Grammar as BaseGrammar;
+
+abstract class Grammar extends BaseGrammar {
 
 	//
 

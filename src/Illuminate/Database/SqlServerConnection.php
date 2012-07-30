@@ -12,4 +12,14 @@ class SqlServerConnection extends Connection {
 		return new Query\Grammars\SqlServerGrammar;
 	}
 
+	/**
+	 * Get the default schema grammar instance.
+	 *
+	 * @return Illuminate\Database\Schema\Grammars\Grammar
+	 */
+	protected function getDefaultSchemaGrammar()
+	{
+		return new Schema\Grammars\SqlServerGrammar;
+	}
+
 }

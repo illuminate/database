@@ -22,6 +22,13 @@ class Connection implements ConnectionInterface {
 	protected $queryGrammar;
 
 	/**
+	 * The schema grammar implementation.
+	 *
+	 * @var Illuminate\Database\Schema\Grammars\Grammar
+	 */
+	protected $schemaGrammar;
+
+	/**
 	 * The query post processor implementation.
 	 *
 	 * @var Illuminate\Database\Query\Processors\Processor
@@ -71,6 +78,8 @@ class Connection implements ConnectionInterface {
 		// We will initialize them to their default value to get started.
 		$this->useDefaultQueryGrammar();
 
+		$this->useDefaultSchemaGrammar();
+
 		$this->useDefaultPostProcessor();
 	}
 
@@ -93,6 +102,23 @@ class Connection implements ConnectionInterface {
 	{
 		return new Query\Grammars\Grammar;
 	}
+
+	/**
+	 * Set the schema grammar to the default implementation.
+	 *
+	 * @return void
+	 */
+	public function useDefaultSchemaGrammar()
+	{
+		$this->schemaGrammar = $this->getDefaultSchemaGrammar();
+	}
+
+	/**
+	 * Get the default schema grammar instance.
+	 *
+	 * @return Illuminate\Database\Schema\Grammars\Grammar
+	 */
+	protected function getDefaultSchemaGrammar() {}
 
 	/**
 	 * Set the query post processor to the default implementation.
@@ -379,6 +405,16 @@ class Connection implements ConnectionInterface {
 	}
 
 	/**
+	 * Get the PDO driver name.
+	 *
+	 * @return string
+	 */
+	public function getDriverName()
+	{
+		return $this->pdo->getAttribute(\PDO::ATTR_DRIVER_NAME);
+	}
+
+	/**
 	 * Get the query grammar used by the connection.
 	 *
 	 * @return Illuminate\Database\Query\Grammars\Grammar
@@ -397,6 +433,27 @@ class Connection implements ConnectionInterface {
 	public function setQueryGrammar(Query\Grammars\Grammar $grammar)
 	{
 		$this->queryGrammar = $grammar;
+	}
+
+	/**
+	 * Get the schema grammar used by the connection.
+	 *
+	 * @return Illuminate\Database\Query\Grammars\Grammar
+	 */
+	public function getSchemaGrammar()
+	{
+		return $this->schemaGrammar;
+	}
+
+	/**
+	 * Set the schema grammar used by the connection.
+	 *
+	 * @param  Illuminate\Database\Schema\Grammars\Grammar
+	 * @return void
+	 */
+	public function setSchemaGrammar(Schema\Grammars\Grammar $grammar)
+	{
+		$this->schemaGrammar = $grammar;
 	}
 
 	/**
