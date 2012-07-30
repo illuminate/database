@@ -10,6 +10,17 @@ abstract class Grammar {
 	protected $tablePrefix = '';
 
 	/**
+	 * Wrap an array of values.
+	 *
+	 * @param  array  $values
+	 * @return array
+	 */
+	public function wrapArray(array $values)
+	{
+		return array_map(array($this, 'wrap'), $values);
+	}
+
+	/**
 	 * Wrap a table in keyword identifiers.
 	 *
 	 * @param  string  $table

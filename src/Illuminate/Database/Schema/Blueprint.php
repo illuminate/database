@@ -154,6 +154,30 @@ class Blueprint {
 	}
 
 	/**
+	 * Indicate that the given columns should be dropped.
+	 *
+	 * @param  string|array  $columns
+	 * @return Illuminate\Support\Fluent
+	 */
+	public function dropColumn($columns)
+	{
+		$columns = (array) $columns;
+
+		return $this->addCommand('dropColumn', compact('columns'));
+	}
+
+	/**
+	 * Indicate that the given columns should be dropped.
+	 *
+	 * @param  dynamic
+	 * @return Illuminate\Support\Fluent
+	 */
+	public function dropColumns()
+	{
+		return $this->dropColumn(func_get_args());
+	}
+
+	/**
 	 * Rename the table to a given name.
 	 *
 	 * @param  string  $to
