@@ -178,6 +178,50 @@ class Blueprint {
 	}
 
 	/**
+	 * Indicate that the given primary key should be dropped.
+	 *
+	 * @param  string  $name
+	 * @return Illuminate\Support\Fluent
+	 */
+	public function dropPrimary($name)
+	{
+		return $this->addCommand('dropPrimary', compact('name'));
+	}
+
+	/**
+	 * Indicate that the given unique key should be dropped.
+	 *
+	 * @param  string  $name
+	 * @return Illuminate\Support\Fluent
+	 */
+	public function dropUnique($name)
+	{
+		return $this->addCommand('dropUnique', compact('name'));
+	}
+
+	/**
+	 * Indicate that the given index should be dropped.
+	 *
+	 * @param  string  $name
+	 * @return Illuminate\Support\Fluent
+	 */
+	public function dropIndex($name)
+	{
+		return $this->addCommand('dropIndex', compact('name'));
+	}
+
+	/**
+	 * Indicate that the given foreign key should be dropped.
+	 *
+	 * @param  string  $name
+	 * @return Illuminate\Support\Fluent
+	 */
+	public function dropForeign($name)
+	{
+		return $this->addCommand('dropForeign', compact('name'));
+	}
+
+	/**
 	 * Rename the table to a given name.
 	 *
 	 * @param  string  $to

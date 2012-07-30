@@ -133,6 +133,60 @@ class MySqlGrammar extends Grammar {
 	}
 
 	/**
+	 * Compile a drop primary key command.
+	 *
+	 * @param  Illuminate\Database\Schema\Blueprint  $blueprint
+	 * @param  Illuminate\Support\Fluent  $command
+	 * @return string
+	 */
+	public function compileDropPrimary(Blueprint $blueprint, Fluent $command)
+	{
+		return 'alter table '.$this->wrapTable($blueprint).' drop primary key';
+	}
+
+	/**
+	 * Compile a drop unique key command.
+	 *
+	 * @param  Illuminate\Database\Schema\Blueprint  $blueprint
+	 * @param  Illuminate\Support\Fluent  $command
+	 * @return string
+	 */
+	public function compileDropUnique(Blueprint $blueprint, Fluent $command)
+	{
+		$table = $this->wrapTable($blueprint);
+
+		return "alter table {$table} drop index {$command->name}";
+	}
+
+	/**
+	 * Compile a drop index command.
+	 *
+	 * @param  Illuminate\Database\Schema\Blueprint  $blueprint
+	 * @param  Illuminate\Support\Fluent  $command
+	 * @return string
+	 */
+	public function compileDropIndex(Blueprint $blueprint, Fluent $command)
+	{
+		$table = $this->wrapTable($blueprint);
+
+		return "alter table {$table} drop index {$command->name}";
+	}
+
+	/**
+	 * Compile a drop foreign key command.
+	 *
+	 * @param  Illuminate\Database\Schema\Blueprint  $blueprint
+	 * @param  Illuminate\Support\Fluent  $command
+	 * @return string
+	 */
+	public function compileDropForeign(Blueprint $blueprint, Fluent $command)
+	{
+		$table = $this->wrapTable($blueprint);
+
+		return "alter table {$table} drop foreign key {$command->name}";
+	}
+
+	/**
 	 * Compile a rename table command.
 	 *
 	 * @param  Illuminate\Database\Schema\Blueprint  $blueprint
