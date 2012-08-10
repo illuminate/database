@@ -9,17 +9,14 @@
     ],
     "require": {
         "php": ">=5.3.0",
+        "illuminate/events": ">=1.0.0",
         "illuminate/support": ">=1.0.0"
     },
     "require-dev": {
-        "mockery/mockery": ">=0.7.2",
-        "illuminate/events": ">=1.0.0"
+        "mockery/mockery": ">=0.7.2"
     },
     "autoload": {
         "psr-0": {"Illuminate\\Database": "src/"}
-    },
-    "suggest": {
-        "illuminate/events": "Allows for catching of database query events."
     },
     "minimum-stability": "dev"
 }
