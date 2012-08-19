@@ -1,7 +1,5 @@
 <?php namespace Illuminate\Database\Connectors;
 
-use PDO;
-
 class MySqlConnector extends Connector {
 
 	/**
@@ -55,19 +53,6 @@ class MySqlConnector extends Connector {
 		}
 
 		return $dsn;
-	}
-
-	/**
-	 * Create a new PDO connection.
-	 *
-	 * @param  string  $dsn
-	 * @param  array   $config
-	 * @param  array   $options
-	 * @return PDO
-	 */
-	protected function createConnection($dsn, array $config, array $optinos)
-	{
-		return new PDO($dsn, $config['username'], $config['password'], $options);
 	}
 
 }
