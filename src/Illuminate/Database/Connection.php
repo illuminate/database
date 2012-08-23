@@ -141,6 +141,16 @@ class Connection implements ConnectionInterface {
 	}
 
 	/**
+	 * Get a schema builder instance for the connection.
+	 *
+	 * @return Illuminate\Database\Schema\Builder
+	 */
+	public function getSchemaBuilder()
+	{
+		return new Schema\Builder($this);
+	}
+
+	/**
 	 * Begin a fluent query against a database table.
 	 *
 	 * @param  string  $table
