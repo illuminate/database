@@ -2,7 +2,7 @@
 
 use PDO;
 
-abstract class Connector {
+class Connector {
 
 	/**
 	 * The default PDO connection options.
@@ -18,20 +18,12 @@ abstract class Connector {
 	);
 
 	/**
-	 * Establish a database connection.
-	 *
-	 * @param  array  $config
-	 * @return PDO
-	 */
-	abstract public function connect(array $config);
-
-	/**
 	 * Get the PDO options based on the configuration.
 	 *
 	 * @param  array  $config
 	 * @return array
 	 */
-	protected function getOptions(array $config)
+	public function getOptions(array $config)
 	{
 		$options = $config['options'];
 
@@ -46,9 +38,34 @@ abstract class Connector {
 	 * @param  array   $options
 	 * @return PDO
 	 */
-	protected function createConnection($dsn, array $config, array $optinos)
+	public function createConnection($dsn, array $config, array $options)
 	{
-		return new PDO($dsn, $config['username'], $config['password'], $options);
+		$username = array_get($config, 'username');
+
+		$password = array_get($config, 'password');
+
+		return new PDO($dsn, $username, $password, $options);
+	}
+
+	/**
+	 * Get the default PDO connection options.
+	 *
+	 * @return array
+	 */
+	public function getDefaultOptions()
+	{
+		return $this->options;
+	}
+
+	/**
+	 * Set the default PDO connection options.
+	 *
+	 * @param  array  $options
+	 * @return void
+	 */
+	public function setDefaultOptions(array $options)
+	{
+		$this->options = $options;
 	}
 
 }

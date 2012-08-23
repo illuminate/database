@@ -1,6 +1,6 @@
 <?php namespace Illuminate\Database\Connectors;
 
-class SQLiteConnector extends Connector {
+class SQLiteConnector extends Connector implements ConnectorInterface {
 
 	/**
 	 * Establish a database connection.
@@ -17,10 +17,10 @@ class SQLiteConnector extends Connector {
 		// querying. In-memory databases may only have a single open connection.
 		if ($config['database'] == ':memory:')
 		{
-			return new PDO('sqlite::memory:', null, null, $options);
+			return $this->createConnection('sqlite::memory:', $config, $options);
 		}
 
-		$path = realpath($config['path']);
+		$path = realpath($config['database']);
 
 		return $this->createConnection("sqlite:{$path}", $config, $options);
 	}

@@ -1,6 +1,8 @@
 <?php namespace Illuminate\Database\Connectors;
 
-class SqlServerConnector extends Connector {
+use PDO;
+
+class SqlServerConnector extends Connector implements ConnectorInterface {
 
 	/**
 	 * The PDO connection options.
@@ -35,11 +37,11 @@ class SqlServerConnector extends Connector {
 	 */
 	protected function getDsn(array $config)
 	{
-		extract($config);
-
 		// First we will create the basic DSN setup as well as the port if it is in
 		// in the configuration options. This will give us the basic DSN we will
 		// need to establish the PDO connections and return them back for use.
+		extract($config);
+
 		$port = isset($config['port']) ? ','.$port : '';
 
 		return "sqlsrv:Server={$host}{$port};Database={$database}";

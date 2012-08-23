@@ -1,6 +1,6 @@
 <?php namespace Illuminate\Database\Connectors;
 
-class MySqlConnector extends Connector {
+class MySqlConnector extends Connector implements ConnectorInterface {
 
 	/**
 	 * Establish a database connection.

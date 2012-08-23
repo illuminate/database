@@ -1,6 +1,8 @@
 <?php namespace Illuminate\Database\Connectors;
 
-class PostgresConnector extends Connector {
+use PDO;
+
+class PostgresConnector extends Connector implements ConnectorInterface {
 
 	/**
 	 * The default PDO connection options.
