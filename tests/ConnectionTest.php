@@ -192,10 +192,19 @@ class ConnectionTest extends PHPUnit_Framework_TestCase {
 	}
 
 
+	public function testSchemaBuilderCanBeCreated()
+	{
+		$connection = $this->getMockConnection();
+		$schema = $connection->getSchemaBuilder();
+		$this->assertInstanceOf('Illuminate\Database\Schema\Builder', $schema);
+		$this->assertTrue($connection === $schema->getConnection());
+	}
+
+
 	protected function getMockConnection($methods = array(), $pdo = null)
 	{
 		$pdo = $pdo ?: new MockPDO;
-		$defaults = array('getDefaultQueryGrammar', 'getDefaultPostProcessor');
+		$defaults = array('getDefaultQueryGrammar', 'getDefaultPostProcessor', 'getDefaultSchemaGrammar');
 		return $this->getMock('Illuminate\Database\Connection', array_merge($defaults, $methods), array($pdo));
 	}
 
