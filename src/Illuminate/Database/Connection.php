@@ -529,6 +529,17 @@ class Connection implements ConnectionInterface {
 	}
 
 	/**
+	 * Set the default fetch mode for the connection.
+	 *
+	 * @param  int  $fetchMode
+	 * @return int
+	 */
+	public function setFetchMode($fetchMode)
+	{
+		$this->fetchMode = $fetchMode;
+	}
+
+	/**
 	 * Get the connection query log.
 	 *
 	 * @return array
