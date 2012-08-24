@@ -2,17 +2,24 @@
 
 use Mockery as m;
 
+class ConnectionFactoryPDOStub extends PDO {
+	public function __construct() {}
+}
+
 class ConnectionFactoryTest extends PHPUnit_Framework_TestCase {
 
 	public function testMakeCallsCreateConnection()
 	{
-		$factory = $this->getMock('Illuminate\Database\Connectors\ConnectionFactory', array('createConnector'));
+		$factory = $this->getMock('Illuminate\Database\Connectors\ConnectionFactory', array('createConnector', 'createConnection'));
 		$connector = m::mock('stdClass');
-		$connector->shouldReceive('connect')->once()->with(array('config'))->andReturn('foo');
-		$factory->expects($this->once())->method('createConnector')->with(array('config'))->will($this->returnValue($connector));
-		$connection = $factory->make(array('config'));
+		$config = array('driver' => 'mysql');
+		$pdo = new ConnectionFactoryPDOStub;
+		$connector->shouldReceive('connect')->once()->with($config)->andReturn($pdo);
+		$factory->expects($this->once())->method('createConnector')->with($config)->will($this->returnValue($connector));
+		$factory->expects($this->once())->method('createConnection')->with($this->equalTo('mysql'), $this->equalTo($pdo))->will($this->returnValue('bar'));
+		$connection = $factory->make($config);
 
-		$this->assertEquals('foo', $connection);
+		$this->assertEquals('bar', $connection);
 	}
 
 
