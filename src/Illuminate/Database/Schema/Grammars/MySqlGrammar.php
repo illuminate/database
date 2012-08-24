@@ -328,7 +328,7 @@ class MySqlGrammar extends Grammar {
 	 * @param  Illuminate\Support\Fluent  $column
 	 * @return string
 	 */
-	protected function typeTime(Fluent $column)
+	protected function typeTimestamp(Fluent $column)
 	{
 		return 'timestamp';
 	}
