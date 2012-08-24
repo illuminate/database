@@ -78,8 +78,6 @@ class Connection implements ConnectionInterface {
 		// We will initialize them to their default value to get started.
 		$this->useDefaultQueryGrammar();
 
-		$this->useDefaultSchemaGrammar();
-
 		$this->useDefaultPostProcessor();
 	}
 
@@ -147,6 +145,8 @@ class Connection implements ConnectionInterface {
 	 */
 	public function getSchemaBuilder()
 	{
+		if (is_null($this->schemaGrammar)) { $this->useDefaultSchemaGrammar(); }
+
 		return new Schema\Builder($this);
 	}
 
