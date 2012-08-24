@@ -25,7 +25,7 @@ class Connector {
 	 */
 	public function getOptions(array $config)
 	{
-		$options = $config['options'];
+		$options = array_get($config, 'options', array());
 
 		return array_diff_key($this->options, $options) + $options;
 	}
