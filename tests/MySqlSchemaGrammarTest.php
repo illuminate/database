@@ -154,6 +154,42 @@ class MySqlSchemaGrammarTest extends PHPUnit_Framework_TestCase {
 	}
 
 
+	public function testAddingIncrementingID()
+	{
+		$blueprint = new Blueprint('users');
+		$blueprint->increments('id');
+		$statements = $blueprint->toSql($this->getGrammar());
+
+		$this->assertEquals(1, count($statements));
+		$this->assertEquals('alter table `users` add `id` int not null auto_increment primary key', $statements[0]);
+	}
+
+
+	public function testAddingString()
+	{
+		$blueprint = new Blueprint('users');
+		$blueprint->string('foo');
+		$statements = $blueprint->toSql($this->getGrammar());
+
+		$this->assertEquals(1, count($statements));
+		$this->assertEquals('alter table `users` add `foo` varchar(255) not null', $statements[0]);
+
+		$blueprint = new Blueprint('users');
+		$blueprint->string('foo', 100);
+		$statements = $blueprint->toSql($this->getGrammar());
+
+		$this->assertEquals(1, count($statements));
+		$this->assertEquals('alter table `users` add `foo` varchar(100) not null', $statements[0]);
+
+		$blueprint = new Blueprint('users');
+		$blueprint->string('foo', 100)->nullable()->default('bar');
+		$statements = $blueprint->toSql($this->getGrammar());
+
+		$this->assertEquals(1, count($statements));
+		$this->assertEquals('alter table `users` add `foo` varchar(100) null default \'bar\'', $statements[0]);
+	}
+
+
 	protected function getConnection()
 	{
 		return m::mock('Illuminate\Database\Connection');
