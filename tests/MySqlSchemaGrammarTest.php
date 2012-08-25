@@ -26,6 +26,16 @@ class MySqlSchemaGrammarTest extends PHPUnit_Framework_TestCase {
 	}
 
 
+	public function testDropTable()
+	{
+		$blueprint = new Blueprint('users');
+		$blueprint->drop();
+		$statements = $blueprint->toSql($this->getGrammar());
+
+		die(var_dump($statements));
+	}
+
+
 	protected function getConnection()
 	{
 		return m::mock('Illuminate\Database\Connection');
