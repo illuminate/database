@@ -66,6 +66,18 @@ class MySqlSchemaGrammarTest extends PHPUnit_Framework_TestCase {
 	}
 
 
+	public function testDropPrimary()
+	{
+		$blueprint = new Blueprint('users');
+		$blueprint->dropPrimary('foo');
+		$statements = $blueprint->toSql($this->getGrammar());
+
+		$this->assertEquals(1, count($statements));
+		$this->assertEquals('alter table `users` drop primary key', $statements[0]);
+	}
+
+
+
 	protected function getConnection()
 	{
 		return m::mock('Illuminate\Database\Connection');
