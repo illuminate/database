@@ -280,7 +280,7 @@ class Blueprint {
 	 */
 	public function index($columns, $name = null)
 	{
-		return $this->addIndex('unique', $columns, $name);
+		return $this->addIndex('index', $columns, $name);
 	}
 
 	/**

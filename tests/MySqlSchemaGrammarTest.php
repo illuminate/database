@@ -132,6 +132,28 @@ class MySqlSchemaGrammarTest extends PHPUnit_Framework_TestCase {
 	}
 
 
+	public function testAddingUniqueKey()
+	{
+		$blueprint = new Blueprint('users');
+		$blueprint->unique('foo', 'bar');
+		$statements = $blueprint->toSql($this->getGrammar());
+
+		$this->assertEquals(1, count($statements));
+		$this->assertEquals('alter table `users` add unique bar(`foo`)', $statements[0]);
+	}
+
+
+	public function testAddingIndex()
+	{
+		$blueprint = new Blueprint('users');
+		$blueprint->index(array('foo', 'bar'), 'baz');
+		$statements = $blueprint->toSql($this->getGrammar());
+
+		$this->assertEquals(1, count($statements));
+		$this->assertEquals('alter table `users` add index baz(`foo`, `bar`)', $statements[0]);
+	}
+
+
 	protected function getConnection()
 	{
 		return m::mock('Illuminate\Database\Connection');
