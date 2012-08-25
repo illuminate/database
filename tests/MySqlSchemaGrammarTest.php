@@ -200,6 +200,114 @@ class MySqlSchemaGrammarTest extends PHPUnit_Framework_TestCase {
 		$this->assertEquals('alter table `users` add `foo` text not null', $statements[0]);
 	}
 
+	public function testAddingInteger()
+	{
+		$blueprint = new Blueprint('users');
+		$blueprint->integer('foo');
+		$statements = $blueprint->toSql($this->getGrammar());
+
+		$this->assertEquals(1, count($statements));
+		$this->assertEquals('alter table `users` add `foo` int not null', $statements[0]);
+
+		$blueprint = new Blueprint('users');
+		$blueprint->integer('foo', true);
+		$statements = $blueprint->toSql($this->getGrammar());
+
+		$this->assertEquals(1, count($statements));
+		$this->assertEquals('alter table `users` add `foo` int not null auto_increment primary key', $statements[0]);				
+	}
+
+	public function testAddingFloat()
+	{
+		$blueprint = new Blueprint('users');
+		$blueprint->float('foo', 5, 2);
+		$statements = $blueprint->toSql($this->getGrammar());
+
+		$this->assertEquals(1, count($statements));
+		// failure. casting issue?
+		$this->assertEquals('alter table `users` add `foo` int not null', $statements[0]);		
+	}
+
+	public function testAddingDecimal()
+	{
+		$blueprint = new Blueprint('users');
+		$blueprint->decimal('foo', 5, 2);
+		$statements = $blueprint->toSql($this->getGrammar());
+
+		$this->assertEquals(1, count($statements));
+		// casting issue again?
+		$this->assertEquals('alter table `users` add `foo` int not null auto_increment primary key', $statements[0]);
+	}
+
+	public function testAddingBoolean()
+	{
+		$blueprint = new Blueprint('users');
+		$blueprint->boolean('foo');
+		$statements = $blueprint->toSql($this->getGrammar());
+
+		$this->assertEquals(1, count($statements));
+		$this->assertEquals('alter table `users` add `foo` tinyint not null', $statements[0]);
+	}
+
+	public function testAddingDate()
+	{
+		$blueprint = new Blueprint('users');
+		$blueprint->date('foo');
+		$statements = $blueprint->toSql($this->getGrammar());
+
+		$this->assertEquals(1, count($statements));
+		$this->assertEquals('alter table `users` add `foo` date not null', $statements[0]);
+	}
+
+	public function testAddingDateTime()
+	{
+		$blueprint = new Blueprint('users');
+		$blueprint->dateTime('foo');
+		$statements = $blueprint->toSql($this->getGrammar());
+
+		$this->assertEquals(1, count($statements));
+		$this->assertEquals('alter table `users` add `foo` datetime not null', $statements[0]);
+	}
+
+	public function testAddingTime()
+	{
+		$blueprint = new Blueprint('users');
+		$blueprint->time('foo');
+		$statements = $blueprint->toSql($this->getGrammar());
+
+		$this->assertEquals(1, count($statements));
+		$this->assertEquals('alter table `users` add `foo` time not null', $statements[0]);
+	}
+
+	public function testAddingTimeStamp()
+	{
+		$blueprint = new Blueprint('users');
+		$blueprint->timestamp('foo');
+		$statements = $blueprint->toSql($this->getGrammar());
+
+		$this->assertEquals(1, count($statements));
+		$this->assertEquals('alter table `users` add `foo` timestamp not null', $statements[0]);
+	}
+
+	public function testAddingTimeStamps()
+	{
+		$blueprint = new Blueprint('users');
+		$blueprint->timestamps();
+		$statements = $blueprint->toSql($this->getGrammar());
+
+		$this->assertEquals(1, count($statements));
+		$this->assertEquals('alter table `users` add `created_at` timestamp not null, add `updated_at` timestamp not null', $statements[0]);
+	}
+
+	public function testAddingBinary()
+	{
+		$blueprint = new Blueprint('users');
+		$blueprint->binary('foo');
+		$statements = $blueprint->toSql($this->getGrammar());
+
+		$this->assertEquals(1, count($statements));
+		$this->assertEquals('alter table `users` add `foo` blob not null', $statements[0]);
+	}
 
 	protected function getConnection()
 	{
