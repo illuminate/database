@@ -3,7 +3,7 @@
 use Mockery as m;
 use Illuminate\Database\Query\Builder;
 
-class BuilderTest extends PHPUnit_Framework_TestCase {
+class QueryBuilderTest extends PHPUnit_Framework_TestCase {
 
 	public function tearDown()
 	{

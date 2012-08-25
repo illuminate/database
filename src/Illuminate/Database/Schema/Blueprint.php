@@ -51,22 +51,37 @@ class Blueprint {
 	 */
 	public function build(Connection $connection, Grammar $grammar)
 	{
+		foreach ($this->toSql($grammar) as $statement)
+		{
+			$connection->statement($statement);
+		}
+	}
+
+	/**
+	 * Get the raw SQL statements for the blueprint.
+	 *
+	 * @param  Illuminate\Database\Schema\Grammars\Grammar  $grammar
+	 * @return array
+	 */
+	public function toSql(Grammar $grammar)
+	{
 		$this->addImpliedCommands();
 
+		$statements = array();
+
+		// Each type of command has a corresponding compiler function on the schema
+		// grammar which is used to build the necessary SQL statements to build
+		// the blueprint element, so we'll just call that compilers function.
 		foreach ($this->commands as $command)
 		{
 			$method = 'compile'.ucfirst($command->name);
 
-			// Each type of command has a corresponding compiler function on the schema
-			// grammar which is used to build the necessary SQL statements to build
-			// the blueprint element, so we'll just call that compilers function.
-			$statements = $grammar->$method($this, $command);
+			$sql = $grammar->$method($this, $command);
 
-			foreach ((array) $statements as $statement)
-			{
-				$connection->statement($statement);
-			}
+			$statements = array_merge($statements, (array) $sql);
 		}
+
+		return $statements;
 	}
 
 	/**
@@ -76,7 +91,7 @@ class Blueprint {
 	 */
 	protected function addImpliedCommands()
 	{
-		if (count($this->columns) > 0 and $this->creating())
+		if (count($this->columns) > 0 and ! $this->creating())
 		{
 			array_unshift($this->commands, $this->createCommand('add'));
 		}
@@ -429,7 +444,7 @@ class Blueprint {
 	{
 		$columns = (array) $columns;
 
-		// If no name was specified for the index, we will create one using a basic
+		// If no name was specified for this index, we will create one using a basic
 		// convention of the table name, followed by the columns, followed by an
 		// index type, such as primary or index, which makes the index unique.
 		if (is_null($name))
