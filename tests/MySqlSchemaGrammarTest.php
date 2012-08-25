@@ -77,6 +77,38 @@ class MySqlSchemaGrammarTest extends PHPUnit_Framework_TestCase {
 	}
 
 
+	public function testDropUnique()
+	{
+		$blueprint = new Blueprint('users');
+		$blueprint->dropUnique('foo');
+		$statements = $blueprint->toSql($this->getGrammar());
+
+		$this->assertEquals(1, count($statements));
+		$this->assertEquals('alter table `users` drop index foo', $statements[0]);
+	}
+
+
+	public function testDropIndex()
+	{
+		$blueprint = new Blueprint('users');
+		$blueprint->dropIndex('foo');
+		$statements = $blueprint->toSql($this->getGrammar());
+
+		$this->assertEquals(1, count($statements));
+		$this->assertEquals('alter table `users` drop index foo', $statements[0]);
+	}
+
+
+	public function testDropForeign()
+	{
+		$blueprint = new Blueprint('users');
+		$blueprint->dropForeign('foo');
+		$statements = $blueprint->toSql($this->getGrammar());
+
+		$this->assertEquals(1, count($statements));
+		$this->assertEquals('alter table `users` drop foreign key foo', $statements[0]);
+	}
+
 
 	protected function getConnection()
 	{
