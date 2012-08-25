@@ -59,7 +59,7 @@ class Blueprint {
 
 			// Each type of command has a corresponding compiler function on the schema
 			// grammar which is used to build the necessary SQL statements to build
-			// the blueprint element, so we'll just call that compiler function.
+			// the blueprint element, so we'll just call that compilers function.
 			$statements = $grammar->$method($this, $command);
 
 			foreach ((array) $statements as $statement)
