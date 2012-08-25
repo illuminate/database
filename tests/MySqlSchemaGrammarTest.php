@@ -110,6 +110,28 @@ class MySqlSchemaGrammarTest extends PHPUnit_Framework_TestCase {
 	}
 
 
+	public function testRenameTable()
+	{
+		$blueprint = new Blueprint('users');
+		$blueprint->rename('foo');
+		$statements = $blueprint->toSql($this->getGrammar());
+
+		$this->assertEquals(1, count($statements));
+		$this->assertEquals('rename table `users` to `foo`', $statements[0]);
+	}
+
+
+	public function testAddingPrimaryKey()
+	{
+		$blueprint = new Blueprint('users');
+		$blueprint->primary('foo', 'bar');
+		$statements = $blueprint->toSql($this->getGrammar());
+
+		$this->assertEquals(1, count($statements));
+		$this->assertEquals('alter table `users` add primary key bar(`foo`)', $statements[0]);
+	}
+
+
 	protected function getConnection()
 	{
 		return m::mock('Illuminate\Database\Connection');

@@ -101,7 +101,7 @@ class MySqlGrammar extends Grammar {
 
 		$table = $this->wrapTable($blueprint);
 
-		return "alter table {$table} add {$type} {$command->name}($columns)";
+		return "alter table {$table} add {$type} {$command->index}($columns)";
 	}
 
 	/**

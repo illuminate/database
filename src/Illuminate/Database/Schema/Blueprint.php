@@ -437,22 +437,22 @@ class Blueprint {
 	 *
 	 * @param  string  $type
 	 * @param  string|array  $columns
-	 * @param  string  $name
+	 * @param  string  $index
 	 * @return Illuminate\Support\Fluent
 	 */
-	protected function addIndex($type, $columns, $name)
+	protected function addIndex($type, $columns, $index)
 	{
 		$columns = (array) $columns;
 
 		// If no name was specified for this index, we will create one using a basic
 		// convention of the table name, followed by the columns, followed by an
 		// index type, such as primary or index, which makes the index unique.
-		if (is_null($name))
+		if (is_null($index))
 		{
-			$name = $this->createIndexName($type, $columns);
+			$index = $this->createIndexName($type, $columns);
 		}
 
-		return $this->addCommand($type, compact('name', 'columns'));
+		return $this->addCommand($type, compact('index', 'columns'));
 	}
 
 	/**
