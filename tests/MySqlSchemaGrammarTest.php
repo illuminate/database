@@ -190,6 +190,17 @@ class MySqlSchemaGrammarTest extends PHPUnit_Framework_TestCase {
 	}
 
 
+	public function testAddingText()
+	{
+		$blueprint = new Blueprint('users');
+		$blueprint->text('foo');
+		$statements = $blueprint->toSql($this->getGrammar());
+
+		$this->assertEquals(1, count($statements));
+		$this->assertEquals('alter table `users` add `foo` text not null', $statements[0]);
+	}
+
+
 	protected function getConnection()
 	{
 		return m::mock('Illuminate\Database\Connection');
