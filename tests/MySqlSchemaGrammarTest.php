@@ -224,8 +224,7 @@ class MySqlSchemaGrammarTest extends PHPUnit_Framework_TestCase {
 		$statements = $blueprint->toSql($this->getGrammar());
 
 		$this->assertEquals(1, count($statements));
-		// failure. casting issue?
-		$this->assertEquals('alter table `users` add `foo` int not null', $statements[0]);		
+		$this->assertEquals('alter table `users` add `foo` float(2, 5) not null', $statements[0]);		
 	}
 
 	public function testAddingDecimal()
@@ -235,8 +234,7 @@ class MySqlSchemaGrammarTest extends PHPUnit_Framework_TestCase {
 		$statements = $blueprint->toSql($this->getGrammar());
 
 		$this->assertEquals(1, count($statements));
-		// casting issue again?
-		$this->assertEquals('alter table `users` add `foo` int not null auto_increment primary key', $statements[0]);
+	$this->assertEquals('alter table `users` add `foo` decimal(2, 5) not null', $statements[0]);
 	}
 
 	public function testAddingBoolean()
