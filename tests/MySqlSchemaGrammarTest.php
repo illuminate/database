@@ -32,7 +32,8 @@ class MySqlSchemaGrammarTest extends PHPUnit_Framework_TestCase {
 		$blueprint->drop();
 		$statements = $blueprint->toSql($this->getGrammar());
 
-		die(var_dump($statements));
+		$this->assertEquals(1, count($statements));
+		$this->assertEquals('drop table `users`', $statements[0]);
 	}
 
 
