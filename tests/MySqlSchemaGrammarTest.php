@@ -69,7 +69,7 @@ class MySqlSchemaGrammarTest extends PHPUnit_Framework_TestCase {
 	public function testDropPrimary()
 	{
 		$blueprint = new Blueprint('users');
-		$blueprint->dropPrimary('foo');
+		$blueprint->dropPrimary();
 		$statements = $blueprint->toSql($this->getGrammar());
 
 		$this->assertEquals(1, count($statements));

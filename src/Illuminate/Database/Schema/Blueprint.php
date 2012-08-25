@@ -198,7 +198,7 @@ class Blueprint {
 	 * @param  string  $index
 	 * @return Illuminate\Support\Fluent
 	 */
-	public function dropPrimary($index)
+	public function dropPrimary($index = null)
 	{
 		return $this->addCommand('dropPrimary', compact('index'));
 	}
