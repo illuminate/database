@@ -485,23 +485,21 @@ class Grammar extends BaseGrammar {
 	{
 		$table = $this->wrapTable($query->from);
 
+		// Each one of the columns in the update statements needs to be wrapped in
+		// keyword identifiers, and a place-holder needs to be created for each
+		// of the values in the arrays of bindings so we can build the "sets".
 		$columns = array();
 
-		// Each one of the columns in the update statements needs to be wrapped in
-		// keyword identifiers, and a place-holder needs to be created for all
-		// of the values in the array of bindings so we can build the sets.
 		foreach ($values as $key => $value)
 		{
-			$key = $this->wrap($key);
-
-			$columns[] = $key.' = '.$this->parameter($value);
+			$columns[] = $this->wrap($key).' = '.$this->parameter($value);
 		}
 
 		$columns = implode(', ', $columns);
 
 		// Of course, update queries may also be constrained by where clauses so
-		// we'll need to compile the where clause and attach it to the query
-		// so only the intended rows are updated by the SQL we generate.
+		// we'll need to compile the where clauses and attach it to the query
+		// so only the intended records are updated by the SQL we generate.
 		$where = $this->compileWheres($query);
 
 		return trim("update $table set $columns $where");
