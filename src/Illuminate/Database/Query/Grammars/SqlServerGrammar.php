@@ -15,8 +15,8 @@ class SqlServerGrammar extends Grammar {
 		$components = $this->compileComponents($query);
 
 		// If an offset is present on the query, we will need to wrap the query in
-		// a big ANSI offset syntax block. This is very nasty compared to the
-		// other database systems, but is necessary for implementing this.
+		// a big "ANSI" offset syntax block. This is very nasty compared to the
+		// other database systems but is necessary for implementing features.
 		if ($query->offset > 0)
 		{
 			return $this->compileAnsiOffset($query, $components);
@@ -38,9 +38,9 @@ class SqlServerGrammar extends Grammar {
 
 		$select = $query->distinct ? 'select distinct ' : 'select ';
 
-		// If there is a limit on the query, but not an offset, we will add the
-		// top clause to the query, which serves as a "limit" type clause in
-		// SQL Server, since it does not have a separate keyword for this.
+		// If there is a limit on the query, but not an offset, we will add the top
+		// clause to the query, which serves as a "limit" type clause within the
+		// SQL Server system similar to the limit keywords available in MySQL.
 		if ($query->limit > 0 and $query->offset <= 0)
 		{
 			$select .= 'top '.$query->limit.' ';
@@ -58,45 +58,79 @@ class SqlServerGrammar extends Grammar {
 	 */
 	protected function compileAnsiOffset(Builder $query, $components)
 	{
-		// An ORDER BY clause is required to make this offset query work, so if
-		// one doesn't exist, we'll just create a dummy clause to trick the
-		// database and pacify it so it doesn't complain about the query.
+		// An ORDER BY clause is required to make this offset query work, so if one does
+		// not exist we'll just create a dummy clause to trick the database and so it
+		// does not complain about the queries for not having an "order by" clause.
 		if ( ! isset($components['orders']))
 		{
 			$components['orders'] = 'order by (select 0)';
 		}
 
-		// We need to add the row number to the query so we can compare it to
-		// the offset and limit values given for the statement. So we will
-		// add an expression to the select that will give back the rows.
-		$orders = $components['orders'];
+		// We need to add the row number to the query so we can compare it to the offset
+		// and limit values given for the statements. So we will add an expression to
+		// the "select" that will give back the row numbers on each of the records.
+		$orderings = $components['orders'];
 
-		$components['columns'] .= ", row_number() over ({$orders}) as row_num";
+		$components['columns'] .= $this->compileOver($orderings);
 
 		unset($components['orders']);
 
+		// Next we need to calculate the constraints that should be placed on the query
+		// to get the right offset and limit from our query but if there is no limit
+		// set we will just handle the offset only since that is all that matters.
 		$start = $query->offset + 1;
 
-		// Next, we need to calculate the constraint that should be placed on
-		// the row number to get the right offset and limit from our query
-		// but if there is not a limit set we'll just handle the offset.
+		$constraint = $this->compileRowConstraint($query);
+
+		$sql = $this->concatenate($components);
+
+		// We are now ready to build the final SQL query so we'll create a common table
+		// expression from the query and get the records with row numbers within our
+		// given limit and offset value that we just put on as a query constraint.
+		return $this->compileTableExpression($sql, $constraint);
+	}
+
+	/**
+	 * Compile the over statement for a table expression.
+	 *
+	 * @param  string  $orderings
+	 * @return string
+	 */
+	protected function compileOver($orderings)
+	{
+		return ", row_number() over ({$orderings}) as row_num";
+	}
+
+	/**
+	 * Compile the limit / offset row constraint for a query.
+	 *
+	 * @param  Illuminate\Database\Query\Builder  $query
+	 * @return string
+	 */
+	protected function compileRowConstraint($query)
+	{
+		$start = $query->offset + 1;
+
 		if ($query->limit > 0)
 		{
 			$finish = $query->offset + $query->limit;
 
-			$constraint = "between {$start} and {$finish}";
+			return "between {$start} and {$finish}";
 		}
-		else
-		{
-			$constraint = ">= {$start}";
-		}
+	
+		return ">= {$start}";
+	}
 
-		// We are now ready to build the final SQL query, so we will create a
-		// common table expression from the query and get the records with
-		// row numbers being between each given limit and offset values.
-		$sql = $this->concatenate($components);
-
-		return "select * from ($sql) as temp_table where row_num $constraint";
+	/**
+	 * Compile a common table expression for a query.
+	 *
+	 * @param  string  $sql
+	 * @param  string  $constraint
+	 * @return string
+	 */
+	protected function compileTableExpression($sql, $constraint)
+	{
+		return "select * from ({$sql}) as temp_table where row_num {$constraint}";
 	}
 
 	/**
