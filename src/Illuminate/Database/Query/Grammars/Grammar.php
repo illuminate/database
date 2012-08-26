@@ -182,8 +182,8 @@ class Grammar extends BaseGrammar {
 		$sql = array();
 
 		// Each type of where clause has its own compiler function whichi is responsible
-		// for actually creating the where clause SQL. This helps keep the code nice
-		// and maintainable since each clause has a very small function they use.
+		// for actually creating the where clauses SQL. This helps keep the code nice
+		// and maintainable since each clause has a very small method that it uses.
 		foreach ($query->wheres as $where)
 		{
 			$method = "where{$where['type']}";
@@ -192,8 +192,8 @@ class Grammar extends BaseGrammar {
 		}
 
 		// If we actually have some where clauses, we will strip off the first boolean
-		// opeartor, which is added by the query builder for convenience so we can
-		// avoid checking for the first clause in each of the compiler methods.
+		// opeartor, which is added by the query builders for convenience so we can
+		// avoid checking for the first clauses in each of the compilers methods.
 		if (count($sql) > 0)
 		{
 			$sql = implode(' ', $sql);
