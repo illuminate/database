@@ -186,9 +186,9 @@ class Builder {
 	 */
 	public function join($table, $first, $operator = null, $second = null, $type = 'inner')
 	{
-		// If the first "column" of the join is really a Closure instance we are
-		// trying to build a join with a complex "on" clause containing more
-		// than one condition, so we'll add the join and call the Closure.
+		// If the first "column" of the join is really a Closure instance the developer
+		// is trying to build a join with a complex "on" clause containing more than
+		// one condition, so we'll add the join and call a Closure with the query.
 		if ($first instanceof Closure)
 		{
 			$this->joins[] = new JoinClause($type, $table);
@@ -196,9 +196,9 @@ class Builder {
 			call_user_func($first, end($this->joins));
 		}
 
-		// If the column is just a string, we can assume the join simply has a
-		// basic "on" clause with a single condition. So we will just build
-		// the join clause instance and auto set the simple join clauses. 
+		// If the column is simply a string, we can assume the join simply has a basic
+		// "on" clause with a single condition. So we will just build the join with
+		// this simple join clauses attached to it. There is not a join callback.
 		else
 		{
 			$join = new JoinClause($type, $table);
@@ -294,22 +294,22 @@ class Builder {
 	 */
 	public function whereNested(Closure $callback, $boolean = 'and')
 	{
+		// To handle nested queries we actually will create a brand new query instance
+		// and pass it off to the Closure that we have. The Closures can simply do
+		// do whatever it wants to the quert and we will store it for compiling.
 		$type = 'Nested';
 
 		$query = $this->newQuery();
 
-		// To handle nested queries we actually will create a brand new query instance
-		// and pass it off to the Closure that we have. The Closure can then just
-		// do whatever it wants to the quer and we'll store it for compiling.
 		$query->from($this->from);
 
 		call_user_func($callback, $query);
 
+		// Once we have let the Closure do its things, we can gather the bindings on
+		// the nested query builder and merge them into this bindings since they
+		// need to get extracted out of the childs and assigend to this array.
 		$this->wheres[] = compact('type', 'query', 'boolean');
 
-		// Once we have let the Closure do its things we can gather the bindings on
-		// the nested query builder and merge them into our bindings since they
-		// need to get extracted out of the child and assigend to our array.
 		$this->mergeBindings($query);
 
 		return $this;
@@ -418,7 +418,7 @@ class Builder {
 
 		// If the value of the where in clause is actually a Closure, we will assume that
 		// the developer is using a full sub-select for this "in" statement, and will
-		// execute those Closures so we can re-constructure the full sub-selects.
+		// execute those Closures and we can re-constructure the full sub-selects.
 		if ($values instanceof Closure)
 		{
 			return $this->whereInSub($column, $values, $boolean, $not);
@@ -756,9 +756,9 @@ class Builder {
 	 */
 	public function insert(array $values)
 	{
-		// Since every insert is treated like a batch insert, we'll make sure the
-		// bindings are structured in a way that is convenient or building our
-		// insert statements by verifying the elements are actually arrays.
+		// Since every insert gets treated like a batch insert, we will make sure the
+		// bindings are structured in a way that is convenient for building these
+		// inserts statements by verifying the elements are dactually an array.
 		if ( ! is_array(reset($values)))
 		{
 			$values = array($values);
@@ -766,19 +766,19 @@ class Builder {
 
 		$bindings = array();
 
-		// We treat every insert like a batch insert so we can easily insert each
-		// of the records into the database consistently. This just makes it
-		// much easier on the grammar side to just handle one situation.
+		// We'll treat every insert like a batch insert so we can easily insert each
+		// of the records into the database consistently. This will make it much
+		// easier on the grammars to just handle one type of record insertion.
 		foreach ($values as $record)
 		{
 			$bindings = array_merge($bindings, array_values($record));
 		}
 
-		// Once we have compiled the insert statement SQL we can execute it on a
-		// connection and return the result as a boolean success indicator as
-		// that is the same type of result returned by the raw connections.
 		$sql = $this->grammar->compileInsert($this, $values);
 
+		// Once we have compiled the insert statement's SQL we can execute it on the
+		// connection and return a result as a boolean success indicator as that
+		// is the same type of result returned by the raw connection instnace.
 		return $this->connection->insert($sql, $bindings);
 	}
 

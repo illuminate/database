@@ -98,7 +98,7 @@ class Grammar extends BaseGrammar {
 	 */
 	protected function compileColumns(Builder $query, $columns)
 	{
-		// If the query is actually performing an aggregating select, we'll let
+		// If the query is actually performing an aggregating select, we will let
 		// that compiler handle the building of the select clause, as it will
 		// need some special syntax that is best handleed by that function.
 		if ( ! is_null($query->aggregate)) return;
@@ -183,7 +183,7 @@ class Grammar extends BaseGrammar {
 
 		// Each type of where clause has its own compiler function whichi is responsible
 		// for actually creating the where clause SQL. This helps keep the code nice
-		// and maintainable since each clause has a very small function it uses.
+		// and maintainable since each clause has a very small function they use.
 		foreach ($query->wheres as $where)
 		{
 			$method = "where{$where['type']}";
@@ -437,11 +437,11 @@ class Grammar extends BaseGrammar {
 	 */
 	public function compileInsert(Builder $query, array $values)
 	{
+		// Essentially we will force every insert to be treated as a batch insert which
+		// simply makes creating the SQL easier for us since we can utilize the same
+		// basic routine regardless of an amount of records given to us to insert.
 		$table = $this->wrapTable($query->from);
 
-		// Essentially we will force every insert to be treated as a batch insert
-		// which simply makes creating the SQL easier for us since we can use
-		// the same basic routine regardless of the number of rows given.
 		if ( ! is_array(reset($values)))
 		{
 			$values = array($values);
@@ -449,18 +449,15 @@ class Grammar extends BaseGrammar {
 
 		$columns = $this->columnize(array_keys(reset($values)));
 
-		// We need to build a list of parameter place-holders of values that are
-		// bound to the query. Each insert should have the exact same number
-		// of parameters so we can just go off the first list of values.
+		// We need to build a list of parameter place-holders of values that are bound
+		// to the query. Each insert should have the exact same amount of parameter
+		// bindings so we can just go off the first list of values in this array.
 		$parameters = $this->parameterize(reset($values));
 
 		$value = array_fill(0, count($values), "($parameters)");
 
 		$parameters = implode(', ', $value);
 
-		// Once we have successfully generated the proper place-holders we just
-		// need to concatenate all the pieces to create the final, complete
-		// insert statements ready for execution against the connection.
 		return "insert into $table ($columns) values $parameters";
 	}
 

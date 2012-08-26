@@ -75,6 +75,8 @@ class ConnectionFactory {
 			case 'sqlsrv':
 				return new SqlServerConnection($connection);
 		}
+
+		throw new \InvalidArgumentException("Unsupported driver [$driver]");
 	}
 
 }
