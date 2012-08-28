@@ -5,7 +5,7 @@ use Illuminate\Database\Query\Builder;
 class PostgresProcessor extends Processor {
 
 	/**
-	 * Process an  "insert get ID" query.
+	 * Process an "insert get ID" query.
 	 *
 	 * @param  Illuminate\Database\Query\Builder  $query
 	 * @param  string  $sql

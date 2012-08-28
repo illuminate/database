@@ -129,8 +129,8 @@ abstract class Model implements ArrayableInterface {
 	public static function newInstance($attributes = array(), $exists = false)
 	{
 		// This method just provides a convenient way for us to generate fresh model
-		// instances of the current model. It is particularly useful during the
-		// hydration of new objects by the Eloquent query builder instance.
+		// instances of this current model. It is particularly useful during the
+		// hydration of new objects via the Eloquent query builder instances.
 		$model = new static((array) $attributes);
 
 		$model->exists = $exists;
@@ -174,7 +174,7 @@ abstract class Model implements ArrayableInterface {
 	{
 		// First we will just create a fresh instance of this model, and then we can
 		// set the connection on the model so that it is be used for the queries
-		// we execute, as well as being set on any relationship we retrieve.
+		// we execute, as well as being set on each relationship we retrieve.
 		$instance = new static;
 
 		$instance->setConnection($connection);
@@ -294,7 +294,7 @@ abstract class Model implements ArrayableInterface {
 	{
 		// First, we'll need to determine the foreign key and "other key" for the
 		// relationship. Once we have determined the keys we'll make the query
-		// instance as well as the relationship instances we need for this.
+		// instances as well as the relationship instances we need for this.
 		$foreignKey = $foreignKey ?: $this->getForeignKey();
 
 		$instance = new $related;
@@ -349,16 +349,16 @@ abstract class Model implements ArrayableInterface {
 	 */
 	public function save()
 	{
-		// First we need to create a fresh query instance and touch the creation
-		// and update timestamps on the model which are maintained by us for
-		// convenience to the developers. Then we'll just save the model.
+		// First we need to create a fresh query instance and touch the creation and
+		// update timestamp on the model which are maintained by us for developer
+		// convenience. Then we will just continue saving the model instances.
 		$query = $this->newQuery();
 
 		$this->updateTimestamps();
 
-		// If the model already exists in the database, we can just update our
-		// record that is already in the database using the current IDs in
-		// the "where" clause of the queries to only update this model.
+		// If the model already exists in the database we can just update our record
+		// that is already in this database using the current IDs in this "where"
+		// clause to only update this model. Otherwise we'll just insert them.
 		if ($this->exists)
 		{
 			$query->where($this->getKeyName(), '=', $this->getKey());
@@ -366,9 +366,9 @@ abstract class Model implements ArrayableInterface {
 			$query->update($this->attributes);
 		}
 
-		// If the model is brand new, we'll insert it into our database and
-		// set the ID attribute on the model to the value of the newly
-		// inserted row's ID, which is typically auto-incremented.
+		// If the model is brand new, we'll insert it into our database and set the
+		// ID attribute on the model to the value of the newly inserted row's ID
+		// which is typically an auto-increment value managed by the database.
 		else
 		{
 			$id = $query->insertGetId($this->attributes);
@@ -671,15 +671,15 @@ abstract class Model implements ArrayableInterface {
 
 		foreach ($this->relations as $key => $value)
 		{
-			// If the value implements the Arrayable interface we can just call the
-			// toArray method on the instance, which will conver both models and
-			// collections to their proper array form and we'll set the value.
+			// If the values implements the Arrayable interface we can just call this
+			// toArray method on the instances, which will conver both models and
+			// collections to their proper array form and we'll set the values.
 			if ($value instanceof ArrayableInterface)
 			{
 				$attributes[$key] = $value->toArray();
 			}
 
-			// If the value is null, we'll still go ahead and set it in our list of
+			// If the value is null, we'll still go ahead and set it in this list of
 			// attributes since null is used to represent empty relationships if
 			// if it a has one or belongs to type relationships on the models.
 			elseif (is_null($value))
@@ -699,25 +699,25 @@ abstract class Model implements ArrayableInterface {
 	 */
 	public function getAttribute($key)
 	{
-		// If the key references an attribtue, we can just go ahead and return
-		// the plain attribute value from the model. This allows all of the
-		// attributes to be dynamically accessed through the _get method.
+		// If the key references an attribute, we can just go ahead and return the
+		// plain attribute value from the model. This allows every attribute to
+		// be dynamically accessed through the _get method without accessors.
 		if (array_key_exists($key, $this->attributes))
 		{
 			return $this->getPlainAttribute($key);
 		}
 
-		// If the key already exists in the relationship array, it means the
-		// relationship has already been loaded, so we can just return it
-		// out of here because there is no need to query into it twice.
+		// If the key already exists in the relationships array, it just means the
+		// relationship has already been loaded, so we'll just return it out of
+		// here because there is no need to query within the relations twice.
 		if (array_key_exists($key, $this->relations))
 		{
 			return $this->relations[$key];
 		}
 
-		// If the "attribute" exists as a method on the model, we will just
-		// assume it is a relationship and will load and return results
-		// from the relationship query and hydrate the relationship.
+		// If the "attribute" exists as a method on the model, we will just assume
+		// it is a relationship and will load and return results from the query
+		// and hydrate the relationship's value on the "relationships" array.
 		if (method_exists($this, $key))
 		{
 			$relations = $this->$key()->getResults();

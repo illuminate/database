@@ -95,9 +95,6 @@ class Builder extends BaseBuilder {
 			$model->setConnection($connection);
 		}
 
-		// Now that we have created the models we can just return them, as this
-		// method is kept separate from eager loadings in case they need to
-		// be used by a relationship individually when loading the model.
 		return $models;
 	}
 
@@ -155,7 +152,7 @@ class Builder extends BaseBuilder {
 
 		// Once we have the results, we just match those back up to their parent models
 		// using the relationship instance. Then we just return the finished arrays
-		// of models that have been eagerly hydrated and are readied for return.
+		// of models which have been eagerly hydrated and are readied for return.
 		return $instance->match($models, $results, $relation);
 	}
 
@@ -241,11 +238,11 @@ class Builder extends BaseBuilder {
 				list($relation, $constraints) = array($constraints, $f);
 			}
 
-			$progress = array();
-
 			// We need to separate out any nested includes. Which allows the developers
 			// to load deep relatoinships using "dots" without stating each level of
 			// the relationship with its own key in the array of eager load names.
+			$progress = array();
+
 			foreach (explode('.', $relation) as $segment)
 			{
 				$progress[] = $segment;
@@ -255,7 +252,7 @@ class Builder extends BaseBuilder {
 
 			// The eager load could have had constrains specified on it. We'll put them
 			// on the last eager load segment, which means that for the nested eager
-			// load include only the final segments will get constrained queries.
+			// load includes only the final segments will get constrained queries.
 			$results[$last] = $constraints;
 		}
 
