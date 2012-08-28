@@ -81,7 +81,9 @@ class SQLiteGrammar extends Grammar {
 	{
 		$columns = $this->columnize($command->columns);
 
-		return "create unique index {$command->index} on ".$this->wrapTable($blueprint)." ({$columns})";
+		$table = $this->wrapTable($blueprint);
+
+		return "create unique index {$command->index} on {$table} ({$columns})";
 	}
 
 	/**
@@ -95,7 +97,9 @@ class SQLiteGrammar extends Grammar {
 	{
 		$columns = $this->columnize($command->columns);
 
-		return "create index {$command->index} on ".$this->wrapTable($blueprint)." ({$columns})";
+		$table = $this->wrapTable($blueprint);
+
+		return "create index {$command->index} on {$table} ({$columns})";
 	}
 
 	/**
