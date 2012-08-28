@@ -252,7 +252,7 @@ abstract class Model implements ArrayableInterface {
 		{
 			list(, $caller) = debug_backtrace(false);
 
-			$foreignKey = $this->snakeCase($caller['function']).'_id';
+			$foreignKey = snake_case($caller['function']).'_id';
 		}
 
 		// Once we have the foreign key name, we'll just create a new Eloquent query
@@ -328,9 +328,9 @@ abstract class Model implements ArrayableInterface {
 		// The joining table name, by convention, is simply the snake cased models
 		// sorted alphabetically and concatenated with an underscore, so we can
 		// just sort the models and join them together to get the table name.
-		$base = $this->snakeCase(static::classBasename($this));
+		$base = snake_case(class_basename($this));
 
-		$related = $this->snakeCase(static::classBasename($related));
+		$related = snake_case(class_basename($related));
 
 		$models = array($related, $base);
 
@@ -470,7 +470,7 @@ abstract class Model implements ArrayableInterface {
 	{
 		$class = basename(str_replace('\\', '/', get_class($this)));
 
-		return $this->snakeCase($class).'_id';
+		return snake_case($class).'_id';
 	}
 
 	/**
@@ -738,7 +738,7 @@ abstract class Model implements ArrayableInterface {
 
 		if ($this->hasGetMutator($key))
 		{
-			return $this->{'get'.$this->camelCase($key)}($value);
+			return $this->{'get'.camel_case($key)}($value);
 		}
 
 		return $value;
@@ -752,7 +752,7 @@ abstract class Model implements ArrayableInterface {
 	 */
 	protected function hasGetMutator($key)
 	{
-		return method_exists($this, 'get'.$this->camelCase($key));
+		return method_exists($this, 'get'.camel_case($key));
 	}
 
 	/**
@@ -769,7 +769,7 @@ abstract class Model implements ArrayableInterface {
 		// the model, such as json_encoding an array of data for storage.
 		if ($this->hasSetMutator($key))
 		{
-			$method = 'set'.$this->camelCase($key);
+			$method = 'set'.camel_case($key);
 
 			return $this->attributes[$key] = $this->$method($value);
 		}
@@ -785,7 +785,7 @@ abstract class Model implements ArrayableInterface {
 	 */
 	protected function hasSetMutator($key)
 	{
-		return method_exists($this, 'set'.$this->camelCase($key));
+		return method_exists($this, 'set'.camel_case($key));
 	}
 
 	/**
@@ -830,47 +830,6 @@ abstract class Model implements ArrayableInterface {
 	public function setRelation($relation, $value)
 	{
 		$this->relations[$relation] = $value;
-	}
-
-	/**
-	 * Convert a snake case string to camel case.
-	 *
-	 * @param  string  $value
-	 * @return string
-	 */
-	protected function camelCase($value)
-	{
-		$value = ucwords(str_replace('_', ' ', $value));
-
-		return str_replace(' ', '', $value);
-	}
-
-	/**
-	 * Convert a CamelCase string back to snake case.
-	 *
-	 * @param  string  $value
-	 * @return string
-	 */
-	protected function snakeCase($value)
-	{
-		return trim(preg_replace_callback('/[A-Z]/', function($match)
-		{
-			return '_'.strtolower($match[0]);
-
-		}, $value), '_');
-	}
-
-	/**
-	 * Get the "base name" of the given class or object.
-	 *
-	 * @param  string|object  $class
-	 * @return string
-	 */
-	public static function classBasename($class)
-	{
-		$class = is_object($class) ? get_class($class) : $class;
-
-		return basename(str_replace('\\', '/', $class));
 	}
 
 	/**

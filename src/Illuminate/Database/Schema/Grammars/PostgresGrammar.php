@@ -3,21 +3,14 @@
 use Illuminate\Support\Fluent;
 use Illuminate\Database\Schema\Blueprint;
 
-class MySqlGrammar extends Grammar {
-
-	/**
-	 * The keyword identifier wrapper format.
-	 *
-	 * @var string
-	 */
-	protected $wrapper = '`%s`';
+class PostgresGrammar extends Grammar {
 
 	/**
 	 * The possible column modifiers.
 	 *
 	 * @var array
 	 */
-	protected $modifiers = array('Unsigned', 'Nullable', 'Default', 'Increment');
+	protected $modifiers = array('Nullable', 'Default', 'Increment');
 
 	/**
 	 * Compile a create table command.
@@ -44,7 +37,7 @@ class MySqlGrammar extends Grammar {
 	{
 		$table = $this->wrapTable($blueprint);
 
-		$columns = $this->prefixArray('add', $this->getColumns($blueprint));
+		$columns = $this->prefixArray('add column', $this->getColumns($blueprint));
 
 		return 'alter table '.$table.' '.implode(', ', $columns);
 	}
@@ -58,9 +51,9 @@ class MySqlGrammar extends Grammar {
 	 */
 	public function compilePrimary(Blueprint $blueprint, Fluent $command)
 	{
-		$command->name(null);
+		$columns = $this->columnize($command->columns);
 
-		return $this->compileKey($blueprint, $command, 'primary key');
+		return 'alter table '.$this->wrapTable($blueprint)." add primary key ({$columns})";
 	}
 
 	/**
@@ -72,7 +65,11 @@ class MySqlGrammar extends Grammar {
 	 */
 	public function compileUnique(Blueprint $blueprint, Fluent $command)
 	{
-		return $this->compileKey($blueprint, $command, 'unique');
+		$table = $this->wrapTable($blueprint);
+
+		$columns = $this->columnize($command->columns);
+
+		return "alter table $table add constraint {$command->index} unique ($columns)";
 	}
 
 	/**
@@ -84,24 +81,9 @@ class MySqlGrammar extends Grammar {
 	 */
 	public function compileIndex(Blueprint $blueprint, Fluent $command)
 	{
-		return $this->compileKey($blueprint, $command, 'index');
-	}
-
-	/**
-	 * Compile an index creation command.
-	 *
-	 * @param  Illuminate\Database\Schema\Blueprint  $blueprint
-	 * @param  Illuminate\Support\Fluent  $command
-	 * @param  string  $type
-	 * @return string
-	 */
-	protected function compileKey(Blueprint $blueprint, Fluent $command, $type)
-	{
 		$columns = $this->columnize($command->columns);
 
-		$table = $this->wrapTable($blueprint);
-
-		return "alter table {$table} add {$type} {$command->index}($columns)";
+		return "create index {$command->index} on ".$this->wrapTable($blueprint)." ({$columns})";
 	}
 
 	/**
@@ -125,7 +107,7 @@ class MySqlGrammar extends Grammar {
 	 */
 	public function compileDropColumn(Blueprint $blueprint, Fluent $command)
 	{
-		$columns = $this->prefixArray('drop', $this->wrapArray($command->columns));
+		$columns = $this->prefixArray('drop column', $this->wrapArray($command->columns));
 
 		$table = $this->wrapTable($blueprint);
 
@@ -141,7 +123,9 @@ class MySqlGrammar extends Grammar {
 	 */
 	public function compileDropPrimary(Blueprint $blueprint, Fluent $command)
 	{
-		return 'alter table '.$this->wrapTable($blueprint).' drop primary key';
+		$table = $blueprint->getTable();
+
+		return 'alter table '.$this->wrapTable($blueprint)." drop constraint {$table}_pkey";
 	}
 
 	/**
@@ -155,7 +139,7 @@ class MySqlGrammar extends Grammar {
 	{
 		$table = $this->wrapTable($blueprint);
 
-		return "alter table {$table} drop index {$command->index}";
+		return "alter table {$table} drop constraint {$command->index}";
 	}
 
 	/**
@@ -167,9 +151,7 @@ class MySqlGrammar extends Grammar {
 	 */
 	public function compileDropIndex(Blueprint $blueprint, Fluent $command)
 	{
-		$table = $this->wrapTable($blueprint);
-
-		return "alter table {$table} drop index {$command->index}";
+		return "drop index {$command->index}";
 	}
 
 	/**
@@ -183,7 +165,7 @@ class MySqlGrammar extends Grammar {
 	{
 		$table = $this->wrapTable($blueprint);
 
-		return "alter table {$table} drop foreign key {$command->index}";
+		return "alter table {$table} drop constraint {$command->index}";
 	}
 
 	/**
@@ -230,7 +212,7 @@ class MySqlGrammar extends Grammar {
 	 */
 	protected function typeInteger(Fluent $column)
 	{
-		return 'int';
+		return $column->autoIncrement ? 'serial' : 'bigint';
 	}
 
 	/**
@@ -241,7 +223,7 @@ class MySqlGrammar extends Grammar {
 	 */
 	protected function typeFloat(Fluent $column)
 	{
-		return "float({$column->places}, {$column->total})";
+		return 'real';
 	}
 
 	/**
@@ -285,7 +267,7 @@ class MySqlGrammar extends Grammar {
 	 */
 	protected function typeDateTime(Fluent $column)
 	{
-		return 'datetime';
+		return 'timestamp(0) without time zone';
 	}
 
 	/**
@@ -318,22 +300,7 @@ class MySqlGrammar extends Grammar {
 	 */
 	protected function typeBinary(Fluent $column)
 	{
-		return 'blob';
-	}
-
-	/**
-	 * Get the SQL for an unsigned column modifier.
-	 *
-	 * @param  Illuminate\Database\Schema\Blueprint  $blueprint
-	 * @param  Illuminate\Support\Fluent  $column
-	 * @return string|null
-	 */
-	protected function modifyUnsigned(Blueprint $blueprint, Fluent $column)
-	{
-		if ($column->type == 'integer' and $column->unsigned)
-		{
-			return ' unsigned';
-		}
+		return 'bytea';
 	}
 
 	/**
@@ -374,7 +341,7 @@ class MySqlGrammar extends Grammar {
 	{
 		if ($column->type == 'integer' and $column->autoIncrement)
 		{
-			return ' auto_increment primary key';
+			return ' primary key';
 		}
 	}
 

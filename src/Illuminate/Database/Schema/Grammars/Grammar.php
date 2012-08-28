@@ -44,6 +44,47 @@ abstract class Grammar extends BaseGrammar {
 	}
 
 	/**
+	 * Compile the blueprint's column definitions.
+	 *
+	 * @param  Illuminate\Database\Schema\Blueprint  $blueprint
+	 * @return array
+	 */
+	protected function getColumns(Blueprint $blueprint)
+	{
+		$columns = array();
+
+		foreach ($blueprint->getColumns() as $column)
+		{
+			// Each of the column types have their own compiler functions which are
+			// responsible for turning the column definition into its SQL format
+			// for the platform. Then column modifiers are compiled and added.
+			$sql = $this->wrap($column).' '.$this->getType($column);
+
+			$columns[] = $this->addModifiers($sql, $blueprint, $column);
+		}
+
+		return $columns;
+	}
+
+	/**
+	 * Add the column modifiers to the definition.
+	 *
+	 * @param  string  $sql
+	 * @param  Illuminate\Database\Schema\Blueprint  $blueprint
+	 * @param  Illuminate\Support\Fluent  $column
+	 * @return string
+	 */
+	protected function addModifiers($sql, Blueprint $blueprint, Fluent $column)
+	{
+		foreach ($this->modifiers as $modifier)
+		{
+			$sql .= $this->{"modify{$modifier}"}($blueprint, $column);
+		}
+
+		return $sql;
+	}
+
+	/**
 	 * Get the SQL for the column data type.
 	 *
 	 * @param  Illuminate\Support\Fluent  $column
@@ -94,6 +135,19 @@ abstract class Grammar extends BaseGrammar {
 		if ($value instanceof Fluent) $value = $value->name;
 
 		return parent::wrap($value);
+	}
+
+	/**
+	 * Format a value so that it can be used in "default" clauses.
+	 *
+	 * @param  mixed   $value
+	 * @return string
+	 */
+	protected function getDefaultValue($value)
+	{
+		if (is_bool($value)) return intval($value);
+
+		return strval($value);
 	}
 
 }

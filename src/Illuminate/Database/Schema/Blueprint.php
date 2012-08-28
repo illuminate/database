@@ -336,7 +336,7 @@ class Blueprint {
 	 * @param  int     $places
 	 * @return Illuminate\Support\Fluent
 	 */
-	public function float($column, $total, $places)
+	public function float($column, $total = 8, $places = 2)
 	{
 		return $this->addColumn('float', $column, compact('total', 'places'));
 	}
@@ -349,7 +349,7 @@ class Blueprint {
 	 * @param  int     $places
 	 * @return Illuminate\Support\Fluent
 	 */
-	public function decimal($column, $total, $places)
+	public function decimal($column, $total = 8, $places = 2)
 	{
 		return $this->addColumn('decimal', $column, compact('total', 'places'));
 	}
