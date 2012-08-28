@@ -267,7 +267,7 @@ class PostgresGrammar extends Grammar {
 	 */
 	protected function typeDateTime(Fluent $column)
 	{
-		return 'timestamp(0) without time zone';
+		return 'timestamp';
 	}
 
 	/**
