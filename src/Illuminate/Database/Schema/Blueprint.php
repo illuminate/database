@@ -76,9 +76,12 @@ class Blueprint {
 		{
 			$method = 'compile'.ucfirst($command->name);
 
-			$sql = $grammar->$method($this, $command);
+			if (method_exists($grammar, $method))
+			{
+				$sql = $grammar->$method($this, $command);
 
-			$statements = array_merge($statements, (array) $sql);
+				$statements = array_merge($statements, (array) $sql);
+			}
 		}
 
 		return $statements;
