@@ -198,34 +198,34 @@ class Blueprint {
 	/**
 	 * Indicate that the given primary key should be dropped.
 	 *
-	 * @param  string  $index
+	 * @param  string|array  $index
 	 * @return Illuminate\Support\Fluent
 	 */
 	public function dropPrimary($index = null)
 	{
-		return $this->addCommand('dropPrimary', compact('index'));
+		return $this->dropIndexCommand('dropPrimary', $index);
 	}
 
 	/**
 	 * Indicate that the given unique key should be dropped.
 	 *
-	 * @param  string  $index
+	 * @param  string|array  $index
 	 * @return Illuminate\Support\Fluent
 	 */
 	public function dropUnique($index)
 	{
-		return $this->addCommand('dropUnique', compact('index'));
+		return $this->dropIndexCommand('dropUnique', $index);
 	}
 
 	/**
 	 * Indicate that the given index should be dropped.
 	 *
-	 * @param  string  $index
+	 * @param  string|array  $index
 	 * @return Illuminate\Support\Fluent
 	 */
 	public function dropIndex($index)
 	{
-		return $this->addCommand('dropIndex', compact('index'));
+		return $this->dropIndexCommand('dropIndex', $index);
 	}
 
 	/**
@@ -236,7 +236,7 @@ class Blueprint {
 	 */
 	public function dropForeign($index)
 	{
-		return $this->addCommand('dropForeign', compact('index'));
+		return $this->dropIndexCommand('dropForeign', $index);
 	}
 
 	/**
@@ -259,7 +259,7 @@ class Blueprint {
 	 */
 	public function primary($columns, $name = null)
 	{
-		return $this->addIndex('primary', $columns, $name);
+		return $this->indexCommand('primary', $columns, $name);
 	}
 
 	/**
@@ -271,7 +271,7 @@ class Blueprint {
 	 */
 	public function unique($columns, $name = null)
 	{
-		return $this->addIndex('unique', $columns, $name);
+		return $this->indexCommand('unique', $columns, $name);
 	}
 
 	/**
@@ -283,7 +283,19 @@ class Blueprint {
 	 */
 	public function index($columns, $name = null)
 	{
-		return $this->addIndex('index', $columns, $name);
+		return $this->indexCommand('index', $columns, $name);
+	}
+
+	/**
+	 * Specify a foreign key for the table.
+	 *
+	 * @param  string|array  $columns
+	 * @param  string  $name
+	 * @return Illuminate\Support\Fluent
+	 */
+	public function foreign($columns, $name = null)
+	{
+		return $this->indexCommand('foreign', $columns, $name);
 	}
 
 	/**
@@ -436,14 +448,38 @@ class Blueprint {
 	}
 
 	/**
-	 * Add a new index to the blueprint.
+	 * Create a new drop index command on the blueprint.
 	 *
-	 * @param  string  $type
-	 * @param  string|array  $columns
-	 * @param  string  $index
+	 * @param  string        $type
+	 * @param  string|array  $index
 	 * @return Illuminate\Support\Fluent
 	 */
-	protected function addIndex($type, $columns, $index)
+	protected function dropIndexCommand($type, $index)
+	{
+		$columns = array();
+
+		// If the given "index" is actually an array of columns, the developer means
+		// to drop an index merely by specifying the columns involved without the
+		// conventional name, so we will built the index name from the columns.
+		if (is_array($index))
+		{
+			$columns = $index;
+
+			$index = null;
+		}
+
+		return $this->indexCommand($type, $columns, $index);
+	}
+
+	/**
+	 * Add a new index command to the blueprint.
+	 *
+	 * @param  string        $type
+	 * @param  string|array  $columns
+	 * @param  string        $index
+	 * @return Illuminate\Support\Fluent
+	 */
+	protected function indexCommand($type, $columns, $index)
 	{
 		$columns = (array) $columns;
 
