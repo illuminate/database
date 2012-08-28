@@ -3,14 +3,14 @@
 use Illuminate\Support\Fluent;
 use Illuminate\Database\Schema\Blueprint;
 
-class PostgresGrammar extends Grammar {
+class SqlServerGrammar extends Grammar {
 
 	/**
 	 * The possible column modifiers.
 	 *
 	 * @var array
 	 */
-	protected $modifiers = array('Increment', 'Nullable', 'Default');
+	protected $modifiers = array('Incrementer', 'Nullable', 'Default');
 
 	/**
 	 * Compile a create table command.
@@ -37,7 +37,7 @@ class PostgresGrammar extends Grammar {
 	{
 		$table = $this->wrapTable($blueprint);
 
-		$columns = $this->prefixArray('add column', $this->getColumns($blueprint));
+		$columns = $this->prefixArray('add', $this->getColumns($blueprint));
 
 		return 'alter table '.$table.' '.implode(', ', $columns);
 	}
@@ -53,7 +53,9 @@ class PostgresGrammar extends Grammar {
 	{
 		$columns = $this->columnize($command->columns);
 
-		return 'alter table '.$this->wrapTable($blueprint)." add primary key ({$columns})";
+		$table = $this->wrapTable($blueprint);
+
+		return "alter table {$table} add constraint {$command->index} primary key ({$columns})";
 	}
 
 	/**
@@ -65,11 +67,11 @@ class PostgresGrammar extends Grammar {
 	 */
 	public function compileUnique(Blueprint $blueprint, Fluent $command)
 	{
-		$table = $this->wrapTable($blueprint);
-
 		$columns = $this->columnize($command->columns);
 
-		return "alter table $table add constraint {$command->index} unique ($columns)";
+		$table = $this->wrapTable($blueprint);
+
+		return "create unique index {$command->index} on {$table} ({$columns})";
 	}
 
 	/**
@@ -83,7 +85,9 @@ class PostgresGrammar extends Grammar {
 	{
 		$columns = $this->columnize($command->columns);
 
-		return "create index {$command->index} on ".$this->wrapTable($blueprint)." ({$columns})";
+		$table = $this->wrapTable($blueprint);
+
+		return "create index {$command->index} on {$table} ({$columns})";
 	}
 
 	/**
@@ -107,7 +111,7 @@ class PostgresGrammar extends Grammar {
 	 */
 	public function compileDropColumn(Blueprint $blueprint, Fluent $command)
 	{
-		$columns = $this->prefixArray('drop column', $this->wrapArray($command->columns));
+		$columns = $this->prefixArray('drop', $this->wrapArray($command->columns));
 
 		$table = $this->wrapTable($blueprint);
 
@@ -125,7 +129,9 @@ class PostgresGrammar extends Grammar {
 	{
 		$table = $blueprint->getTable();
 
-		return 'alter table '.$this->wrapTable($blueprint)." drop constraint {$table}_pkey";
+		$table = $this->wrapTable($blueprint);
+
+		return "alter table {$table} drop constraint {$command->name}";
 	}
 
 	/**
@@ -139,7 +145,7 @@ class PostgresGrammar extends Grammar {
 	{
 		$table = $this->wrapTable($blueprint);
 
-		return "alter table {$table} drop constraint {$command->index}";
+		return "drop index {$command->index} on {$table}";
 	}
 
 	/**
@@ -151,7 +157,9 @@ class PostgresGrammar extends Grammar {
 	 */
 	public function compileDropIndex(Blueprint $blueprint, Fluent $command)
 	{
-		return "drop index {$command->index}";
+		$table = $this->wrapTable($blueprint);
+
+		return "drop index {$command->index} on {$table}";
 	}
 
 	/**
@@ -179,7 +187,7 @@ class PostgresGrammar extends Grammar {
 	{
 		$from = $this->wrapTable($blueprint);
 
-		return "rename table {$from} to ".$this->wrapTable($command->to);
+		return "sp_rename {$from}, ".$this->wrapTable($command->to);
 	}
 
 	/**
@@ -190,7 +198,7 @@ class PostgresGrammar extends Grammar {
 	 */
 	protected function typeString(Fluent $column)
 	{
-		return "varchar({$column->length})";
+		return "nvarchar({$column->length})";
 	}
 
 	/**
@@ -201,7 +209,7 @@ class PostgresGrammar extends Grammar {
 	 */
 	protected function typeText(Fluent $column)
 	{
-		return 'text';
+		return 'nvarchar(max)';
 	}
 
 	/**
@@ -212,7 +220,7 @@ class PostgresGrammar extends Grammar {
 	 */
 	protected function typeInteger(Fluent $column)
 	{
-		return $column->autoIncrement ? 'serial' : 'bigint';
+		return 'int';
 	}
 
 	/**
@@ -223,7 +231,7 @@ class PostgresGrammar extends Grammar {
 	 */
 	protected function typeFloat(Fluent $column)
 	{
-		return 'real';
+		return 'float';
 	}
 
 	/**
@@ -267,7 +275,7 @@ class PostgresGrammar extends Grammar {
 	 */
 	protected function typeDateTime(Fluent $column)
 	{
-		return 'timestamp';
+		return 'datetime';
 	}
 
 	/**
@@ -289,7 +297,7 @@ class PostgresGrammar extends Grammar {
 	 */
 	protected function typeTimestamp(Fluent $column)
 	{
-		return 'timestamp';
+		return 'datetime';
 	}
 
 	/**
@@ -300,7 +308,7 @@ class PostgresGrammar extends Grammar {
 	 */
 	protected function typeBinary(Fluent $column)
 	{
-		return 'bytea';
+		return 'varbinary(max)';
 	}
 
 	/**
