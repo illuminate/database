@@ -1,5 +1,6 @@
 <?php namespace Illuminate\Database\Eloquent;
 
+use Closure;
 use DateTime;
 use Illuminate\Database\Connection;
 use Illuminate\Database\Eloquent\Relations\HasOne;
