@@ -78,8 +78,8 @@ class BelongsTo extends Relation {
 		$keys = array();
 
 		// First we need to gather all of the keys from the parent models so we know what
-		// to query for in the eager loading query. We will add them to an array then
-		// execute a where in statement to gather up all of those related records.
+		// to query for via the eager loading query. We will add them to an array then
+		// execute a "where in" statement to gather up all of those related records.
 		foreach ($models as $model)
 		{
 			if ( ! is_null($value = $model->{$this->foreignKey}))
@@ -89,8 +89,8 @@ class BelongsTo extends Relation {
 		}
 
 		// We'll grab the primary key name of the related model since it could be set to
-		// a non-standard name and not "id". We'll then construct the constraint for
-		// our eager loading query so it returns the proper models on exeuction.
+		// a non-standard name and not "id". We'll then construct the constraints for
+		// our eagerly loading query so it returns the proper models for exeuction.
 		$key = $this->related->getKeyName();
 
 		$this->query->whereIn($key, array_unique($keys));

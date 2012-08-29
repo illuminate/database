@@ -6,6 +6,13 @@ use Illuminate\Database\Schema\Blueprint;
 class SQLiteGrammar extends Grammar {
 
 	/**
+	 * The keyword identifier wrapper format.
+	 *
+	 * @var string
+	 */
+	protected $wrapper = '"%s"';
+
+	/**
 	 * The possible column modifiers.
 	 *
 	 * @var array

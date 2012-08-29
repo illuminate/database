@@ -23,4 +23,18 @@ class SchemaBlueprintTest extends PHPUnit_Framework_TestCase {
 		$blueprint->build($conn, $grammar);
 	}
 
+
+	public function testIndexDefaultNames()
+	{
+		$blueprint = new Blueprint('users');
+		$blueprint->unique(array('foo', 'bar'));
+		$commands = $blueprint->getCommands();
+		$this->assertEquals('users_foo_bar_unique', $commands[0]->index);
+
+		$blueprint = new Blueprint('users');
+		$blueprint->index('foo');
+		$commands = $blueprint->getCommands();
+		$this->assertEquals('users_foo_index', $commands[0]->index);
+	}
+
 }

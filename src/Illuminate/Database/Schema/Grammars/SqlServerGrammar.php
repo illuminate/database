@@ -6,11 +6,18 @@ use Illuminate\Database\Schema\Blueprint;
 class SqlServerGrammar extends Grammar {
 
 	/**
+	 * The keyword identifier wrapper format.
+	 *
+	 * @var string
+	 */
+	protected $wrapper = '"%s"';
+
+	/**
 	 * The possible column modifiers.
 	 *
 	 * @var array
 	 */
-	protected $modifiers = array('Incrementer', 'Nullable', 'Default');
+	protected $modifiers = array('Increment', 'Nullable', 'Default');
 
 	/**
 	 * Compile a create table command.
@@ -131,7 +138,7 @@ class SqlServerGrammar extends Grammar {
 
 		$table = $this->wrapTable($blueprint);
 
-		return "alter table {$table} drop constraint {$command->name}";
+		return "alter table {$table} drop constraint {$command->index}";
 	}
 
 	/**
@@ -349,7 +356,7 @@ class SqlServerGrammar extends Grammar {
 	{
 		if ($column->type == 'integer' and $column->autoIncrement)
 		{
-			return ' primary key';
+			return ' identity primary key';
 		}
 	}
 

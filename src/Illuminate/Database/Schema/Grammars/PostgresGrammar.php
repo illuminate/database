@@ -6,6 +6,13 @@ use Illuminate\Database\Schema\Blueprint;
 class PostgresGrammar extends Grammar {
 
 	/**
+	 * The keyword identifier wrapper format.
+	 *
+	 * @var string
+	 */
+	protected $wrapper = '"%s"';
+
+	/**
 	 * The possible column modifiers.
 	 *
 	 * @var array
@@ -179,7 +186,7 @@ class PostgresGrammar extends Grammar {
 	{
 		$from = $this->wrapTable($blueprint);
 
-		return "rename table {$from} to ".$this->wrapTable($command->to);
+		return "alter table {$from} rename to ".$this->wrapTable($command->to);
 	}
 
 	/**
