@@ -25,6 +25,52 @@ class EloquentBuilderTest extends PHPUnit_Framework_TestCase {
 	}
 
 
+	public function testFirstMethod()
+	{
+		$builder = $this->getMock('Illuminate\Database\Eloquent\Builder', array('get'), $this->getMocks());
+		$collection = m::mock('stdClass');
+		$collection->shouldReceive('first')->once()->andReturn('bar');
+		$builder->expects($this->once())->method('get')->with($this->equalTo(array('*')))->will($this->returnValue($collection));
+
+		$result = $builder->first();
+		$this->assertEquals('bar', $result);
+	}
+
+
+	public function testEagerLoadParsingSetsProperRelationships()
+	{
+		$builder = $this->getBuilder();
+		$builder->with(array('orders', 'orders.lines'));
+		$eagers = $builder->getEagerLoads();
+
+		$this->assertEquals(array('orders', 'orders.lines'), array_keys($eagers));
+		$this->assertInstanceOf('Closure', $eagers['orders']);
+		$this->assertInstanceOf('Closure', $eagers['orders.lines']);
+
+		$builder = $this->getBuilder();
+		$builder->with(array('orders.lines'));
+		$eagers = $builder->getEagerLoads();
+
+		$this->assertEquals(array('orders', 'orders.lines'), array_keys($eagers));
+		$this->assertInstanceOf('Closure', $eagers['orders']);
+		$this->assertInstanceOf('Closure', $eagers['orders.lines']);
+
+		$builder = $this->getBuilder();
+		$builder->with(array('orders' => function() { return 'foo'; }));
+		$eagers = $builder->getEagerLoads();
+
+		$this->assertEquals('foo', $eagers['orders']());
+
+		$builder = $this->getBuilder();
+		$builder->with(array('orders.lines' => function() { return 'foo'; }));
+		$eagers = $builder->getEagerLoads();
+
+		$this->assertInstanceOf('Closure', $eagers['orders']);
+		$this->assertNull($eagers['orders']());
+		$this->assertEquals('foo', $eagers['orders.lines']());
+	}
+
+
 	protected function getBuilder()
 	{
 		$grammar = new Illuminate\Database\Query\Grammars\Grammar;
