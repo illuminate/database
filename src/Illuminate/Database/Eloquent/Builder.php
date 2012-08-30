@@ -1,10 +1,17 @@
 <?php namespace Illuminate\Database\Eloquent;
 
 use Closure;
-use Illuminate\Database\Query\Builder as BaseBuilder;
+use Illuminate\Database\Query\Builder as QueryBuilder;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 
-class Builder extends BaseBuilder {
+class Builder {
+
+	/**
+	 * The base query builder instance.
+	 *
+	 * @var Illuminate\Database\Query\Builder
+	 */
+	protected $query;
 
 	/**
 	 * The model being queried.
@@ -21,6 +28,17 @@ class Builder extends BaseBuilder {
 	protected $eagerLoad = array();
 
 	/**
+	 * Create a new Eloquent query builder instance.
+	 *
+	 * @param  Illuminate\Database\Query\Builder  $query
+	 * @return void
+	 */
+	public function __construct(QueryBuilder $query)
+	{
+		$this->query = $query;
+	}
+
+	/**
 	 * Find a model by its primary key.
 	 *
 	 * @param  mixed  $id
@@ -29,7 +47,7 @@ class Builder extends BaseBuilder {
 	 */
 	public function find($id, $columns = array('*'))
 	{
-		$this->where($this->model->getKeyName(), '=', $id);
+		$this->query->where($this->model->getKeyName(), '=', $id);
 
 		return $this->first($columns);
 	}
@@ -55,9 +73,9 @@ class Builder extends BaseBuilder {
 	{
 		$models = $this->getModels($columns);
 
-		// If we actually found models we will also eager load any relationships
-		// that have been specified as needing to be eager loaded. This will
-		// solve the n + 1 query problem for the developers conveniently.
+		// If we actually found models we will also eager load any relationships that
+		// have been specified as needing to be eager loaded, which will solve the
+		// n+1 query issue for the developers to avoid running a lot of queries.
 		if (count($models) > 0)
 		{
 			$models = $this->eagerLoadRelations($models);
@@ -74,18 +92,18 @@ class Builder extends BaseBuilder {
 	 */
 	public function getModels($columns = array('*'))
 	{
-		// First we will simply get the raw reuslts from the query builder which we
-		// can use to popular an array of Eloquent models. We will pass columns
-		// that should be selected too, which are typically just everything.
-		$results = parent::get($columns);
+		// First, we will simply get the raw results from the query builders which we
+		// can use to populate an array with Eloquent models. We will pass columns
+		// that should be selected as well, which are typically just everything.
+		$results = $this->query->get($columns);
 
 		$connection = $this->model->getConnectionName();
 
 		$models = array();
 
-		// Once we have the results we can spin through them and instantiate a new
-		// model instance for each record we retrieved from the database. We'll
-		// also set the proper connection names for the model after creating.
+		// Once we have the results, we can spin through them and instantiate a fresh
+		// model instance for each records we retrieved from the database. We will
+		// also set the proper connection name for the model after we create it.
 		foreach ($results as $result)
 		{
 			$models[] = $model = $this->model->newExisting();
@@ -106,14 +124,14 @@ class Builder extends BaseBuilder {
 	 */
 	public function eagerLoadRelations(array $models)
 	{
-		foreach ($this->eagerLoad as $relation => $constraints)
+		foreach ($this->eagerLoad as $name => $constraints)
 		{
 			// For nested eager loads we'll skip loading them here and they will be set as an
 			// eager load on the query to retrieve the relation so that they will be eager
 			// loaded on that query, because that is where they get hydrated as models.
-			if (strpos($relation, '.') === false)
+			if (strpos($name, '.') === false)
 			{
-				$models = $this->eagerLoadRelation($models, $relation, $constraints);
+				$models = $this->loadRelation($models, $name, $constraints);
 			}
 		}
 
@@ -121,39 +139,39 @@ class Builder extends BaseBuilder {
 	}
 
 	/**
-	 * Eager load a given relationship for the models.
+	 * Eagerly load the relationship on a set of models.
 	 *
-	 * @param  array    $models
 	 * @param  string   $relation
+	 * @param  array    $models
 	 * @param  Closure  $constraints
 	 * @return array
 	 */
-	protected function eagerLoadRelation(array $models, $relation, Closure $constraints)
+	protected function loadRelation(array $models, $name, Closure $constraints)
 	{
-		// First we will simply get the relationship instances from the top-level model.
-		// Then we can set the necessary constraints on that instance to get all of
-		// the models for the eager load querys, hydrating those on each parent.
-		$instance = $this->getRelation($relation);
+		// First we will "back up" the existing where conditions on the query so we can
+		// add our eager constraints. Then we will merge the wheres that were on the
+		// query back to it in order that any where conditions might be specified.
+		$relation = $this->getRelation($name);
 
-		list($wheres, $bindings) = $instance->getAndResetWheres();
+		list($wheres, $bindings) = $relation->getAndResetWheres();
 
-		$instance->addEagerConstraints($models);
-
-		$instance->mergeWheres($wheres, $bindings);
+		$relation->addEagerConstraints($models);
 
 		// We allow the developers to specify constraints on eager loads and we'll just
-		// call the constraints Closure, passing along the query so they can simply
-		// do all they wish to the queriea, even specifying limits, orders, etc.
-		call_user_func($constraints, $instance);
+		// call the constraints Closure, passing along the query so they will simply
+		// do all they need to the queries, and even may specify non-where things.
+		$relation->mergeWheres($wheres, $bindings);
 
-		$models = $instance->initRelation($models, $relation);
+		call_user_func($constraints, $relation);
 
-		$results = $instance->get();
+		$models = $relation->initRelation($models, $name);
 
 		// Once we have the results, we just match those back up to their parent models
 		// using the relationship instance. Then we just return the finished arrays
 		// of models which have been eagerly hydrated and are readied for return.
-		return $instance->match($models, $results, $relation);
+		$results = $relation->get();
+
+		return $relation->match($models, $results, $name);
 	}
 
 	/**
@@ -162,13 +180,13 @@ class Builder extends BaseBuilder {
 	 * @param  string  $relation
 	 * @return Illuminate\Database\Eloquent\Relations\Relation
 	 */
-	protected function getRelation($relation)
+	public function getRelation($relation)
 	{
 		$query = $this->getModel()->$relation();
 
 		// If there are nosted relationships set on the query, we will put those onto
-		// the query instance so that they can be handled after this relationship
-		// is loaded. In this way they'll all trickle down as they are loaded.
+		// the query instances so that they can be handled after this relationship
+		// is loaded. In this way they will all trickle down as they are loaded.
 		$nested = $this->nestedRelations($relation);
 
 		if (count($nested) > 0)
@@ -191,7 +209,7 @@ class Builder extends BaseBuilder {
 
 		// We are basically looking for any relationships that are nested deeper than
 		// the given top-level relationship. We will just check for any relations
-		// that start with the given top relation and adds them to our arrays.
+		// that start with the given top relations and adds them to our arrays.
 		foreach ($this->eagerLoad as $name => $constraints)
 		{
 			if (strpos($name, $relation) === 0 and $name !== $relation)
@@ -260,6 +278,16 @@ class Builder extends BaseBuilder {
 	}
 
 	/**
+	 * Get the underlying query builder instance.
+	 *
+	 * @return Illuminate\Database\Query\Builder
+	 */
+	public function getQuery()
+	{
+		return $this->query;
+	}
+
+	/**
 	 * Get the relationships being eagerly laoded.
 	 *
 	 * @return array
@@ -267,6 +295,17 @@ class Builder extends BaseBuilder {
 	public function getEagerLoads()
 	{
 		return $this->eagerLoad;
+	}
+
+	/**
+	 * Set the relationships being eagerly laoded.
+	 *
+	 * @param  array  $eagerLoad
+	 * @return void
+	 */
+	public function setEagerLoads(array $eagerLoad)
+	{
+		$this->eagerLoad = $eagerLoad;
 	}
 
 	/**
@@ -289,7 +328,24 @@ class Builder extends BaseBuilder {
 	{
 		$this->model = $model;
 
-		$this->from($model->getTable());
+		$this->query->from($model->getTable());
+	}
+
+	/**
+	 * Dynamically handle calls into the query instance.
+	 *
+	 * @param  string  $method
+	 * @param  array   $parameters
+	 * @return mixed
+	 */
+	public function __call($method, $parameters)
+	{
+		if (method_exists($this->query, $method))
+		{
+			return call_user_func_array(array($this->query, $method), $parameters);
+		}
+
+		throw new \BadMethodCallException("Method [$method] does not exist.");
 	}
 
 }

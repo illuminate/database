@@ -6,6 +6,7 @@ use Illuminate\Database\Connection;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Query\Builder as QueryBuilder;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 
 abstract class Model implements ArrayableInterface {
@@ -412,23 +413,28 @@ abstract class Model implements ArrayableInterface {
 	 */
 	public function newQuery()
 	{
-		// First we will build the query builder by passing in the grammar and post
-		// processor, which are used to construct and process the SQL statements
-		// and queries generated from the builder. Then we can set the models.
-		$conn = $this->getConnection();
+		$builder = new Builder($this->newBaseQueryBuilder());
 
-		$grammar = $conn->getQueryGrammar();
-
-		$processor = $conn->getPostProcessor();
-
-		$builder = new Builder($conn, $grammar, $processor);
-
-		// Once we have the query builders, we will set the model instancse so the
+		// Once we have the query builders, we will set the model instances so the
 		// builder can easily access any information it may need from the model
 		// while it is constructing and executing various queries against it.
 		$builder->setModel($this);
 
 		return $builder;
+	}
+
+	/**
+	 * Get a new query builder instance for the connection.
+	 *
+	 * @return Illuminate\Database\Query\Builder
+	 */
+	protected function newBaseQueryBuilder()
+	{
+		$conn = $this->getConnection();
+
+		$grammar = $conn->getQueryGrammar();
+
+		return new QueryBuilder($conn, $grammar, $conn->getPostProcessor());
 	}
 
 	/**

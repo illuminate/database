@@ -67,11 +67,7 @@ class Collection implements ArrayAccess, ArrayableInterface, Countable, Iterator
 	 */
 	public function toJson()
 	{
-		return json_encode(array_map(function($value)
-		{
-			return $value->toArray();
-
-		}, $this->items));
+		return json_encode($this->toArray());
 	}
 
 	/**
@@ -146,7 +142,7 @@ class Collection implements ArrayAccess, ArrayableInterface, Countable, Iterator
 	 */
 	public function offsetUnset($key)
 	{
-		unset($this->attributes[$key]);
+		unset($this->items[$key]);
 	}
 
 	/**
