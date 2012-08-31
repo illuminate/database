@@ -22,7 +22,7 @@ class EloquentBelongsToManyTest extends PHPUnit_Framework_TestCase {
 
 		$relation = $this->getRelation();
 		$relation->getParent()->shouldReceive('getConnectionName')->andReturn('foo.connection');
-		$relation->getQuery()->shouldReceive('getModels')->once()->with(array('*'))->andReturn($models);
+		$relation->getQuery()->shouldReceive('getModels')->once()->with(array('roles.*', 'user_role.user_id as pivot_user_id', 'user_role.role_id as pivot_role_id'))->andReturn($models);
 		$relation->getQuery()->shouldReceive('eagerLoadRelations')->once()->with($models)->andReturn($models);
 		$results = $relation->get();
 
@@ -97,6 +97,32 @@ class EloquentBelongsToManyTest extends PHPUnit_Framework_TestCase {
 	}
 
 
+	public function testAttachInsertsPivotTableRecord()
+	{
+		$relation = $this->getRelation();
+		$query = m::mock('stdClass');
+		$query->shouldReceive('from')->once()->with('user_role')->andReturn($query);
+		$query->shouldReceive('insert')->once()->with(array('user_id' => 1, 'role_id' => 2, 'foo' => 'bar'))->andReturn(true);
+		$relation->getQuery()->shouldReceive('newQuery')->once()->andReturn($query);
+		
+		$this->assertTrue($relation->attach(2, array('foo' => 'bar')));
+	}
+
+
+	public function testAttachInsertsPivotTableRecordWithTimestampsWhenNecessary()
+	{
+		$relation = $this->getRelation();
+		$relation->withTimestamps();
+		$query = m::mock('stdClass');
+		$query->shouldReceive('from')->once()->with('user_role')->andReturn($query);
+		$query->shouldReceive('insert')->once()->with(array('user_id' => 1, 'role_id' => 2, 'foo' => 'bar', 'created_at' => 'time', 'updated_at' => 'time'))->andReturn(true);
+		$relation->getQuery()->shouldReceive('newQuery')->once()->andReturn($query);
+		$relation->getParent()->shouldReceive('freshTimestamp')->once()->andReturn('time');
+		
+		$this->assertTrue($relation->attach(2, array('foo' => 'bar')));
+	}
+
+
 	public function getRelation()
 	{
 		$parent = m::mock('Illuminate\Database\Eloquent\Model');
@@ -109,7 +135,6 @@ class EloquentBelongsToManyTest extends PHPUnit_Framework_TestCase {
 		$related->shouldReceive('getTable')->andReturn('roles');
 		$related->shouldReceive('getKeyName')->andReturn('id');
 
-		$builder->shouldReceive('select')->once()->with(array('roles.*', 'user_role.user_id as pivot_user_id', 'user_role.role_id as pivot_role_id'));
 		$builder->shouldReceive('join')->once()->with('user_role', 'roles.id', '=', 'user_role.role_id');
 		$builder->shouldReceive('where')->once()->with('user_role.user_id', '=', 1);
 
