@@ -50,7 +50,10 @@ class HasMany extends HasOneOrMany {
 		{
 			$key = $model->getKey();
 
-			$model->setRelation($relation, new Collection($dictionary[$key]));
+			if (isset($dictionary[$key]))
+			{
+				$model->setRelation($relation, new Collection($dictionary[$key]));
+			}
 		}
 
 		return $models;

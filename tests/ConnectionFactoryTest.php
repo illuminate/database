@@ -8,6 +8,12 @@ class ConnectionFactoryPDOStub extends PDO {
 
 class ConnectionFactoryTest extends PHPUnit_Framework_TestCase {
 
+	public function tearDown()
+	{
+		m::close();
+	}
+
+
 	public function testMakeCallsCreateConnection()
 	{
 		$factory = $this->getMock('Illuminate\Database\Connectors\ConnectionFactory', array('createConnector', 'createConnection'));

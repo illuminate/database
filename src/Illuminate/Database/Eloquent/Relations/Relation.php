@@ -120,6 +120,16 @@ abstract class Relation {
 	}
 
 	/**
+	 * Get the related model of the relation.
+	 *
+	 * @return Illuminate\Database\Eloquent\Model
+	 */
+	public function getRelated()
+	{
+		return $this->related;
+	}
+
+	/**
 	 * Handle dynamic method calls to the relationship.
 	 *
 	 * @param  string  $method

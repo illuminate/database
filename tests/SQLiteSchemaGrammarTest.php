@@ -5,6 +5,12 @@ use Illuminate\Database\Schema\Blueprint;
 
 class SQLiteSchemaGrammarTest extends PHPUnit_Framework_TestCase {
 
+	public function tearDown()
+	{
+		m::close();
+	}
+
+
 	public function testBasicCreateTable()
 	{
 		$blueprint = new Blueprint('users');

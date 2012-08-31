@@ -50,7 +50,10 @@ class HasOne extends HasOneOrMany {
 		{
 			$key = $model->getKey();
 
-			$model->setRelation($relation, reset($dictionary[$key]));
+			if (isset($dictionary[$key]))
+			{
+				$model->setRelation($relation, reset($dictionary[$key]));
+			}
 		}
 
 		return $models;

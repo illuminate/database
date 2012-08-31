@@ -128,7 +128,7 @@ abstract class Model implements ArrayableInterface {
 	 * @param  bool   $exists
 	 * @return Illuminate\Database\Eloquent\Model
 	 */
-	public static function newInstance($attributes = array(), $exists = false)
+	public function newInstance($attributes = array(), $exists = false)
 	{
 		// This method just provides a convenient way for us to generate fresh model
 		// instances of this current model. It is particularly useful during the
@@ -305,7 +305,7 @@ abstract class Model implements ArrayableInterface {
 
 		// If no table name was provided, we can guess it by concatenating the two
 		// models using underscores in alphabetical order. The two model names
-		// are transformed to snake case from their default CamelCase also.
+		// are transformed to snake case from thecir default CamelCase also.
 		if (is_null($table))
 		{
 			$table = $this->joiningTable($related);
@@ -345,6 +345,21 @@ abstract class Model implements ArrayableInterface {
 	}
 
 	/**
+	 * Delete the model from the database.
+	 *
+	 * @return void
+	 */
+	public function delete()
+	{
+		if ($this->exists)
+		{
+			$key = $this->getKeyName();
+
+			return $this->newQuery()->where($key, $this->getKey())->delete();
+		}
+	}
+
+	/**
 	 * Save the model to the database.
 	 *
 	 * @return bool
@@ -360,7 +375,7 @@ abstract class Model implements ArrayableInterface {
 
 		// If the model already exists in the database we can just update our record
 		// that is already in this database using the current IDs in this "where"
-		// clause to only update this model. Otherwise we'll just insert them.
+		// clause to only update this model. Otherwise, we'll just insert them.
 		if ($this->exists)
 		{
 			$query->where($this->getKeyName(), '=', $this->getKey());
@@ -373,9 +388,14 @@ abstract class Model implements ArrayableInterface {
 		// which is typically an auto-increment value managed by the database.
 		else
 		{
-			$id = $query->insertGetId($this->attributes);
-
-			if ($this->incrementing) $this->id = $id;
+			if ($this->incrementing)
+			{
+				$this->id = $query->insertGetId($this->attributes);
+			}
+			else
+			{
+				$query->insert($this->attributes);				
+			}
 		}
 
 		return true;

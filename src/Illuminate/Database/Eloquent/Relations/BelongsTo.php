@@ -29,27 +29,13 @@ class BelongsTo extends Relation {
 	}
 
 	/**
-	 * Update the parent model on the relationship.
+	 * Get the results of the relationship.
 	 *
-	 * @param  array  $attributes
 	 * @return mixed
 	 */
-	public function update(array $attributes)
+	public function getResults()
 	{
-		$instance = $this->getResults();
-
-		return $instance->fill($attributes)->save();
-	}
-
-	/**
-	 * Perform an update on the parent model without retrieving it.
-	 *
-	 * @param  array  $attributes
-	 * @return int
-	 */
-	public function fastUpdate(array $attributes)
-	{
-		return $this->query->update($attributes);
+		return $this->query->first();
 	}
 
 	/**
@@ -163,13 +149,27 @@ class BelongsTo extends Relation {
 	}
 
 	/**
-	 * Get the results of the relationship.
+	 * Update the parent model on the relationship.
 	 *
+	 * @param  array  $attributes
 	 * @return mixed
 	 */
-	public function getResults()
+	public function update(array $attributes)
 	{
-		return $this->query->first();
+		$instance = $this->getResults();
+
+		return $instance->fill($attributes)->save();
+	}
+
+	/**
+	 * Perform an update on the parent model without retrieving it.
+	 *
+	 * @param  array  $attributes
+	 * @return int
+	 */
+	public function fastUpdate(array $attributes)
+	{
+		return $this->query->update($attributes);
 	}
 
 	/**

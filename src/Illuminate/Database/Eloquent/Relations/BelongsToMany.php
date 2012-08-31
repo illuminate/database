@@ -54,71 +54,6 @@ class BelongsToMany extends Relation {
 	}
 
 	/**
-	 * Attach a model to the parent.
-	 *
-	 * @param  mixed  $id
-	 * @param  array  $attributes
-	 * @return void
-	 */
-	public function attach($id, array $attributes = array())
-	{
-		$foreign = $this->foreignKey;
-
-		// When attaching models in a many to many relationship, we need to set the
-		// keys on the pivot table, including both the foreign key and the other
-		// associated keys before saving so it will automatically link models.
-		$query = $this->query->newQuery()->from($this->table);
-
-		$attributes[$foreign] = $this->parent->getKey();
-
-		$attributes[$this->otherKey] = $id;
-
-		// Since all Eloquent models are timestamped, we will set the creation and
-		// update timestamps on the pivot record so they will be initialized on
-		// the record like all of the other pivot table records on the table.
-		$attributes['created_at'] = new DateTime;
-
-		$attributes['updated_at'] = new DateTime;
-
-		return $query->insert($attributes);
-	}
-
-	/**
-	 * Detach models from the relationship.
-	 *
-	 * @param  int|array  $ids
-	 * @return int
-	 */
-	public function detach($ids = array())
-	{
-		$query = $this->query->newQuery()->from($this->table);
-
-		$query->where($this->foreignKey, '=', $this->parent->getKey());
-
-		// If associated IDs were passed to the method we will onyl delete those
-		// associations, otherwise all of the association ties will be broken.
-		// We'll return the numbers of affected rows when we do the deletes.
-		$ids = (array) $ids;
-
-		if (count($ids) > 0)
-		{
-			$query->whereIn($this->otherKey, $ids);
-		}
-
-		return $query->delete();
-	}
-
-	/**
-	 * Set the base constraints on the relation query.
-	 *
-	 * @return void
-	 */
-	public function addConstraints()
-	{
-		$this->setSelect()->setJoin()->setWhere();
-	}
-
-	/**
 	 * Get the results of the relationship.
 	 *
 	 * @return mixed
@@ -142,7 +77,7 @@ class BelongsToMany extends Relation {
 
 		// If we actually found models we will also eager load any relationships that
 		// have been specified as needing to be eager loaded. This will solve the
-		// n+1 query problem for the developers and also increase performance.
+		// n + 1 query problem for the developer and also increase performance.
 		if (count($models) > 0)
 		{
 			$models = $this->query->eagerLoadRelations($models);
@@ -152,15 +87,72 @@ class BelongsToMany extends Relation {
 	}
 
 	/**
+	 * Hydrate the pivot table relationship on the models.
+	 *
+	 * @param  array  $models
+	 * @return void
+	 */
+	protected function hydratePivotRelation(array $models)
+	{
+		// To hydrate the pivot relationship, we will just gather the pivot attributes
+		// and create a new Pivot model, which is basically a dynamic model that we
+		// will set the attributes, table, and connections on so it they be used.
+		foreach ($models as $model)
+		{
+			$values = $this->cleanPivotAttributes($model);
+
+			$pivot = $this->newExistingPivot($values);
+
+			$model->setRelation('pivot', $pivot);
+		}
+	}
+
+	/**
+	 * Get the pivot attributes from a model.
+	 *
+	 * @param  Illuminate\Database\Eloquent\Model  $model
+	 * @return array
+	 */
+	protected function cleanPivotAttributes(Model $model)
+	{
+		$values = array();
+
+		foreach ($model->getAttributes() as $key => $value)
+		{
+			// To get the pivots attributes we will just take any of the attributes which
+			// begin with "pivot_" and add those to this arrays, as well as unsetting
+			// them from the parent's models since they exist in a different table.
+			if (strpos($key, 'pivot_') === 0)
+			{
+				$values[substr($key, 6)] = $value;
+
+				unset($model->$key);
+			}
+		}
+
+		return $values;
+	}
+
+	/**
+	 * Set the base constraints on the relation query.
+	 *
+	 * @return void
+	 */
+	public function addConstraints()
+	{
+		$this->setSelect()->setJoin()->setWhere();
+	}
+
+	/**
 	 * Set the select clause for the relation query.
 	 *
 	 * @return Illuminate\Database\Eloquent\Relation\BelongsToMany
 	 */
 	protected function setSelect()
 	{
-		$columns = array($this->query->getModel()->getTable().'.*');
+		$columns = array($this->related->getTable().'.*');
 
-		$this->query->select(array_merge($columns, $this->getPivotColumns()));
+		$this->query->select(array_merge($columns, $this->getAliasedPivotColumns()));
 
 		return $this;
 	}
@@ -170,23 +162,21 @@ class BelongsToMany extends Relation {
 	 *
 	 * @return array
 	 */
-	protected function getPivotColumns()
+	protected function getAliasedPivotColumns()
 	{
-		$defaults = array('id', 'created_at', 'updated_at');
-
-		$pivot = array_merge($defaults, $this->pivotColumns);
+		$defaults = array($this->foreignKey, $this->otherKey);
 
 		// We need to alias all of the pivot columns with the "pivot_" prefix so we
 		// can easily extract them out of the models and put them into the pivot
 		// relationships when they are retrieved and hydrated into the models.
 		$columns = array();
 
-		foreach ($pivot as $column)
+		foreach (array_merge($this->pivotColumns, $defaults) as $column)
 		{
 			$columns[] = $this->table.'.'.$column.' as pivot_'.$column;
 		}
 
-		return $columns;
+		return array_unique($columns);
 	}
 
 	/**
@@ -197,11 +187,11 @@ class BelongsToMany extends Relation {
 	protected function setJoin()
 	{
 		// We need to join to the intermediate table on the related model's primary
-		// key column with the intermediate tables foreign key for the related
-		// model instance. Then we can set the where for the parent model.
-		$baseTable = $this->query->getModel()->getTable();
+		// key column with the intermediate table's foreign key for the related
+		// model instance. Then we can set the "where" for the parent models.
+		$baseTable = $this->related->getTable();
 
-		$key = $baseTable.'.'.$this->query->getModel()->getKeyName();
+		$key = $baseTable.'.'.$this->related->getKeyName();
 
 		$this->query->join($this->table, $key, '=', $this->getOtherKey());
 
@@ -260,11 +250,35 @@ class BelongsToMany extends Relation {
 	 */
 	public function match(array $models, Collection $results, $relation)
 	{
-		// First we'll build a dictionary of child models keyed by the foreign key
-		// of the relation so that we can easily and quickly match them to the
-		// parents without having a possibly slow inner loops for each one.
+		$dictionary = $this->buildDictionary($results);
+
+		// Once we have an array dictionary of child objects we can easily match the
+		// children back to their parent using the dictionary and the keys on the
+		// the parent models. Then we will return the hydrated models back out.
+		foreach ($models as $model)
+		{;
+			if (isset($dictionary[$key = $model->getKey()]))
+			{
+				$model->setRelation($relation, new Collection($dictionary[$key]));
+			}
+		}
+
+		return $models;
+	}
+
+	/**
+	 * Build model dictionary keyed by the relation's foreign key.
+	 *
+	 * @param  Illuminate\Database\Eloquent\Collection  $results
+	 * @return array
+	 */
+	protected function buildDictionary(Collection $results)
+	{
 		$foreign = $this->foreignKey;
 
+		// First we will build a dictionary of child models keyed by the foreign key
+		// of the relation so that we will easily and quickly match them to their
+		// parents without having a possibly slow inner loops for every models.
 		$dictionary = array();
 
 		foreach ($results as $result)
@@ -272,70 +286,62 @@ class BelongsToMany extends Relation {
 			$dictionary[$result->pivot->$foreign][] = $result;
 		}
 
-		// Once we have a nice dictionary of child objects we can easily match the
-		// children back to their parents using the dictionary and the keys on
-		// the parent models. Then we will return the hydrated models back.
-		foreach ($models as $model)
-		{;
-			if (isset($dictionary[$key = $model->getKey()]))
-			{
-				$collection = new Collection($dictionary[$key]);
-
-				$model->setRelation($relation, $collection);
-			}
-		}
-
-		// Now that we should have the children models totally matched up to their
-		// parents, we can just return the array of models. Eager loading them
-		// helps the developer avoid tons of queries (n + 1 query problems).
-		return $models;
+		return $dictionary;
 	}
 
 	/**
-	 * Hydrate the pivot table relationship on the models.
+	 * Attach a model to the parent.
 	 *
-	 * @param  array  $models
+	 * @param  mixed  $id
+	 * @param  array  $attributes
 	 * @return void
 	 */
-	protected function hydratePivotRelation(array $models)
+	public function attach($id, array $attributes = array())
 	{
-		// To hydrate the pivot relationship, we will just gather the pivot attributes
-		// and create a new Pivot model, which is basically a dynamic model that we
-		// will set the attributes, table, and connections on so it they be used.
-		foreach ($models as $model)
-		{
-			$values = $this->cleanPivotAttributes($model);
+		$foreign = $this->foreignKey;
 
-			$pivot = $this->newExistingPivot($values);
+		// When attaching models in a many to many relationship, we need to set the
+		// keys on the pivot table, including both the foreign key and the other
+		// associated keys before saving so it will automatically link models.
+		$query = $this->query->newQuery()->from($this->table);
 
-			$model->setRelation('pivot', $pivot);
-		}
+		$attributes[$foreign] = $this->parent->getKey();
+
+		$attributes[$this->otherKey] = $id;
+
+		// Since all Eloquent models are timestamped, we will set the creation and
+		// update timestamps on the pivot record so they will be initialized on
+		// the record like all of the other pivot table records on the table.
+		$attributes['created_at'] = new DateTime;
+
+		$attributes['updated_at'] = new DateTime;
+
+		return $query->insert($attributes);
 	}
 
 	/**
-	 * Get the pivot attributes from a model.
+	 * Detach models from the relationship.
 	 *
-	 * @param  Illuminate\Database\Eloquent\Model  $model
-	 * @return array
+	 * @param  int|array  $ids
+	 * @return int
 	 */
-	protected function cleanPivotAttributes(Model $model)
+	public function detach($ids = array())
 	{
-		$values = array();
+		$query = $this->query->newQuery()->from($this->table);
 
-		// To get the pivots attributes we will just take any of the attributes that
-		// begin with "pivot_" and add those to our arrays, as well as unsetting
-		// them from the parents models since they exist in a different table.
-		foreach ($model->getAttributes() as $key => $value)
+		$query->where($this->foreignKey, '=', $this->parent->getKey());
+
+		// If associated IDs were passed to the method we will only delete those
+		// associations, otherwise all of the association ties will be broken.
+		// We'll return the numbers of affected rows when we do the deletes.
+		$ids = (array) $ids;
+
+		if (count($ids) > 0)
 		{
-			if (strpos($key, 'pivot_') === 0)
-			{
-				$values[substr($key, 6)] = $value;
-
-				unset($model->$key);
-			}
+			$query->whereIn($this->otherKey, $ids);
 		}
 
-		return $values;
+		return $query->delete();
 	}
 
 	/**
@@ -349,7 +355,11 @@ class BelongsToMany extends Relation {
 	{
 		$connection = $this->parent->getConnectionName();
 
-		return new Pivot($attributes, $this->table, $connection, $exists);
+		$pivot = new Pivot($attributes, $this->table, $connection, $exists);
+
+		$pivot->setPivotKeys($this->foreignKey, $this->otherKey);
+
+		return $pivot;
 	}
 
 	/**
@@ -377,6 +387,20 @@ class BelongsToMany extends Relation {
 	}
 
 	/**
+	 * Specify that the pivot table has creation and update timestamps.
+	 *
+	 * @return Illuminate\Database\Eloquent\Relations\BelongsToMany
+	 */
+	public function withTimestamps()
+	{
+		$columns = array('created_at', 'updated_at');
+
+		$this->pivotColumns = array_merge($this->pivotColumns, $columns);
+
+		return $this;
+	}
+
+	/**
 	 * Get the fully qualified foreign key for the relation.
 	 *
 	 * @return string
@@ -394,20 +418,6 @@ class BelongsToMany extends Relation {
 	public function getOtherKey()
 	{
 		return $this->table.'.'.$this->otherKey;
-	}
-
-	/**
-	 * Get both of the relation keys in an array.
-	 *
-	 * @return array
-	 */
-	protected function getBothKeys()
-	{
-		return array_map(function($value)
-		{
-			return $value.' as pivot_'.$value;
-
-		}, array($this->foreignKey, $this->otherKey));
 	}
 
 	/**

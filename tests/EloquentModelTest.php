@@ -95,6 +95,31 @@ class EloquentModelTest extends PHPUnit_Framework_TestCase {
 		$model->exists = false;
 		$this->assertTrue($model->save());
 		$this->assertEquals(1, $model->id);
+
+		$model = $this->getMock('EloquentModelStub', array('newQuery', 'updateTimestamps'));
+		$query = m::mock('Illuminate\Database\Eloquent\Builder');
+		$query->shouldReceive('insert')->once()->with(array('name' => 'taylor'));
+		$model->expects($this->once())->method('newQuery')->will($this->returnValue($query));
+		$model->expects($this->once())->method('updateTimestamps');
+		$model->setIncrementing(false);
+
+		$model->name = 'taylor';
+		$model->exists = false;
+		$this->assertTrue($model->save());
+		$this->assertNull($model->id);
+	}
+
+
+	public function testDeleteProperlyDeletesModel()
+	{
+		$model = $this->getMock('Illuminate\Database\Eloquent\Model', array('newQuery', 'updateTimestamps'));
+		$query = m::mock('stdClass');
+		$query->shouldReceive('where')->once()->with('id', 1)->andReturn($query);
+		$query->shouldReceive('delete')->once();
+		$model->expects($this->once())->method('newQuery')->will($this->returnValue($query));
+		$model->exists = true;
+		$model->id = 1;
+		$model->delete();
 	}
 
 
@@ -282,6 +307,10 @@ class EloquentModelStub extends Illuminate\Database\Eloquent\Model {
 class EloquentModelSaveStub extends Illuminate\Database\Eloquent\Model {
 	protected $table = 'save_stub';
 	public function save() { $_SERVER['__eloquent.saved'] = true; }
+	public function setIncrementing($value)
+	{
+		$this->incrementing = $value;
+	}
 }
 
 class EloquentModelFindStub extends Illuminate\Database\Eloquent\Model {
