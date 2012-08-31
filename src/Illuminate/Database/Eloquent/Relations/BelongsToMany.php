@@ -298,23 +298,26 @@ class BelongsToMany extends Relation {
 	 */
 	public function attach($id, array $attributes = array())
 	{
-		$foreign = $this->foreignKey;
-
 		// When attaching models in a many to many relationship, we need to set the
 		// keys on the pivot table, including both the foreign key and the other
 		// associated keys before saving so it will automatically link models.
+		$foreign = $this->foreignKey;
+
 		$query = $this->query->newQuery()->from($this->table);
 
 		$attributes[$foreign] = $this->parent->getKey();
 
 		$attributes[$this->otherKey] = $id;
 
-		// Since all Eloquent models are timestamped, we will set the creation and
-		// update timestamps on the pivot record so they will be initialized on
-		// the record like all of the other pivot table records on the table.
-		$attributes['created_at'] = new DateTime;
+		// If the pivot table has timestamps on it, we'll set the attributes on the
+		// model so that they are properly placed in the table. We will just use
+		// a fresh timestamp from the parent's model to get the proper format.
+		if (in_array('created_at', $this->pivotColumns))
+		{
+			$attributes['created_at'] = $this->parent->freshTimestamp();
 
-		$attributes['updated_at'] = new DateTime;
+			$attributes['updated_at'] = $attributes['created_at'];
+		}
 
 		return $query->insert($attributes);
 	}

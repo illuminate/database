@@ -412,7 +412,7 @@ abstract class Model implements ArrayableInterface {
 	 */
 	protected function updateTimestamps()
 	{
-		$this->updated_at = $this->getFreshTimestamp();
+		$this->updated_at = $this->freshTimestamp();
 
 		if ( ! $this->exists)
 		{
@@ -425,7 +425,7 @@ abstract class Model implements ArrayableInterface {
 	 *
 	 * @return mixed
 	 */
-	protected function getFreshTimestamp()
+	public function freshTimestamp()
 	{
 		return new DateTime;
 	}
