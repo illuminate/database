@@ -878,9 +878,9 @@ class Builder {
 	 */
 	public function mergeWheres($wheres, $bindings)
 	{
-		array_merge($this->wheres, (array) $wheres);
+		$this->wheres = array_merge($this->wheres, (array) $wheres);
 
-		array_merge($this->bindings, (array) $bindings);
+		$this->bindings = array_values(array_merge($this->bindings, (array) $bindings));
 	}
 
 	/**
@@ -908,6 +908,17 @@ class Builder {
 	}
 
 	/**
+	 * Set the bindings on the query builder.
+	 *
+	 * @param  array  $bindings
+	 * @return void
+	 */
+	public function setBindings(array $bindings)
+	{
+		$this->bindings = $bindings;
+	}
+
+	/**
 	 * Merge an array of bindings into our bindings.
 	 *
 	 * @param  Illuminate\Database\Query\Builder  $query
@@ -915,7 +926,7 @@ class Builder {
 	 */
 	public function mergeBindings(Builder $query)
 	{
-		$this->bindings = array_merge($this->bindings, $query->bindings);
+		$this->bindings = array_values(array_merge($this->bindings, $query->bindings));
 	}
 
 	/**

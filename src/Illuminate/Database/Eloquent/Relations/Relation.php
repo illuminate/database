@@ -85,6 +85,37 @@ abstract class Relation {
 	abstract public function getResults();
 
 	/**
+	 * Remove the original where clause set by the relationship.
+	 *
+	 * The remaining constraints on the query will be reset and returned.
+	 *
+	 * @return array
+	 */
+	public function getAndResetWheres()
+	{
+		$this->removeFirstWhereClause();
+
+		return $this->getBaseQuery()->getAndResetWheres();
+	}
+
+	/**
+	 * Remove the first where clause from the relationship query.
+	 *
+	 * @return void
+	 */
+	public function removeFirstWhereClause()
+	{
+		array_shift($this->getBaseQuery()->wheres);
+
+		// When resetting the relation where clause, we want to shift the first element
+		// off of the bindings, leaving only the constraints that the developers put
+		// as "extra" on the relationships, and not original relation constraints.
+		$bindings = array_slice($this->getBaseQuery()->getBindings(), 1);
+
+		$this->getBaseQuery()->setBindings(array_values($bindings));
+	}
+
+	/**
 	 * Get all of the primary keys for an array of models.
 	 *
 	 * @param  array  $models
@@ -107,6 +138,16 @@ abstract class Relation {
 	public function getQuery()
 	{
 		return $this->query;
+	}
+
+	/**
+	 * Get the base query builder driving the Eloquent builder.
+	 *
+	 * @return Illuminate\Database\Query\Builder
+	 */
+	public function getBaseQuery()
+	{
+		return $this->query->getQuery();
 	}
 
 	/**
@@ -138,12 +179,7 @@ abstract class Relation {
 	 */
 	public function __call($method, $parameters)
 	{
-		if (method_exists($this->query, $method))
-		{
-			return call_user_func_array(array($this->query, $method), $parameters);
-		}
-
-		throw new \BadMethodCallException("Method [$method] does not exist.");
+		return call_user_func_array(array($this->query, $method), $parameters);
 	}
 
 }

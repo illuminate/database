@@ -5,6 +5,8 @@ use DateTime;
 use Illuminate\Database\Connection;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\MorphOne;
+use Illuminate\Database\Eloquent\Relations\MorphMany;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Query\Builder as QueryBuilder;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
@@ -243,6 +245,21 @@ abstract class Model implements ArrayableInterface {
 	}
 
 	/**
+	 * Define a polymorphic one-to-one relationship.
+	 *
+	 * @param  string  $related
+	 * @param  string  $name
+	 * @param  string  $foreignKey
+	 * @return Illuminate\Database\Eloquent\Relation\MorphOne
+	 */
+	public function morphOne($related, $name)
+	{
+		$instance = new $related;
+
+		return new MorphOne($instance->newQuery(), $this, $name);
+	}
+
+	/**
 	 * Define an inverse one-to-one or many relationship.
 	 *
 	 * @param  string  $related
@@ -261,14 +278,35 @@ abstract class Model implements ArrayableInterface {
 			$foreignKey = snake_case($caller['function']).'_id';
 		}
 
-		// Once we have the foreign key name, we'll just create a new Eloquent query
-		// for the related model and returns the relationship instance which will
-		// actually be responsible for retrieving and hydrating each relations.
+		// Once we have the foreign key names, we'll just create a new Eloquent query
+		// for the related models and returns the relationship instance which will
+		// actually be responsible for retrieving and hydrating every relations.
 		$instance = new $related;
 
 		$query = $instance->newQuery();
 
 		return new BelongsTo($query, $this, $foreignKey);
+	}
+
+	/**
+	 * Define an polymorphic, inverse one-to-one or many relationship.
+	 *
+	 * @param  string  $name
+	 * @return Illuminate\Database\Eloquent\Relations\BelongsTo
+	 */
+	public function morphTo($name = null)
+	{
+		// If no name is provided, we will use the backtrace to get the function name
+		// since that is most likely the name of the polymorphic interface. We can
+		// use that to get both the class and foreign key that will be utilized.
+		if (is_null($name))
+		{
+			list(, $caller) = debug_backtrace(false);
+
+			$name = snake_case($caller['function']);
+		}
+
+		return $this->belongsTo($this->{"{$name}_type"}, "{$name}_id");
 	}
 
 	/**
@@ -285,6 +323,21 @@ abstract class Model implements ArrayableInterface {
 		$instance = new $related;
 
 		return new HasMany($instance->newQuery(), $this, $foreignKey);
+	}
+
+	/**
+	 * Define a polymorphic one-to-many relationship.
+	 *
+	 * @param  string  $related
+	 * @param  string  $name
+	 * @param  string  $foreignKey
+	 * @return Illuminate\Database\Eloquent\Relation\MorphMany
+	 */
+	public function morphMany($related, $name)
+	{
+		$instance = new $related;
+
+		return new MorphMany($instance->newQuery(), $this, $name);
 	}
 
 	/**

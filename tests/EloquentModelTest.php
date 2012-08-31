@@ -220,6 +220,18 @@ class EloquentModelTest extends PHPUnit_Framework_TestCase {
 	}
 
 
+	public function testMorphOneCreatesProperRelation()
+	{
+		$model = new EloquentModelStub;
+		$this->addMockConnection($model);
+		$relation = $model->morphOne('EloquentModelSaveStub', 'morph');
+		$this->assertEquals('morph_id', $relation->getForeignKey());
+		$this->assertEquals('morph_type', $relation->getMorphType());
+		$this->assertEquals('EloquentModelStub', $relation->getMorphClass());
+		EloquentModelStub::clearConnections();
+	}
+
+
 	public function testHasManyCreatesProperRelation()
 	{
 		$model = new EloquentModelStub;
@@ -237,6 +249,18 @@ class EloquentModelTest extends PHPUnit_Framework_TestCase {
 	}
 
 
+	public function testMorphManyCreatesProperRelation()
+	{
+		$model = new EloquentModelStub;
+		$this->addMockConnection($model);
+		$relation = $model->morphMany('EloquentModelSaveStub', 'morph');
+		$this->assertEquals('morph_id', $relation->getForeignKey());
+		$this->assertEquals('morph_type', $relation->getMorphType());
+		$this->assertEquals('EloquentModelStub', $relation->getMorphClass());
+		EloquentModelStub::clearConnections();
+	}
+
+
 	public function testBelongsToCreatesProperRelation()
 	{
 		$model = new EloquentModelStub;
@@ -251,6 +275,20 @@ class EloquentModelTest extends PHPUnit_Framework_TestCase {
 		$this->addMockConnection($model);
 		$relation = $model->belongsToExplicitKeyStub();
 		$this->assertEquals('foo', $relation->getForeignKey());
+	}
+
+
+	public function testMorphToCreatesProperRelation()
+	{
+		$model = m::mock('Illuminate\Database\Eloquent\Model[belongsTo]');
+		$model->foo_type = 'FooClass';
+		$model->shouldReceive('belongsTo')->with('FooClass', 'foo_id');
+		$relation = $model->morphTo('foo');
+
+		$model = m::mock('EloquentModelStub[belongsTo]');
+		$model->morph_to_stub_type = 'FooClass';
+		$model->shouldReceive('belongsTo')->with('FooClass', 'morph_to_stub_id');
+		$relation = $model->morphToStub();
 	}
 
 
@@ -297,6 +335,10 @@ class EloquentModelStub extends Illuminate\Database\Eloquent\Model {
 	public function belongsToStub()
 	{
 		return $this->belongsTo('EloquentModelSaveStub');
+	}
+	public function morphToStub()
+	{
+		return $this->morphTo();
 	}
 	public function belongsToExplicitKeyStub()
 	{

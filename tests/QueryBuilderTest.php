@@ -403,6 +403,16 @@ class QueryBuilderTest extends PHPUnit_Framework_TestCase {
 	}
 
 
+	public function testMergeWheresCanMergeWheresAndBindings()
+	{
+		$builder = $this->getBuilder();
+		$builder->wheres = array('foo');
+		$builder->mergeWheres(array('wheres'), array(12 => 'foo', 13 => 'bar'));
+		$this->assertEquals(array('foo', 'wheres'), $builder->wheres);
+		$this->assertEquals(array('foo', 'bar'), $builder->getBindings());
+	}
+
+
 	protected function getBuilder()
 	{
 		$grammar = new Illuminate\Database\Query\Grammars\Grammar;
