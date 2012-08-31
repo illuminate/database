@@ -45,6 +45,28 @@ class EloquentBelongsToManyTest extends PHPUnit_Framework_TestCase {
 	}
 
 
+	public function testTimestampsCanBeRetrieveProperly()
+	{
+		$model1 = new EloquentBelongsToManyModelStub;
+		$model1->fill(array('name' => 'taylor', 'pivot_user_id' => 1, 'pivot_role_id' => 2));
+		$model2 = new EloquentBelongsToManyModelStub;
+		$model2->fill(array('name' => 'dayle', 'pivot_user_id' => 3, 'pivot_role_id' => 4));
+		$models = array($model1, $model2);
+
+		$relation = $this->getRelation()->withTimestamps();
+		$relation->getParent()->shouldReceive('getConnectionName')->andReturn('foo.connection');
+		$relation->getQuery()->shouldReceive('getModels')->once()->with(array(
+			'roles.*',
+			'user_role.user_id as pivot_user_id',
+			'user_role.role_id as pivot_role_id',
+			'user_role.created_at as pivot_created_at',
+			'user_role.updated_at as pivot_updated_at',
+		))->andReturn($models);
+		$relation->getQuery()->shouldReceive('eagerLoadRelations')->once()->with($models)->andReturn($models);
+		$results = $relation->get();
+	}
+
+
 	public function testModelsAreProperlyMatchedToParents()
 	{
 		$relation = $this->getRelation();

@@ -50,6 +50,7 @@ class BelongsToMany extends Relation {
 		$this->table = $table;
 		$this->otherKey = $otherKey;
 		$this->foreignKey = $foreignKey;
+
 		parent::__construct($query, $parent);
 	}
 
@@ -169,7 +170,7 @@ class BelongsToMany extends Relation {
 		// relationships when they are retrieved and hydrated into the models.
 		$columns = array();
 
-		foreach (array_merge($this->pivotColumns, $defaults) as $column)
+		foreach (array_merge($defaults, $this->pivotColumns) as $column)
 		{
 			$columns[] = $this->table.'.'.$column.' as pivot_'.$column;
 		}
