@@ -76,22 +76,7 @@ abstract class HasOneOrMany extends Relation {
 	 */
 	public function matchOne(array $models, Collection $results, $relation)
 	{
-		$dictionary = $this->buildDictionary($results);
-
-		// Once we have the dictionary we can simply spin through the parent models to
-		// link them up with their children using the keyed dictionary to make the
-		// matching very convenient and easy work. Then we'll just return them.
-		foreach ($models as $model)
-		{
-			$key = $model->getKey();
-
-			if (isset($dictionary[$key]))
-			{
-				$model->setRelation($relation, reset($dictionary[$key]));
-			}
-		}
-
-		return $models;
+		return $this->matchOneOrMany($models, $results, $relation, 'one');
 	}
 
 	/**
@@ -104,6 +89,20 @@ abstract class HasOneOrMany extends Relation {
 	 */
 	public function matchMany(array $models, Collection $results, $relation)
 	{
+		return $this->matchOneOrMany($models, $results, $relation, 'many');
+	}
+
+	/**
+	 * Match the eagerly loaded results to their many parents.
+	 *
+	 * @param  array   $models
+	 * @param  Illuminate\Database\Eloquent\Collection  $results
+	 * @param  string  $relation
+	 * @param  string  $type
+	 * @return array
+	 */
+	protected function matchOneOrMany(array $models, Collection $results, $relation, $type)
+	{
 		$dictionary = $this->buildDictionary($results);
 
 		// Once we have the dictionary we can simply spin through the parent models to
@@ -115,11 +114,27 @@ abstract class HasOneOrMany extends Relation {
 
 			if (isset($dictionary[$key]))
 			{
-				$model->setRelation($relation, new Collection($dictionary[$key]));
+				$value = $this->getRelationValue($dictionary, $key, $type);
+
+				$model->setRelation($relation, $value);
 			}
 		}
 
 		return $models;
+	}
+
+	/**
+	 * Get the value of a relationship by one or many type.
+	 *
+	 * @param  array   $dictionary
+	 * @param  string  $key
+	 * @param  string  $type
+	 */
+	protected function getRelationValue(array $dictionary, $key, $type)
+	{
+		$value = $dictionary[$key];
+
+		return $type == 'one' ? reset($value) : new Collection($value);
 	}
 
 	/**
