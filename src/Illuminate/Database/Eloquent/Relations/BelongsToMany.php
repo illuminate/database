@@ -331,7 +331,7 @@ class BelongsToMany extends Relation {
 	{
 		$query = $this->query->newQuery()->from($this->table);
 
-		$query->where($this->foreignKey, '=', $this->parent->getKey());
+		$query->where($this->foreignKey, $this->parent->getKey());
 
 		// If associated IDs were passed to the method we will only delete those
 		// associations, otherwise all of the association ties will be broken.

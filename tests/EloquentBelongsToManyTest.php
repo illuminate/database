@@ -145,6 +145,34 @@ class EloquentBelongsToManyTest extends PHPUnit_Framework_TestCase {
 	}
 
 
+	public function testDetachRemovesPivotTableRecord()
+	{
+		$relation = $this->getRelation();
+		$query = m::mock('stdClass');
+		$query->shouldReceive('from')->once()->with('user_role')->andReturn($query);
+		$query->shouldReceive('where')->once()->with('user_id', 1);
+		$query->shouldReceive('whereIn')->once()->with('role_id', array(1, 2, 3));
+		$query->shouldReceive('delete')->once()->andReturn(true);
+		$relation->getQuery()->shouldReceive('newQuery')->once()->andReturn($query);
+
+		$this->assertTrue($relation->detach(array(1, 2, 3)));
+	}
+
+
+	public function testDetachMethodClearsAllPivotRecordsWhenNoIDsAreGiven()
+	{
+		$relation = $this->getRelation();
+		$query = m::mock('stdClass');
+		$query->shouldReceive('from')->once()->with('user_role')->andReturn($query);
+		$query->shouldReceive('where')->once()->with('user_id', 1);
+		$query->shouldReceive('whereIn')->never();
+		$query->shouldReceive('delete')->once()->andReturn(true);
+		$relation->getQuery()->shouldReceive('newQuery')->once()->andReturn($query);
+
+		$this->assertTrue($relation->detach());
+	}
+
+
 	public function getRelation()
 	{
 		$parent = m::mock('Illuminate\Database\Eloquent\Model');
