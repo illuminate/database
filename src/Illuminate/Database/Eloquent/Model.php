@@ -192,7 +192,9 @@ abstract class Model implements ArrayableInterface {
 	 */
 	public static function all($columns = array('*'))
 	{
-		return static::newInstance()->newQuery()->get($columns);
+		$instance = new static;
+
+		return $instance->newQuery()->get($columns);
 	}
 
 	/**
@@ -204,7 +206,9 @@ abstract class Model implements ArrayableInterface {
 	 */
 	public static function find($id, $columns = array('*'))
 	{
-		return static::newInstance()->newQuery()->find($id, $columns);
+		$instance = new static;
+
+		return $instance->newQuery()->find($id, $columns);
 	}
 
 	/**
