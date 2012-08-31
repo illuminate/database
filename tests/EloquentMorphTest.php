@@ -50,8 +50,8 @@ class EloquentMorphTest extends PHPUnit_Framework_TestCase {
 
 
 	/**
-	 * Note that the tests are the exact same for morph many because the classes are identical...
-	 * Not sure of a good way to get around duplicating that code...
+	 * Note that the tests are the exact same for morph many because the classes share this code...
+	 * Will still test to be safe.
 	 */
 	public function testMorphManySetsProperConstraints()
 	{
