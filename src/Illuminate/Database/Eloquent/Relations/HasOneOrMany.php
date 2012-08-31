@@ -67,6 +67,62 @@ abstract class HasOneOrMany extends Relation {
 	}
 
 	/**
+	 * Match the eagerly loaded results to their single parents.
+	 *
+	 * @param  array   $models
+	 * @param  Illuminate\Database\Eloquent\Collection  $results
+	 * @param  string  $relation
+	 * @return array
+	 */
+	public function matchOne(array $models, Collection $results, $relation)
+	{
+		$dictionary = $this->buildDictionary($results);
+
+		// Once we have the dictionary we can simply spin through the parent models to
+		// link them up with their children using the keyed dictionary to make the
+		// matching very convenient and easy work. Then we'll just return them.
+		foreach ($models as $model)
+		{
+			$key = $model->getKey();
+
+			if (isset($dictionary[$key]))
+			{
+				$model->setRelation($relation, reset($dictionary[$key]));
+			}
+		}
+
+		return $models;
+	}
+
+	/**
+	 * Match the eagerly loaded results to their many parents.
+	 *
+	 * @param  array   $models
+	 * @param  Illuminate\Database\Eloquent\Collection  $results
+	 * @param  string  $relation
+	 * @return array
+	 */
+	public function matchMany(array $models, Collection $results, $relation)
+	{
+		$dictionary = $this->buildDictionary($results);
+
+		// Once we have the dictionary we can simply spin through the parent models to
+		// link them up with their children using the keyed dictionary to make the
+		// matching very convenient and easy work. Then we'll just return them.
+		foreach ($models as $model)
+		{
+			$key = $model->getKey();
+
+			if (isset($dictionary[$key]))
+			{
+				$model->setRelation($relation, new Collection($dictionary[$key]));
+			}
+		}
+
+		return $models;
+	}
+
+	/**
 	 * Build model dictionary keyed by the relation's foreign key.
 	 *
 	 * @param  Illuminate\Database\Eloquent\Collection  $reuslts

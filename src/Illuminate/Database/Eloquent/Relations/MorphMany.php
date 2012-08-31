@@ -1,100 +1,47 @@
 <?php namespace Illuminate\Database\Eloquent\Relations;
 
-use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Collection;
 
-class MorphMany extends HasMany {
-
-	/**
-	 * The foreign key type for the relationship.
-	 *
-	 * @var string
-	 */
-	protected $morphType;
+class MorphMany extends MorphOneOrMany {
 
 	/**
-	 * The class name of the parent model.
+	 * Get the results of the relationship.
 	 *
-	 * @var string
+	 * @return mixed
 	 */
-	protected $morphClass;
-
-	/**
-	 * Create a new has many relationship instance.
-	 *
-	 * @param  Illuminate\Database\Eloquent\Builder  $query
-	 * @param  Illuminate\Database\Eloquent\Model  $parent
-	 * @param  string  $morphName
-	 * @return void
-	 */
-	public function __construct(Builder $query, Model $parent, $morphName)
+	public function getResults()
 	{
-		$this->morphType = "{$morphName}_type";
-		$this->morphClass = get_class($parent);
-
-		parent::__construct($query, $parent, "{$morphName}_id");
+		return $this->query->get();
 	}
 
 	/**
-	 * Set the base constraints on the relation query.
+	 * Initialize the relation on a set of models.
 	 *
+	 * @param  array   $models
+	 * @param  string  $relation
 	 * @return void
 	 */
-	public function addConstraints()
+	public function initRelation(array $models, $relation)
 	{
-		parent::addConstraints();
+		foreach ($models as $model)
+		{
+			$model->setRelation($relation, new Collection);
+		}
 
-		$this->query->where($this->morphType, $this->morphClass);
+		return $models;
 	}
 
 	/**
-	 * Set the constraints for an eager load of the relation.
+	 * Match the eagerly loaded results to their parents.
 	 *
-	 * @param  array  $models
-	 * @return void
-	 */
-	public function addEagerConstraints(array $models)
-	{
-		parent::addEagerConstraints($models);
-
-		$this->query->where($this->morphType, $this->morphClass);
-	}	
-
-	/**
-	 * Remove the original where clause set by the relationship.
-	 *
-	 * The remaining constraints on the query will be reset and returned.
-	 *
+	 * @param  array   $models
+	 * @param  Illuminate\Database\Eloquent\Collection  $results
+	 * @param  string  $relation
 	 * @return array
 	 */
-	public function getAndResetWheres()
+	public function match(array $models, Collection $results, $relation)
 	{
-		// We actually need to remove two where clauses from polymorphic queries so we
-		// will make an extra call to remove the first where clause here so that we
-		// remove two total where clause from the query leaving only custom ones.
-		$this->removeFirstWhereClause();
-
-		return parent::getAndResetWheres();
-	}
-
-	/**
-	 * Get the foreign key "type" name.
-	 *
-	 * @return string
-	 */
-	public function getMorphType()
-	{
-		return $this->morphType;
-	}
-
-	/**
-	 * Get the class name of the parent model.
-	 *
-	 * @return string
-	 */
-	public function getMorphClass()
-	{
-		return $this->morphClass;
+		return $this->matchMany($models, $results, $relation);
 	}
 
 }

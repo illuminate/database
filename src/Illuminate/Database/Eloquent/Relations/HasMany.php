@@ -41,22 +41,7 @@ class HasMany extends HasOneOrMany {
 	 */
 	public function match(array $models, Collection $results, $relation)
 	{
-		$dictionary = $this->buildDictionary($results);
-
-		// Once we have the dictionary we can simply spin through the parent models to
-		// link them up with their children using the keyed dictionary to make the
-		// matching very convenient and easy work. Then we'll just return them.
-		foreach ($models as $model)
-		{
-			$key = $model->getKey();
-
-			if (isset($dictionary[$key]))
-			{
-				$model->setRelation($relation, new Collection($dictionary[$key]));
-			}
-		}
-
-		return $models;
+		return $this->matchMany($models, $results, $relation);
 	}
 
 }

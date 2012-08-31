@@ -59,7 +59,7 @@ abstract class Grammar {
 
 		// If the value is not an aliased table expression, we'll just wrap it like
 		// normal, so if there is more than one segment, we will wrap the first
-		// segments as if it was a table and the rest as just regulsr values.
+		// segments as if it was a table and the rest as just regular values.
 		foreach ($segments as $key => $value)
 		{
 			if ($key == 0 and count($segments) > 1)
