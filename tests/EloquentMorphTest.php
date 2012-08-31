@@ -34,7 +34,6 @@ class EloquentMorphTest extends PHPUnit_Framework_TestCase {
 
 	public function testMorphOneWhereClausesCanBeRemoved()
 	{
-		// For this test it doesn't matter what type of relationship we have, so we'll just use HasOne
 		$builder = new EloquentMorphResetBuilderStub;
 		$parent = m::mock('Illuminate\Database\Eloquent\Model');
 		$parent->shouldReceive('getKey')->andReturn(1);
@@ -75,7 +74,6 @@ class EloquentMorphTest extends PHPUnit_Framework_TestCase {
 
 	public function testMorphManyWhereClausesCanBeRemoved()
 	{
-		// For this test it doesn't matter what type of relationship we have, so we'll just use HasOne
 		$builder = new EloquentMorphResetBuilderStub;
 		$parent = m::mock('Illuminate\Database\Eloquent\Model');
 		$parent->shouldReceive('getKey')->andReturn(1);
