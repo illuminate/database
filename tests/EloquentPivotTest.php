@@ -22,6 +22,16 @@ class EloquentPivotTest extends PHPUnit_Framework_TestCase {
 	}
 
 
+	public function testTimestampPropertyIsSetIfCreatedAtInAttributes()
+	{
+		$pivot = new Pivot(array('foo' => 'bar', 'created_at' => 'foo'), 'table', 'connection');
+		$this->assertTrue($pivot->timestamps);
+
+		$pivot = new Pivot(array('foo' => 'bar'), 'table', 'connection');
+		$this->assertFalse($pivot->timestamps);
+	}
+
+
 	public function testKeysCanBeSetProperly()
 	{
 		$pivot = new Pivot(array('foo' => 'bar'), 'table', 'connection');

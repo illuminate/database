@@ -39,6 +39,8 @@ class Pivot extends Model {
 		$this->setConnection($connection);
 
 		$this->exists = $exists;
+
+		$this->timestamps = array_key_exists('created_at', $attributes);
 	}
 
 	/**

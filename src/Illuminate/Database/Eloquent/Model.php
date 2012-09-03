@@ -39,7 +39,14 @@ abstract class Model implements ArrayableInterface {
 	 *
 	 * @var bool
 	 */
-	protected $incrementing = true;
+	public $incrementing = true;
+
+	/**
+	 * Indicates if the model should be timestamped.
+	 *
+	 * @var bool
+	 */
+	public $timestamps = true;
 
 	/**
 	 * The model's attributes.
@@ -428,7 +435,10 @@ abstract class Model implements ArrayableInterface {
 		// convenience. Then we will just continue saving the model instances.
 		$query = $this->newQuery();
 
-		$this->updateTimestamps();
+		if ($this->timestamps)
+		{
+			$this->updateTimestamps();
+		}
 
 		// If the model already exists in the database we can just update our record
 		// that is already in this database using the current IDs in this "where"

@@ -83,6 +83,23 @@ class EloquentModelTest extends PHPUnit_Framework_TestCase {
 	}
 
 
+	public function testUpdateProcessWithoutTimestamps()
+	{
+		$model = $this->getMock('EloquentModelStub', array('newQuery', 'updateTimestamps'));
+		$model->timestamps = false;
+		$query = m::mock('Illuminate\Database\Eloquent\Builder');
+		$query->shouldReceive('where')->once()->with('id', '=', 1);
+		$query->shouldReceive('update')->once()->with(array('id' => 1, 'name' => 'taylor'));
+		$model->expects($this->once())->method('newQuery')->will($this->returnValue($query));
+		$model->expects($this->never())->method('updateTimestamps');
+
+		$model->id = 1;
+		$model->name = 'taylor';
+		$model->exists = true;
+		$this->assertTrue($model->save());
+	}
+
+
 	public function testInsertProcess()
 	{
 		$model = $this->getMock('EloquentModelStub', array('newQuery', 'updateTimestamps'));
