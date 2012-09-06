@@ -166,6 +166,17 @@ class Connection implements ConnectionInterface {
 	}
 
 	/**
+	 * Get a new raw query expression.
+	 *
+	 * @param  mixed  $value
+	 * @return Illuminate\Database\Query\Expression
+	 */
+	public function raw($value)
+	{
+		return new Query\Expression($value);
+	}
+
+	/**
 	 * Run a select statement and return a single result.
 	 *
 	 * @param  string  $query

@@ -2,6 +2,7 @@
 
 use Mockery as m;
 use Illuminate\Database\Query\Builder;
+use Illuminate\Database\Query\Expression as Raw;
 
 class QueryBuilderTest extends PHPUnit_Framework_TestCase {
 
@@ -187,8 +188,9 @@ class QueryBuilderTest extends PHPUnit_Framework_TestCase {
 		$builder = $this->getBuilder();
 		$builder->select('*')->from('users')->where('email', '=', 'foo')->orWhere('id', '=', function($q)
 		{
-			$q->select('raw|max(id)')->from('users')->where('email', '=', 'bar');
+			$q->select(new Raw('max(id)'))->from('users')->where('email', '=', 'bar');
 		});
+
 		$this->assertEquals('select * from "users" where "email" = ? or "id" = (select max(id) from "users" where "email" = ?)', $builder->toSql());
 		$this->assertEquals(array(0 => 'foo', 1 => 'bar'), $builder->getBindings());
 	}
@@ -199,28 +201,28 @@ class QueryBuilderTest extends PHPUnit_Framework_TestCase {
 		$builder = $this->getBuilder();
 		$builder->select('*')->from('orders')->whereExists(function($q)
 		{
-			$q->select('*')->from('products')->where('products.id', '=', 'raw|"orders"."id"');
+			$q->select('*')->from('products')->where('products.id', '=', new Raw('"orders"."id"'));
 		});
 		$this->assertEquals('select * from "orders" where exists (select * from "products" where "products"."id" = "orders"."id")', $builder->toSql());
 
 		$builder = $this->getBuilder();
 		$builder->select('*')->from('orders')->whereNotExists(function($q)
 		{
-			$q->select('*')->from('products')->where('products.id', '=', 'raw|"orders"."id"');
+			$q->select('*')->from('products')->where('products.id', '=', new Raw('"orders"."id"'));
 		});
 		$this->assertEquals('select * from "orders" where not exists (select * from "products" where "products"."id" = "orders"."id")', $builder->toSql());
 
 		$builder = $this->getBuilder();
 		$builder->select('*')->from('orders')->where('id', '=', 1)->orWhereExists(function($q)
 		{
-			$q->select('*')->from('products')->where('products.id', '=', 'raw|"orders"."id"');
+			$q->select('*')->from('products')->where('products.id', '=', new Raw('"orders"."id"'));
 		});
 		$this->assertEquals('select * from "orders" where "id" = ? or exists (select * from "products" where "products"."id" = "orders"."id")', $builder->toSql());
 
 		$builder = $this->getBuilder();
 		$builder->select('*')->from('orders')->where('id', '=', 1)->orWhereNotExists(function($q)
 		{
-			$q->select('*')->from('products')->where('products.id', '=', 'raw|"orders"."id"');
+			$q->select('*')->from('products')->where('products.id', '=', new Raw('"orders"."id"'));
 		});
 		$this->assertEquals('select * from "orders" where "id" = ? or not exists (select * from "products" where "products"."id" = "orders"."id")', $builder->toSql());
 	}
@@ -248,7 +250,7 @@ class QueryBuilderTest extends PHPUnit_Framework_TestCase {
 	public function testRawExpressionsInSelect()
 	{
 		$builder = $this->getBuilder();
-		$builder->select('raw|substr(foo, 6)')->from('users');
+		$builder->select(new Raw('substr(foo, 6)'))->from('users');
 		$this->assertEquals('select substr(foo, 6) from "users"', $builder->toSql());
 	}
 

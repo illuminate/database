@@ -824,7 +824,9 @@ class Builder {
 	{
 		$wrapped = $this->grammar->wrap($column);
 
-		return $this->update(array($column => "raw|$wrapped + $amount"));
+		$value = $this->connection->raw("$wrapped + $amount");
+
+		return $this->update(array($column => $value));
 	}
 
 	/**
@@ -838,7 +840,9 @@ class Builder {
 	{
 		$wrapped = $this->grammar->wrap($column);
 
-		return $this->update(array($column => "raw|$wrapped - $amount"));
+		$value = $this->connection->raw("$wrapped - $amount");
+
+		return $this->update(array($column => $value));
 	}
 
 	/**

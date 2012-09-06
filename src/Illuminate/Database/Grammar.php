@@ -122,12 +122,12 @@ abstract class Grammar {
 	/**
 	 * Get the value of a raw expression.
 	 *
-	 * @param  string  $expression
+	 * @param  Illuminate\Database\Query\Expression  $expression
 	 * @return string
 	 */
 	public function getValue($expression)
 	{
-		return substr($expression, 4);
+		return $expression->getValue();
 	}
 
 	/**
@@ -138,7 +138,7 @@ abstract class Grammar {
 	 */
 	public function isExpression($value)
 	{
-		return is_string($value) and strpos($value, 'raw|') === 0;
+		return $value instanceof Query\Expression;
 	}
 
 	/**
