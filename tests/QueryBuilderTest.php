@@ -346,6 +346,15 @@ class QueryBuilderTest extends PHPUnit_Framework_TestCase {
 	}
 
 
+	public function testUpdateMethodRespectsRaw()
+	{
+		$builder = $this->getBuilder();
+		$builder->getConnection()->shouldReceive('update')->once()->with('update "users" set "email" = foo, "name" = ? where "id" = ?', array('bar', 1))->andReturn(1);
+		$result = $builder->from('users')->where('id', '=', 1)->update(array('email' => new Raw('foo'), 'name' => 'bar'));
+		$this->assertEquals(1, $result);
+	}
+
+
 	public function testDeleteMethod()
 	{
 		$builder = $this->getBuilder();

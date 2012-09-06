@@ -810,7 +810,7 @@ class Builder {
 
 		$sql = $this->grammar->compileUpdate($this, $values);
 
-		return $this->connection->update($sql, $bindings);
+		return $this->connection->update($sql, $this->cleanBindings($bindings));
 	}
 
 	/**
@@ -899,6 +899,20 @@ class Builder {
 		list($this->wheres, $this->bindings) = array(null, array());
 
 		return $values;
+	}
+
+	/**
+	 * Remove all of the expressions from a list of bindings.
+	 *
+	 * @param  array  $bindings
+	 * @return array
+	 */
+	protected function cleanBindings(array $bindings)
+	{
+		return array_values(array_filter($bindings, function($binding)
+		{
+			return ! $binding instanceof Expression;
+		}));
 	}
 
 	/**
