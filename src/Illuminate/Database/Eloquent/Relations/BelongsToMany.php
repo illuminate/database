@@ -385,7 +385,7 @@ class BelongsToMany extends Relation {
 	{
 		$this->pivotColumns = is_array($columns) ? $columns : func_get_args();
 
-		return $this->setSelect();
+		return $this;
 	}
 
 	/**
