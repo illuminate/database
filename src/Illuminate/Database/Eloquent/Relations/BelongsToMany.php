@@ -297,28 +297,82 @@ class BelongsToMany extends Relation {
 	 */
 	public function attach($id, array $attributes = array())
 	{
-		// When attaching models in a many to many relationship, we need to set the
-		// keys on the pivot table, including both the foreign key and the other
-		// associated keys before saving so it will automatically link models.
-		$foreign = $this->foreignKey;
-
 		$query = $this->query->newQuery()->from($this->table);
 
-		$attributes[$foreign] = $this->parent->getKey();
+		return $query->insert($this->createAttachRecords((array) $id, $attributes));
+	}
 
-		$attributes[$this->otherKey] = $id;
+	/**
+	 * Create an array of records to insert into the pivot table.
+	 *
+	 * @param  array  $ids
+	 * @return void
+	 */
+	protected function createAttachRecords($ids, array $attributes)
+	{
+		$records = array();
 
-		// If the pivot table has timestamps on it, we'll set the attributes on the
-		// model so that they are properly placed in the table. We will just use
-		// a fresh timestamp from the parent's model to get the proper format.
-		if (in_array('created_at', $this->pivotColumns))
+		$hasTimestamps = in_array('created_at', $this->pivotColumns);
+
+		// To create the attachment records, we will simply spin through the IDs given
+		// and create a new record to insert for each ID. Each ID may actually be a
+		// key in the array, with extra attributes to be placed in other columns.
+		foreach ($ids as $key => $value)
 		{
-			$attributes['created_at'] = $this->parent->freshTimestamp();
+			list($id, $extra) = $this->getAttachId($key, $value, $attributes);
 
-			$attributes['updated_at'] = $attributes['created_at'];
+			$record = $this->createAttachRecord($id, $hasTimestamps);
+
+			$records[] = array_merge($record, $extra);
 		}
 
-		return $query->insert($attributes);
+		return $records;
+	}
+
+	/**
+	 * Get the attach record ID and extra attributes.
+	 *
+	 * @param  mixed  $key
+	 * @param  mixed  $value
+	 * @param  array  $attributes
+	 * @return array
+	 */
+	protected function getAttachId($key, $value, array $attributes)
+	{
+		if (is_array($value))
+		{
+			return array($key, array_merge($value, $attributes));
+		}
+		else
+		{
+			return array($value, $attributes);
+		}
+	}
+
+	/**
+	 * Create a new pivot attachment record.
+	 *
+	 * @param  int   $id
+	 * @param  bool  $hasTimestamps
+	 * @return array
+	 */
+	protected function createAttachRecord($id, $hasTimestamps)
+	{
+		$record[$this->foreignKey] = $this->parent->getKey();
+
+		$record[$this->otherKey] = $id;
+
+		// If the record needs to have creation and update timestamps, we will make
+		// them by calling the parent model's "freshTimestamp" method which will
+		// provide us with a fresh timestamp in this model's preferred format.
+		if ($hasTimestamps)
+		{
+			$record['created_at'] = $this->parent->freshTimestamp();
+
+			$record['updated_at'] = $record['created_at'];
+		}
+
+		return $record;
 	}
 
 	/**

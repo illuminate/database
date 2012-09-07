@@ -124,10 +124,27 @@ class EloquentBelongsToManyTest extends PHPUnit_Framework_TestCase {
 		$relation = $this->getRelation();
 		$query = m::mock('stdClass');
 		$query->shouldReceive('from')->once()->with('user_role')->andReturn($query);
-		$query->shouldReceive('insert')->once()->with(array('user_id' => 1, 'role_id' => 2, 'foo' => 'bar'))->andReturn(true);
+		$query->shouldReceive('insert')->once()->with(array(array('user_id' => 1, 'role_id' => 2, 'foo' => 'bar')))->andReturn(true);
 		$relation->getQuery()->shouldReceive('newQuery')->once()->andReturn($query);
 		
 		$this->assertTrue($relation->attach(2, array('foo' => 'bar')));
+	}
+
+
+	public function testAttachMultipleInsertsPivotTableRecord()
+	{
+		$relation = $this->getRelation();
+		$query = m::mock('stdClass');
+		$query->shouldReceive('from')->once()->with('user_role')->andReturn($query);
+		$query->shouldReceive('insert')->once()->with(
+			array(
+				array('user_id' => 1, 'role_id' => 2, 'foo' => 'bar'),
+				array('user_id' => 1, 'role_id' => 3, 'baz' => 'boom', 'foo' => 'bar'),
+			)
+		)->andReturn(true);
+		$relation->getQuery()->shouldReceive('newQuery')->once()->andReturn($query);
+		
+		$this->assertTrue($relation->attach(array(2, 3 => array('baz' => 'boom')), array('foo' => 'bar')));
 	}
 
 
@@ -137,7 +154,7 @@ class EloquentBelongsToManyTest extends PHPUnit_Framework_TestCase {
 		$relation->withTimestamps();
 		$query = m::mock('stdClass');
 		$query->shouldReceive('from')->once()->with('user_role')->andReturn($query);
-		$query->shouldReceive('insert')->once()->with(array('user_id' => 1, 'role_id' => 2, 'foo' => 'bar', 'created_at' => 'time', 'updated_at' => 'time'))->andReturn(true);
+		$query->shouldReceive('insert')->once()->with(array(array('user_id' => 1, 'role_id' => 2, 'foo' => 'bar', 'created_at' => 'time', 'updated_at' => 'time')))->andReturn(true);
 		$relation->getQuery()->shouldReceive('newQuery')->once()->andReturn($query);
 		$relation->getParent()->shouldReceive('freshTimestamp')->once()->andReturn('time');
 		
