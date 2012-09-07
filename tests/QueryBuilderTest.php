@@ -337,6 +337,15 @@ class QueryBuilderTest extends PHPUnit_Framework_TestCase {
 	}
 
 
+	public function testInsertMethodRespectsRawBindings()
+	{
+		$builder = $this->getBuilder();
+		$builder->getConnection()->shouldReceive('insert')->once()->with('insert into "users" ("email") values (CURRENT TIMESTAMP)', array())->andReturn(true);
+		$result = $builder->from('users')->insert(array('email' => new Raw('CURRENT TIMESTAMP')));
+		$this->assertTrue($result);
+	}
+
+
 	public function testUpdateMethod()
 	{
 		$builder = $this->getBuilder();

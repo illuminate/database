@@ -779,6 +779,8 @@ class Builder {
 		// Once we have compiled the insert statement's SQL we can execute it on the
 		// connection and return a result as a boolean success indicator as that
 		// is the same type of result returned by the raw connection instnace.
+		$bindings = $this->cleanBindings($bindings);
+
 		return $this->connection->insert($sql, $bindings);
 	}
 
@@ -824,9 +826,7 @@ class Builder {
 	{
 		$wrapped = $this->grammar->wrap($column);
 
-		$value = $this->connection->raw("$wrapped + $amount");
-
-		return $this->update(array($column => $value));
+		return $this->update(array($column => $this->raw("$wrapped + $amount")));
 	}
 
 	/**
@@ -840,9 +840,7 @@ class Builder {
 	{
 		$wrapped = $this->grammar->wrap($column);
 
-		$value = $this->connection->raw("$wrapped - $amount");
-
-		return $this->update(array($column => $value));
+		return $this->update(array($column => $this->raw("$wrapped - $amount")));
 	}
 
 	/**
@@ -913,6 +911,17 @@ class Builder {
 		{
 			return ! $binding instanceof Expression;
 		}));
+	}
+
+	/**
+	 * Create a raw database expression.
+	 *
+	 * @param  mixed  $value
+	 * @return Illuminate\Database\Query\Expression
+	 */
+	public function raw($value)
+	{
+		return $this->connection->raw($value);
 	}
 
 	/**
