@@ -1,6 +1,7 @@
 {
     "name": "illuminate/database",
     "description": "An elegant database abstraction library.",
+    "keywords": ["laravel"],
     "authors": [
         {
             "name": "Taylor Otwell",
