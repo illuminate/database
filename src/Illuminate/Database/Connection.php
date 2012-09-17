@@ -43,6 +43,13 @@ class Connection implements ConnectionInterface {
 	protected $events;
 
 	/**
+	 * The paginator environment instance.
+	 *
+	 * @var Illuminate\Pagination\Paginator
+	 */
+	protected $paginator;
+
+	/**
 	 * The default fetch mode of the connection.
 	 *
 	 * @var int
@@ -517,6 +524,32 @@ class Connection implements ConnectionInterface {
 	public function setEventDispatcher(\Illuminate\Events\Dispatcher $events)
 	{
 		$this->events = $events;
+	}
+
+	/**
+	 * Get the paginator environment instance.
+	 *
+	 * @return Illuminate\Pagination\Environment
+	 */
+	public function getPaginator()
+	{
+		if ($this->paginator instanceof Closure)
+		{
+			$this->paginator = call_user_func($this->paginator);
+		}
+
+		return $this->paginator;
+	}
+
+	/**
+	 * Set the pagination environment instance.
+	 *
+	 * @param  Illuminate\Pagination\Environment|Closure  $paginator
+	 * @return void
+	 */
+	public function setPaginator($paginator)
+	{
+		$this->paginator = $paginator;
 	}
 
 	/**

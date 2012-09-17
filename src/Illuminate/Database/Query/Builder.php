@@ -672,6 +672,18 @@ class Builder {
 	}
 
 	/**
+	 * Get a paginator for the "select" statement.
+	 *
+	 * @param  int    $perPage
+	 * @param  array  $columns
+	 * @return Illuminate\Pagination\Paginator
+	 */
+	public function paginate($perPage = 15, $columns = array('*'))
+	{
+		//	
+	}
+
+	/**
 	 * Determine if any rows exist for the current query.
 	 *
 	 * @return bool
