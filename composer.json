@@ -14,6 +14,7 @@
         "illuminate/support": ">=1.0.0"
     },
     "require-dev": {
+        "illuminate/pagination": ">=1.0.0",
         "mockery/mockery": ">=0.7.2"
     },
     "autoload": {

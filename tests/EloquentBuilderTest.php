@@ -61,6 +61,31 @@ class EloquentBuilderTest extends PHPUnit_Framework_TestCase {
 	}
 
 
+	public function testPaginateMethod()
+	{
+		$builder = $this->getMock('Illuminate\Database\Eloquent\Builder', array('get'), $this->getMocks());
+		$model = m::mock('Illuminate\Database\Eloquent\Model');
+		$model->shouldReceive('getPerPage')->once()->andReturn(15);
+		$model->shouldReceive('getTable')->once()->andReturn('foo_table');
+		$query = $builder->getQuery();
+		$query->shouldReceive('from')->once()->with('foo_table');
+		$builder->setModel($model);
+		$query->shouldReceive('getPaginationCount')->once()->andReturn(10);
+		$conn = m::mock('stdClass');
+		$paginator = m::mock('stdClass');
+		$paginator->shouldReceive('getCurrentPage')->once()->andReturn(1);
+		$conn->shouldReceive('getPaginator')->once()->andReturn($paginator);
+		$query->shouldReceive('getConnection')->once()->andReturn($conn);
+		$query->shouldReceive('forPage')->once()->with(1, 15);
+		$collection = m::mock('stdClass');
+		$collection->shouldReceive('all')->once()->andReturn(array('results'));
+		$builder->expects($this->once())->method('get')->with($this->equalTo(array('*')))->will($this->returnValue($collection));
+		$paginator->shouldReceive('make')->once()->with(array('results'), 10, 15)->andReturn(array('results'));
+
+		$this->assertEquals(array('results'), $builder->paginate());
+	}
+
+
 	public function testGetModelsProperlyHydratesModels()
 	{
 		$builder = $this->getMock('Illuminate\Database\Eloquent\Builder', array('get'), $this->getMocks());

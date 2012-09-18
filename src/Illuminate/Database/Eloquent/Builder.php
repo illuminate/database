@@ -91,9 +91,37 @@ class Builder {
 	 * @param  array  $columns
 	 * @return Illuminate\Pagination\Paginator
 	 */
-	public function paginate($perPage = 15, $columns = array('*'))
+	public function paginate($perPage = null, $columns = array('*'))
 	{
-		//
+		$perPage = $perPage ?: $this->model->getPerPage();
+
+		$total = $this->query->getPaginationCount();
+
+		return $this->createPaginator($total, $perPage, $columns);
+	}
+
+	/**
+	 * Create the paginator instance for the given totals.
+	 *
+	 * @param  int    $total
+	 * @param  int    $perPage
+	 * @param  array  $columns
+	 * @return Illuminate\Pagination\Paginator
+	 */
+	protected function createPaginator($total, $perPage, $columns)
+	{
+		$paginator = $this->query->getConnection()->getPaginator();
+
+		// Once we have the paginator we need to set the limit and offet values for
+		// the query so we can get the properly paginated items. Once we have an
+		// array of items we can create the paginator instances for the items.
+		$page = $paginator->getCurrentPage();
+
+		$this->query->forPage($page, $perPage);
+
+		$results = $this->get($columns)->all();
+
+		return $paginator->make($results, $total, $perPage);
 	}
 
 	/**

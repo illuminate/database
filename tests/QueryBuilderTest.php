@@ -159,6 +159,10 @@ class QueryBuilderTest extends PHPUnit_Framework_TestCase {
 		$builder = $this->getBuilder();
 		$builder->select('*')->from('users')->skip(5)->take(10);
 		$this->assertEquals('select * from "users" limit 10 offset 5', $builder->toSql());
+
+		$builder = $this->getBuilder();
+		$builder->select('*')->from('users')->forPage(2, 15);
+		$this->assertEquals('select * from "users" limit 15 offset 15', $builder->toSql());
 	}
 
 
@@ -272,6 +276,50 @@ class QueryBuilderTest extends PHPUnit_Framework_TestCase {
 		$builder->getProcessor()->shouldReceive('processSelect')->once()->with($builder, array(array('foo' => 'bar')));
 		$results = $builder->from('users')->where('id', '=', 1)->first();
 		$this->assertEquals(array('foo' => 'bar'), $results);	
+	}
+
+
+	public function testPaginateCorrectlyCreatesPaginatorInstance()
+	{
+		$connection = m::mock('Illuminate\Database\ConnectionInterface');
+		$grammar = m::mock('Illuminate\Database\Query\Grammars\Grammar');
+		$processor = m::mock('Illuminate\Database\Query\Processors\Processor');
+		$builder = $this->getMock('Illuminate\Database\Query\Builder', array('getPaginationCount', 'forPage', 'get'), array($connection, $grammar, $processor));
+		$paginator = m::mock('Illuminate\Pagination\Environment');
+		$paginator->shouldReceive('getCurrentPage')->once()->andReturn(1);
+		$connection->shouldReceive('getPaginator')->once()->andReturn($paginator);
+		$builder->expects($this->once())->method('forPage')->with($this->equalTo(1), $this->equalTo(15))->will($this->returnValue($builder));
+		$builder->expects($this->once())->method('get')->with($this->equalTo(array('*')))->will($this->returnValue(array('foo')));
+		$builder->expects($this->once())->method('getPaginationCount')->will($this->returnValue(10));
+		$paginator->shouldReceive('make')->once()->with(array('foo'), 10, 15)->andReturn(array('results'));
+
+		$this->assertEquals(array('results'), $builder->paginate(15, array('*')));
+	}
+
+
+	public function testGetPaginationCountGetsResultCount()
+	{
+		unset($_SERVER['orders']);
+		$builder = $this->getBuilder();
+		$builder->getConnection()->shouldReceive('select')->once()->with('select count(*) as aggregate from "users"', array())->andReturn(array(array('aggregate' => 1)));
+		$builder->getProcessor()->shouldReceive('processSelect')->once()->andReturnUsing(function($query)
+		{
+			$_SERVER['orders'] = $query->orders;
+		});
+		$results = $builder->from('users')->orderBy('foo', 'desc')->getPaginationCount();
+
+		$this->assertNull($_SERVER['orders']);
+		unset($_SERVER['orders']);
+
+		$this->assertEquals(array(0 => array('column' => 'foo', 'direction' => 'desc')), $builder->orders);
+		$this->assertEquals(1, $results);
+	}
+
+
+	public function testPaginateMethodCorrectlyQueriesTables()
+	{
+		$builder = $this->getBuilder();
+
 	}
 
 

@@ -601,6 +601,18 @@ class Builder {
 	}
 
 	/**
+	 * Set the limit and offset for a given page.
+	 *
+	 * @param  int  $page
+	 * @param  int  $perPage
+	 * @return Illuminate\Database\Query\Builder
+	 */
+	public function forPage($page, $perPage = 15)
+	{
+		return $this->skip(($page - 1) * $perPage)->take($perPage);
+	}
+
+	/**
 	 * Get the SQL representation of the query.
 	 *
 	 * @return string
@@ -680,7 +692,37 @@ class Builder {
 	 */
 	public function paginate($perPage = 15, $columns = array('*'))
 	{
-		//	
+		$paginator = $this->connection->getPaginator();
+
+		$total = $this->getPaginationCount();
+
+		// Once we have the total number of records to be paginated, we can grab the
+		// current page and the result array. Then we are ready to create a brand
+		// new Paginator instances for the results which will create the links.
+		$page = $paginator->getCurrentPage();
+
+		$results = $this->forPage($page, $perPage)->get($columns);
+
+		return $paginator->make($results, $total, $perPage);
+	}
+
+	/**
+	 * Get the count of the total records for pagination.
+	 *
+	 * @return int
+	 */
+	public function getPaginationCount()
+	{
+		list($orders, $this->orders) = array($this->orders, null);
+
+		// Because some database engines may throw errors if we leave the ordering
+		// statements on the query, we will "back them up" and remove them from
+		// the query. Once we have the count we will put them back onto this.
+		$total = $this->count();
+
+		$this->orders = $orders;
+
+		return $total;
 	}
 
 	/**
