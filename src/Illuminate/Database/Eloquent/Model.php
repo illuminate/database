@@ -466,10 +466,14 @@ abstract class Model implements ArrayableInterface {
 			if ($this->incrementing)
 			{
 				$this->id = $query->insertGetId($this->attributes);
+				
+				$this->exists = true;
 			}
 			else
 			{
-				$query->insert($this->attributes);				
+				$query->insert($this->attributes);	
+
+				$this->exists = true;			
 			}
 		}
 
