@@ -28,6 +28,16 @@ class Builder {
 	protected $eagerLoad = array();
 
 	/**
+	 * The methods that should be returned from query builder.
+	 *
+	 * @var array
+	 */
+	protected $passthru = array(
+		'insert', 'insertGetId', 'update', 'delete', 'increment', 'decrement',
+		'count', 'min', 'max', 'avg', 'sum',
+	);
+
+	/**
 	 * Create a new Eloquent query builder instance.
 	 *
 	 * @param  Illuminate\Database\Query\Builder  $query
@@ -380,12 +390,9 @@ class Builder {
 	 */
 	public function __call($method, $parameters)
 	{
-		if (method_exists($this->query, $method))
-		{
-			return call_user_func_array(array($this->query, $method), $parameters);
-		}
+		$result = call_user_func_array(array($this->query, $method), $parameters);
 
-		throw new \BadMethodCallException("Method [$method] does not exist.");
+		return in_array($method, $this->passthru) ? $result : $this;
 	}
 
 }
