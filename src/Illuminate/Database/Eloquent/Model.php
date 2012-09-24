@@ -1026,12 +1026,7 @@ abstract class Model implements ArrayableInterface {
 	{
 		$query = $this->newQuery();
 
-		if (method_exists($query, $method))
-		{
-			return call_user_func_array(array($query, $method), $parameters);
-		}
-
-		throw new \BadMethodCallException("Method [$method] does not exist.");
+		return call_user_func_array(array($query, $method), $parameters);
 	}
 
 	/**
