@@ -189,6 +189,20 @@ class EloquentBuilderTest extends PHPUnit_Framework_TestCase {
 	}
 
 
+	public function testQueryPassThru()
+	{
+		$builder = $this->getBuilder();
+		$builder->getQuery()->shouldReceive('foobar')->once()->andReturn('foo');
+
+		$this->assertInstanceOf('Illuminate\Database\Eloquent\Builder', $builder->foobar());
+
+		$builder = $this->getBuilder();
+		$builder->getQuery()->shouldReceive('insert')->once()->with(array('bar'))->andReturn('foo');
+
+		$this->assertEquals('foo', $builder->insert(array('bar')));
+	}
+
+
 	protected function getBuilder()
 	{
 		return new Builder(m::mock('Illuminate\Database\Query\Builder'));

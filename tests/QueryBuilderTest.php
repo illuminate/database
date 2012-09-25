@@ -279,6 +279,22 @@ class QueryBuilderTest extends PHPUnit_Framework_TestCase {
 	}
 
 
+	public function testListMethodsGetsArrayOfColumnValues()
+	{
+		$builder = $this->getBuilder();
+		$builder->getConnection()->shouldReceive('select')->once()->andReturn(array(array('foo' => 'bar'), array('foo' => 'baz')));
+		$builder->getProcessor()->shouldReceive('processSelect')->once()->with($builder, array(array('foo' => 'bar'), array('foo' => 'baz')));
+		$results = $builder->from('users')->where('id', '=', 1)->lists('foo');
+		$this->assertEquals(array('bar', 'baz'), $results);
+
+		$builder = $this->getBuilder();
+		$builder->getConnection()->shouldReceive('select')->once()->andReturn(array(array('id' => 1, 'foo' => 'bar'), array('id' => 10, 'foo' => 'baz')));
+		$builder->getProcessor()->shouldReceive('processSelect')->once()->with($builder, array(array('id' => 1, 'foo' => 'bar'), array('id' => 10, 'foo' => 'baz')));
+		$results = $builder->from('users')->where('id', '=', 1)->lists('foo', 'id');
+		$this->assertEquals(array(1 => 'bar', 10 => 'baz'), $results);	
+	}
+
+
 	public function testPaginateCorrectlyCreatesPaginatorInstance()
 	{
 		$connection = m::mock('Illuminate\Database\ConnectionInterface');
@@ -313,13 +329,6 @@ class QueryBuilderTest extends PHPUnit_Framework_TestCase {
 
 		$this->assertEquals(array(0 => array('column' => 'foo', 'direction' => 'desc')), $builder->orders);
 		$this->assertEquals(1, $results);
-	}
-
-
-	public function testPaginateMethodCorrectlyQueriesTables()
-	{
-		$builder = $this->getBuilder();
-
 	}
 
 
