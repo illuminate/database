@@ -53,7 +53,11 @@ class Builder {
 	 */
 	public function create($table, Closure $callback)
 	{
-		$this->build($this->createBlueprint($table, $callback)->create());
+		$blueprint = $this->createBlueprint($table, $callback);
+
+		$blueprint->create();
+
+		$this->build($blueprint);
 	}
 
 	/**
@@ -64,7 +68,11 @@ class Builder {
 	 */
 	public function drop($table)
 	{
-		$this->build($this->createBlueprint($table)->drop());
+		$blueprint = $this->createBlueprint($table);
+
+		$blueprint->drop();
+
+		$this->build($blueprint);
 	}
 
 	/**
@@ -76,7 +84,11 @@ class Builder {
 	 */
 	public function rename($from, $to)
 	{
-		$this->build($this->createBlueprint($from)->rename($to));
+		$blueprint = $this->createBlueprint($from);
+
+		$blueprint->rename($to);
+
+		$this->build($blueprint);
 	}
 
 	/**
