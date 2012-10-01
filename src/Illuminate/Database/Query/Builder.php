@@ -889,7 +889,7 @@ class Builder {
 	{
 		$sql = $this->grammar->compileInsertGetId($this, $values, $sequence);
 
-		$values = array_values($values);
+		$values = $this->cleanBindings($values);
 
 		return $this->processor->processInsertGetId($this, $sql, $values, $sequence);
 	}
