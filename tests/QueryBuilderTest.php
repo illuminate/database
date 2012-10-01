@@ -394,6 +394,15 @@ class QueryBuilderTest extends PHPUnit_Framework_TestCase {
 	}
 
 
+	public function testInsertGetIdMethodRemovesExpressions()
+	{
+		$builder = $this->getBuilder();
+		$builder->getProcessor()->shouldReceive('processInsertGetId')->once()->with($builder, 'insert into "users" ("email", "bar") values (?, bar)', array('foo'), 'id')->andReturn(1);
+		$result = $builder->from('users')->insertGetId(array('email' => 'foo', 'bar' => new Illuminate\Database\Query\Expression('bar')), 'id');
+		$this->assertEquals(1, $result);
+	}
+
+
 	public function testInsertMethodRespectsRawBindings()
 	{
 		$builder = $this->getBuilder();
