@@ -63,7 +63,9 @@ abstract class HasOneOrMany extends Relation {
 
 		$instance = $this->related->newInstance(array_merge($attributes, $foreign));
 
-		return $instance->save();
+		$instance->save();
+
+		return $instance->getKey();
 	}
 
 	/**
