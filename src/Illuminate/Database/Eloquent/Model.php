@@ -175,8 +175,9 @@ abstract class Model implements ArrayableInterface {
 	 */
 	public static function create(array $attributes)
 	{
-		$model = new static($attributes);
+		$model = new static;
 
+		$model->fill($attributes);
 		$model->save();
 
 		return $model;
@@ -465,10 +466,14 @@ abstract class Model implements ArrayableInterface {
 			if ($this->incrementing)
 			{
 				$this->id = $query->insertGetId($this->attributes);
+				
+				$this->exists = true;
 			}
 			else
 			{
-				$query->insert($this->attributes);				
+				$query->insert($this->attributes);	
+
+				$this->exists = true;			
 			}
 		}
 
