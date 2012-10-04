@@ -59,7 +59,7 @@ class Migrator {
 	 */
 	public function runMigrations(OuputInterface $output, $package, $path, $pretend = false)
 	{
-		$this->output->writeln('<info>Running migrations at path: '.$path.'</info>');
+		$this->output->writeln('<info>Running migration path: '.$path.'</info>');
 
 		// Once we grab all of the migration files for the path, we will compare them
 		// against the migrations that have already been run for this package then
@@ -117,12 +117,8 @@ class Migrator {
 	 */
 	protected function runUp($output, $migration, $pretend)
 	{
-		if ($pretend)
-		{
-			return $this->pretendToRunUp($output, $migration);
-		}
+		if ($pretend) return $this->pretendToRunUp($output, $migration);
 
-		// Can we simulate the run and catch errors?
 		$migration->up();
 
 		$output->writeln('<info>Migrated: '.get_class($migration).'</info>');
