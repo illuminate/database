@@ -164,9 +164,9 @@ class Migrator {
 		// Now that we have the connections we can resolve it and pretend to run the
 		// queries against the database returning the array of raw SQL statements
 		// that would get fired against the database system for this migration.
-		$connection = $this->resolveConnection($connection);
+		$db = $this->resolveConnection($connection);
 
-		return $connection->pretend(function() use ($migration, $method)
+		return $db->pretend(function() use ($migration, $method)
 		{
 			$migration->$method();
 		});
