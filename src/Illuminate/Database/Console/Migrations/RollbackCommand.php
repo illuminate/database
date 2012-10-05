@@ -1,20 +1,20 @@
 <?php namespace Illuminate\Database\Console\Migrations;
 
-class MigrateCommand extends BasicMigrationCommand {
+class RollbackCommand extends BasicMigrationCommand {
 
 	/**
 	 * The console command name.
 	 *
 	 * @var string
 	 */
-	protected $name = 'migrate';
+	protected $name = 'migrate:rollback';
 
 	/**
 	 * The console command description.
 	 *
 	 * @var string
 	 */
-	protected $description = 'Run the database migrations';
+	protected $description = 'Rollback the last database migration';
 
 	/**
 	 * Execute the console command.
@@ -27,7 +27,7 @@ class MigrateCommand extends BasicMigrationCommand {
 
 		$path = $this->getPackageMigrationPath($package);
 
-		$this->migrator->runMigrations($this->output, $package, $path, $pretend);
+		$this->migrator->rollbackMigrations($this->output, $package, $path, $pretend);
 	}
 
 }

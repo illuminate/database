@@ -59,7 +59,7 @@ class Migrator {
 	 */
 	public function runMigrations(OuputInterface $output, $package, $path, $pretend = false)
 	{
-		$this->output->writeln('<info>Running migration path: '.$path.'</info>');
+		$output->writeln('<info>Running migration path: '.$path.'</info>');
 
 		// Once we grab all of the migration files for the path, we will compare them
 		// against the migrations that have already been run for this package then
@@ -101,9 +101,7 @@ class Migrator {
 		// that the migration was run so we don't repeat it next time we execute.
 		foreach ($migrations as $file)
 		{
-			$this->runUp($output, $this->resolve($file), $pretend);
-
-			$this->repository->logMigration($package, $file, $batch);
+			$this->runUp($output, $package, $file, $pretend);
 		}
 	}
 
@@ -111,32 +109,97 @@ class Migrator {
 	 * Run "up" a migration instance.
 	 *
 	 * @param  Symfony\Component\Console\Output\OutputInterface  $output
-	 * @param  object  $migration
+	 * @param  string  $package
+	 * @param  string  $file
 	 * @param  bool    $pretend
 	 * @return void
 	 */
-	protected function runUp($output, $migration, $pretend)
+	protected function runUp($output, $package, $file, $pretend)
 	{
-		if ($pretend) return $this->pretendToRunUp($output, $migration);
+		// First we will resolve a "real" instance of the migration class from this
+		// migration file name. Once we have the instances we can run the actual
+		// command such as "up" or "down", or we can just simulate the action.
+		$migration = $this->resolve($file);
+
+		if ($pretend)
+		{
+			return $this->pretendToRun($output, $migration, 'up');
+		}
 
 		$migration->up();
 
-		$output->writeln('<info>Migrated: '.get_class($migration).'</info>');
+		// Once we have run a migrations class, we will log that it was run in this
+		// repository so that we don't try to run it next time we do a migration
+		// in the application. A migration repository keeps the migrate order.
+		$this->repository->log($package, $file, $batch);
+
+		$output->writeln("<info>Migrated: $file</info>");
 	}
 
 	/**
-	 * Pretend to run the "up" migrations.
+	 * Rollback the last migration operation.
 	 *
 	 * @param  Symfony\Component\Console\Output\OutputInterface  $output
-	 * @param  object  $migration
+	 * @param  string  $package
+	 * @param  string  $path
+	 * @param  bool    $pretend
+	 * @return int
+	 */
+	public function rollbackMigrations(OutputInterface $output, $package, $path, $pretend = false)
+	{
+		// We want to pull in the last batch of migrations that ran on the previous
+		// migration operation. We'll then reverse those migrations and run each
+		// of them "down" to reverse the last migration "operation" which ran.
+		$migrations = $this->repository->getLastMigrations();
+
+		if (count($migrations) == 0)
+		{
+			$output->writeln('<info>Nothing to rollback.</info>');
+
+			return count($migrations);
+		}
+
+		// We need to reverse these migrations so that they are "downed" in reverse
+		// to what they run on "up". It lets us backtrack through the migrations
+		// and properly reverse the entire database schema operation that ran.
+		foreach (array_reverse($migrations) as $migration)
+		{
+			$this->runDown($output, $migration, $pretend);
+		}
+
+		return count($migrations);
+	}
+
+	/**
+	 * Run "down" a migration instance.
+	 *
+	 * @param  Symfony\Component\Console\Output\OutputInterface  $output
+	 * @param  StdClass  $migration
+	 * @param  bool  $pretend
 	 * @return void
 	 */
-	protected function pretendToRunUp($output, $migration)
+	protected function runDown($output, $migration, $pretend)
 	{
-		foreach ($this->getQueries($output, $migration, 'up') as $query)
+		$file = $migration->migration;
+
+		// First we will get the file name of the migration so we can resolve out an
+		// instance of the migration. Once we get an instance we can either run a
+		// pretend execution of the migration or we can run the real migration.
+		$instance = $this->resolve($file);
+
+		if ($pretend)
 		{
-			$output->writeln("<info>$query</info>");
+			return $this->pretendToRun($output, $instance, 'down');
 		}
+
+		$instance->down();
+
+		// Once we have successfully run the migration "down" we will remove it from
+		// the migration repository so it will be considered to have not been run
+		// by the application then will be able to fire by any later operation.
+		$this->repository->delete($migration);
+
+		$output->writeln("<info>Rolled back: $file</info>");
 	}
 
 	/**
@@ -199,6 +262,21 @@ class Migrator {
 		sort($files);
 
 		return $files;
+	}
+
+	/**
+	 * Pretend to run the migrations.
+	 *
+	 * @param  Symfony\Component\Console\Output\OutputInterface  $output
+	 * @param  object  $migration
+	 * @return void
+	 */
+	protected function pretendToRun($output, $migration, $method)
+	{
+		foreach ($this->getQueries($output, $migration, $method) as $query)
+		{
+			$output->writeln("<info>$query</info>");
+		}
 	}
 
 	/**

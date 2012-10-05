@@ -11,6 +11,13 @@ interface MigrationRepositoryInterface {
 	public function getRanMigrations($package);
 
 	/**
+	 * Get the last migration batch.
+	 *
+	 * @return array
+	 */
+	public function getLastMigrations();
+
+	/**
 	 * Log that a migration was run.
 	 *
 	 * @param  string  $package
@@ -18,7 +25,15 @@ interface MigrationRepositoryInterface {
 	 * @param  int     $batch
 	 * @return void
 	 */
-	public function logMigration($package, $file, $batch);
+	public function log($package, $file, $batch);
+
+	/**
+	 * Remove that a migration from the log.
+	 *
+	 * @param  StdClass  $migration
+	 * @return void
+	 */
+	public function delete($migration);
 
 	/**
 	 * Get the next migration batch number.
