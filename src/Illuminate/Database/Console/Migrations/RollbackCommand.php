@@ -1,6 +1,8 @@
 <?php namespace Illuminate\Database\Console\Migrations;
 
-class RollbackCommand extends BasicMigrationCommand {
+use Illuminate\Console\Command;
+
+class RollbackCommand extends Command {
 
 	/**
 	 * The console command name.
@@ -17,17 +19,33 @@ class RollbackCommand extends BasicMigrationCommand {
 	protected $description = 'Rollback the last database migration';
 
 	/**
+	 * The migrator instance.
+	 *
+	 * @var Illuminate\Database\Console\Migrations\Migrator
+	 */
+	protected $migrator;
+
+	/**
+	 * Create a new migration rollback command instance.
+	 *
+	 * @param  Illuminate\Database\Console\Migrations\Migrator  $migrator
+	 * @return void
+	 */
+	public function __construct(Migrator $migrator)
+	{
+		parent::__construct();
+
+		$this->migrator = $migrator;
+	}
+
+	/**
 	 * Execute the console command.
 	 *
 	 * @return void
 	 */
 	protected function fire()
 	{
-		$package = $this->input->getArgument('package');
-
-		$path = $this->getPackageMigrationPath($package);
-
-		$this->migrator->rollbackMigrations($this->output, $package, $path, $pretend);
+		$this->migrator->rollbackMigrations($this->output, $pretend);
 	}
 
 }

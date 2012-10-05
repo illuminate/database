@@ -140,12 +140,10 @@ class Migrator {
 	 * Rollback the last migration operation.
 	 *
 	 * @param  Symfony\Component\Console\Output\OutputInterface  $output
-	 * @param  string  $package
-	 * @param  string  $path
-	 * @param  bool    $pretend
+	 * @param  bool  $pretend
 	 * @return int
 	 */
-	public function rollbackMigrations(OutputInterface $output, $package, $path, $pretend = false)
+	public function rollbackMigrations(OutputInterface $output, $pretend = false)
 	{
 		// We want to pull in the last batch of migrations that ran on the previous
 		// migration operation. We'll then reverse those migrations and run each
