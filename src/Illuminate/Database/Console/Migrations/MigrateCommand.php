@@ -64,6 +64,11 @@ class MigrateCommand extends Command {
 	{
 		$package = $this->input->getArgument('package');
 
+		// The pretend option can be used for "simulating" the migration and grabbing
+		// the SQL queries that would fire if the migration were to be run against
+		// a database for real, which is helpful for double checking migrations.
+		$pretend = $this->input->getOption('pretend');
+
 		$path = $this->getPackageMigrationPath($package);
 
 		$this->migrator->runMigrations($this->output, $package, $path, $pretend);

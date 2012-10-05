@@ -1,6 +1,7 @@
 <?php namespace Illuminate\Database\Console\Migrations;
 
 use Illuminate\Console\Command;
+use Symfony\Component\Console\Input\InputArgument;
 
 class ResetCommand extends Command {
 
@@ -45,7 +46,21 @@ class ResetCommand extends Command {
 	 */
 	protected function fire()
 	{
+		$pretend = $this->input->getOption('pretend');
+
 		while ($this->migrator->rollbackMigrations($this->output, $pretend)) {}
+	}
+
+	/**
+	 * Get the console command options.
+	 *
+	 * @return array
+	 */
+	protected function getOptions()
+	{
+		return array(
+			array('pretend', null, InputArgument::VALUE_NONE, 'Dump the SQL queries that would be run'),
+		);
 	}
 
 }
