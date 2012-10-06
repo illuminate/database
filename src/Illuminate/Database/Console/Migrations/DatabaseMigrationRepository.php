@@ -1,5 +1,6 @@
 <?php namespace Illuminate\Database\Console\Migrations;
 
+use Closure;
 use Illuminate\Database\Connection;
 
 class DatabaseMigrationRepository implements MigrationRepositoryInterface {
