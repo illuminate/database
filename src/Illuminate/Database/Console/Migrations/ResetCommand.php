@@ -1,7 +1,7 @@
 <?php namespace Illuminate\Database\Console\Migrations;
 
 use Illuminate\Console\Command;
-use Symfony\Component\Console\Input\InputArgument;
+use Symfony\Component\Console\Input\InputOption;
 
 class ResetCommand extends Command {
 
@@ -59,7 +59,7 @@ class ResetCommand extends Command {
 	protected function getOptions()
 	{
 		return array(
-			array('pretend', null, InputArgument::VALUE_NONE, 'Dump the SQL queries that would be run'),
+			array('pretend', null, InputOption::VALUE_NONE, 'Dump the SQL queries that would be run'),
 		);
 	}
 
