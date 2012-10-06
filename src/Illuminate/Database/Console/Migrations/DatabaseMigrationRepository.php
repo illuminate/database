@@ -103,6 +103,28 @@ class DatabaseMigrationRepository implements MigrationRepositoryInterface {
 	}
 
 	/**
+	 * Create the migration repository data store.
+	 *
+	 * @return void
+	 */
+	public function createRepository()
+	{
+		$schema = $this->getConnection()->getSchema();
+
+		$schema->create($this->table, function($table)
+		{
+			// The migrations table is responsible for keeping track of which of the
+			// migrations have actually run for the application. We'll create the
+			// table to hold the migration and package as well as the batch ID.
+			$table->string('migration');
+
+			$table->string('package');
+
+			$table->integer('batch');
+		});
+	}
+
+	/**
 	 * Get a query builder for the migration table.
 	 *
 	 * @return Illuminate\Database\Query\Builder
