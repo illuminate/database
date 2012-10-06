@@ -59,7 +59,7 @@ class Migrator {
 	 */
 	public function runMigrations(OuputInterface $output, $package, $path, $pretend = false)
 	{
-		$output->writeln('<info>Running migration path: '.$path.'</info>');
+		$output->writeln('<info>Running migration path:</info> '.$path);
 
 		// Once we grab all of the migration files for the path, we will compare them
 		// against the migrations that have already been run for this package then
@@ -133,7 +133,7 @@ class Migrator {
 		// in the application. A migration repository keeps the migrate order.
 		$this->repository->log($package, $file, $batch);
 
-		$output->writeln("<info>Migrated: $file</info>");
+		$output->writeln("<info>Migrated:</info> $file");
 	}
 
 	/**
@@ -197,7 +197,7 @@ class Migrator {
 		// by the application then will be able to fire by any later operation.
 		$this->repository->delete($migration);
 
-		$output->writeln("<info>Rolled back: $file</info>");
+		$output->writeln("<info>Rolled back:</info> $file");
 	}
 
 	/**
