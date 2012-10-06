@@ -21,10 +21,10 @@ class DatabaseMigrationRepository implements MigrationRepositoryInterface {
 	/**
 	 * Create a new database migration repository instance.
 	 *
-	 * @param  Illuminate\Database\Connection  $connection
+	 * @param  Illuminate\Database\Connection|Closure  $connection
 	 * @return void
 	 */
-	public function __construct(Connection $connection, $table)
+	public function __construct($connection, $table)
 	{
 		$this->table = $table;
 		$this->connection = $connection;
@@ -108,7 +108,22 @@ class DatabaseMigrationRepository implements MigrationRepositoryInterface {
 	 */
 	protected function table()
 	{
-		return $this->connection->table($this->table);
+		return $this->getConnection()->table($this->table);
+	}
+
+	/**
+	 * Resolve the database connection instance.
+	 *
+	 * @return Illuminate\Database\Connection
+	 */
+	protected function getConnection()
+	{
+		if ($this->connection instanceof Closure)
+		{
+			$this->connection = call_user_func($this->connection);
+		}
+
+		return $this->connection;
 	}
 
 }
