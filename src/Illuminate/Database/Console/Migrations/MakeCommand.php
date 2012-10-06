@@ -101,9 +101,9 @@ class MakeCommand extends Command {
 		return array(
 			array('path', null, InputOption::VALUE_OPTIONAL, 'Where to put the migration file'),
 
-			array('table', null, InputOption::VALUE_OPTIONAL, 'The table to modify'),
+			array('table', null, InputOption::VALUE_OPTIONAL, 'The table to migrate'),
 
-			array('create', null, InputOption::VALUE_NONE, 'The table should be created'),
+			array('create', null, InputOption::VALUE_NONE, 'The table needs to be created'),
 		);
 	}
 
