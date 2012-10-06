@@ -65,6 +65,8 @@ class MakeCommand extends Command {
 		$create = $this->input->getOption('create');
 
 		$this->creator->create($name, $this->getPath(), $table, $create);
+
+		$this->info('Enjoy your new migration!');
 	}
 
 	/**
@@ -85,7 +87,7 @@ class MakeCommand extends Command {
 	protected function getArguments()
 	{
 		return array(
-			array('name', InputArgument::REQUIRED, 'The name of the migration', null),
+			array('name', InputArgument::REQUIRED, 'The name of the migration'),
 		);
 	}
 

@@ -47,6 +47,8 @@ class InstallCommand extends Command {
 	protected function fire()
 	{
 		$this->repository->createRepository();
+
+		$this->info("Nice! Now we're ready to do some migrating!");
 	}
 
 }
