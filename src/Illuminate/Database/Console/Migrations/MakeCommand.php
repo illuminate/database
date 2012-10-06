@@ -21,6 +21,13 @@ class MakeCommand extends Command {
 	protected $description = 'Create a new migration file';
 
 	/**
+	 * The default path to the migrations.
+	 *
+	 * @var string
+	 */
+	protected $path;
+
+	/**
 	 * The migration creaotor instance.
 	 *
 	 * @var Illuminate\Database\Console\Migrations\MigrationCreator
@@ -33,10 +40,11 @@ class MakeCommand extends Command {
 	 * @param  Illuminate\Database\Console\Migrations\MigrationCreator  $creator
 	 * @return void
 	 */
-	public function __construct(MigrationCreator $creator)
+	public function __construct(MigrationCreator $creator, $path)
 	{
 		parent::__construct();
 
+		$this->path = $path;
 		$this->creator = $creator;
 	}
 
@@ -49,7 +57,24 @@ class MakeCommand extends Command {
 	{
 		$name = $this->input->getArgument('name');
 
-		$this->creator->createMigration($name, $this->input->getOption('path'));
+		// It's possible for the developer to specify the tables to modify in this
+		// schema operation. The developer may also specify if this table needs
+		// to be freshly created so we can create the appropriate migrations.
+		$table = $this->input->getOption('table');
+
+		$create = $this->input->getOption('create');
+
+		$this->creator->create($name, $this->getPath(), $table, $create);
+	}
+
+	/**
+	 * Get the path to the migration directory.
+	 *
+	 * @return string
+	 */
+	protected function getPath()
+	{
+		return $this->input->getArgument('path') ?: $this->path;
 	}
 
 	/**
@@ -72,7 +97,11 @@ class MakeCommand extends Command {
 	protected function getOptions()
 	{
 		return array(
-			array('path', 'p', InputOption::VALUE_OPTIONAL, 'Where to put the migration file', null),
+			array('path', null, InputOption::VALUE_OPTIONAL, 'Where to put the migration file'),
+
+			array('table', null, InputOption::VALUE_OPTIONAL, 'The table to modify'),
+
+			array('create', null, InputOption::VALUE_NONE, 'The table should be created'),
 		);
 	}
 
