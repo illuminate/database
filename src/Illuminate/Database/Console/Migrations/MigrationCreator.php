@@ -50,7 +50,7 @@ class MigrationCreator {
 	{
 		if (is_null($table))
 		{
-			return $this->files->get(__DIR__.'/stubs/blank.stub');
+			return $this->files->get(__DIR__.'/stubs/blank.php');
 		}
 
 		// We also have stubs for creating new tables and modifying existing tables
@@ -58,7 +58,7 @@ class MigrationCreator {
 		// or modifying existing tables. We'll grab the appropriate stub here.
 		else
 		{
-			$stub = $create ? 'create.stub' : 'update.stub';
+			$stub = $create ? 'create.php' : 'update.php';
 
 			return $this->files->get(__DIR__.'/stubs/'.$stub);
 		}
