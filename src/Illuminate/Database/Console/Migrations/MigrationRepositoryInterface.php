@@ -8,14 +8,14 @@ interface MigrationRepositoryInterface {
 	 * @param  string  $package
 	 * @return array
 	 */
-	public function getRanMigrations($package);
+	public function getRan($package);
 
 	/**
 	 * Get the last migration batch.
 	 *
 	 * @return array
 	 */
-	public function getLastMigrations();
+	public function getLast();
 
 	/**
 	 * Log that a migration was run.

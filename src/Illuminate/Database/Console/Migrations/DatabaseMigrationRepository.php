@@ -8,7 +8,7 @@ class DatabaseMigrationRepository implements MigrationRepositoryInterface {
 	/**
 	 * The database connection instance.
 	 *
-	 * @var Illuminate\Database\Connection
+	 * @var Illuminate\Database\Connection|Closure
 	 */
 	protected $connection;
 
@@ -37,7 +37,7 @@ class DatabaseMigrationRepository implements MigrationRepositoryInterface {
 	 * @param  string  $package
 	 * @return array
 	 */
-	public function getRanMigrations($package)
+	public function getRan($package)
 	{
 		return $this->table()->where('package', $package)->lists('migration');
 	}
@@ -47,7 +47,7 @@ class DatabaseMigrationRepository implements MigrationRepositoryInterface {
 	 *
 	 * @return array
 	 */
-	public function getLastMigrations()
+	public function getLast()
 	{
 		$query = $this->table()->where('batch', $this->getLastBatchNumber());
 
@@ -139,7 +139,7 @@ class DatabaseMigrationRepository implements MigrationRepositoryInterface {
 	 *
 	 * @return Illuminate\Database\Connection
 	 */
-	protected function getConnection()
+	public function getConnection()
 	{
 		if ($this->connection instanceof Closure)
 		{

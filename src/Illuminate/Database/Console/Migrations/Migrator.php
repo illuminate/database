@@ -66,7 +66,7 @@ class Migrator {
 		// run all of the oustanding migrations against the database connection.
 		$files = $this->getMigrationFiles($path);
 
-		$ran = $this->repository->getRanMigrations($package);
+		$ran = $this->repository->getRan($package);
 
 		$migrations = array_diff($files, $ran);
 
@@ -148,7 +148,7 @@ class Migrator {
 		// We want to pull in the last batch of migrations that ran on the previous
 		// migration operation. We'll then reverse those migrations and run each
 		// of them "down" to reverse the last migration "operation" which ran.
-		$migrations = $this->repository->getLastMigrations();
+		$migrations = $this->repository->getLast();
 
 		if (count($migrations) == 0)
 		{
