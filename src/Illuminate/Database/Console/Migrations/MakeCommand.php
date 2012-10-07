@@ -21,13 +21,6 @@ class MakeCommand extends Command {
 	protected $description = 'Create a new migration file';
 
 	/**
-	 * The default path to the migrations.
-	 *
-	 * @var string
-	 */
-	protected $path;
-
-	/**
 	 * The migration creaotor instance.
 	 *
 	 * @var Illuminate\Database\Console\Migrations\MigrationCreator
@@ -35,17 +28,33 @@ class MakeCommand extends Command {
 	protected $creator;
 
 	/**
+	 * The paths to the migration files.
+	 *
+	 * @var array
+	 */
+	protected $paths;
+
+	/**
+	 * The path to the packages directory (vendor).
+	 *
+	 * @var string
+	 */
+	protected $packagePath;
+
+	/**
 	 * Create a new migration install command instance.
 	 *
 	 * @param  Illuminate\Database\Console\Migrations\MigrationCreator  $creator
+	 * @param  array  $paths
 	 * @return void
 	 */
-	public function __construct(MigrationCreator $creator, $path)
+	public function __construct(MigrationCreator $creator, array $paths, $packagePath)
 	{
 		parent::__construct();
 
-		$this->path = $path;
+		$this->paths = $paths;
 		$this->creator = $creator;
+		$this->packagePath = $packagePath;
 	}
 
 	/**
@@ -55,16 +64,21 @@ class MakeCommand extends Command {
 	 */
 	protected function fire()
 	{
-		$name = $this->input->getArgument('name');
-
 		// It's possible for the developer to specify the tables to modify in this
 		// schema operation. The developer may also specify if this table needs
 		// to be freshly created so we can create the appropriate migrations.
+		$name = $this->input->getArgument('name');
+
 		$table = $this->input->getOption('table');
 
 		$create = $this->input->getOption('create');
 
-		$this->creator->create($name, $this->getPath(), $table, $create);
+		// Now we're ready to get the path where these migrations should be placed
+		// on disk. This may be specified via the package option on the command
+		// and we will verify that option to determine the appropriate paths.
+		$path = $this->getPath();
+
+		$this->creator->create($name, $path, $table, $create);
 
 		$this->info('Enjoy your new migration!');
 	}
@@ -76,14 +90,17 @@ class MakeCommand extends Command {
 	 */
 	protected function getPath()
 	{
-		$path = $this->input->getOption('path');
+		$package = $this->input->getOption('package');
 
-		if ( ! is_null($path))
+		// If the package is in the list of migration paths we received we will put
+		// the migrations in that path. Otherwise, we will assume the package is
+		// is in the package directories and will place them in that location.
+		if (isset($this->paths[$package]))
 		{
-			return str_replace('{app}', $this->laravel['path'], $path);
+			return $this->paths[$package];
 		}
 
-		return $this->path;
+		return $this->packagePath.'/'.$package.'/src/migrations';
 	}
 
 	/**
@@ -106,7 +123,7 @@ class MakeCommand extends Command {
 	protected function getOptions()
 	{
 		return array(
-			array('path', null, InputOption::VALUE_OPTIONAL, 'Where to put the migration file'),
+			array('package', null, InputOption::VALUE_OPTIONAL, 'The package the migration belongs to', 'application'),
 
 			array('table', null, InputOption::VALUE_OPTIONAL, 'The table to migrate'),
 
