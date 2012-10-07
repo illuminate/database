@@ -28,11 +28,11 @@ class MigrateCommand extends Command {
 	protected $migrator;
 
 	/**
-	 * The default path to the migration files.
+	 * The paths to the migrations.
 	 *
-	 * @var string
+	 * @var array
 	 */
-	protected $path;
+	protected $paths;
 
 	/**
 	 * The path to the packages directory (vendor).
@@ -43,15 +43,15 @@ class MigrateCommand extends Command {
 	 * Create a new migration command instance.
 	 *
 	 * @param  Illuminate\Database\Console\Migrations\Migrator  $migrator
-	 * @param  string  $path
+	 * @param  array   $paths
 	 * @param  string  $packagePath
 	 * @return void
 	 */
-	public function __construct(Migrator $migrator, $path, $packagePath)
+	public function __construct(Migrator $migrator, array $paths, $packagePath)
 	{
 		parent::__construct();
 
-		$this->path = $path;
+		$this->paths = $paths;
 		$this->migrator = $migrator;
 		$this->packagePath = $packagePath;
 	}
@@ -83,7 +83,7 @@ class MigrateCommand extends Command {
 	 */
 	protected function getPackageMigrationPath($package)
 	{
-		if ($package == 'application') return $this->path;
+		if (isset($this->paths[$package])) return $this->paths[$package];
 
 		return $this->packagePath.'/'.$package.'/src/migrations';
 	}
