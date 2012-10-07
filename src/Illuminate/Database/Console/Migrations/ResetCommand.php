@@ -44,7 +44,7 @@ class ResetCommand extends Command {
 	 *
 	 * @return void
 	 */
-	protected function fire()
+	public function fire()
 	{
 		$pretend = $this->input->getOption('pretend');
 

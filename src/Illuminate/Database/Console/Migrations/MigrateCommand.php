@@ -61,7 +61,7 @@ class MigrateCommand extends Command {
 	 *
 	 * @return void
 	 */
-	protected function fire()
+	public function fire()
 	{
 		$package = $this->input->getArgument('package');
 

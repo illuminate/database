@@ -44,7 +44,7 @@ class InstallCommand extends Command {
 	 *
 	 * @return void
 	 */
-	protected function fire()
+	public function fire()
 	{
 		$this->repository->createRepository();
 
