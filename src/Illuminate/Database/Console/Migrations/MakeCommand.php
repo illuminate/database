@@ -76,7 +76,14 @@ class MakeCommand extends Command {
 	 */
 	protected function getPath()
 	{
-		return $this->input->getArgument('path') ?: $this->path;
+		$path = $this->input->getOption('path');
+
+		if ( ! is_null($path))
+		{
+			return str_replace('{app}', $this->laravel['path'], $path);
+		}
+
+		return $this->path;
 	}
 
 	/**
