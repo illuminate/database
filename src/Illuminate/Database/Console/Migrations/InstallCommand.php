@@ -1,7 +1,7 @@
 <?php namespace Illuminate\Database\Console\Migrations;
 
 use Illuminate\Console\Command;
-use Illuminate\Database\Console\Migrations\MigrationRepositoryInterface;
+use Illuminate\Database\Migrations\MigrationRepositoryInterface;
 
 class InstallCommand extends Command {
 

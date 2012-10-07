@@ -1,6 +1,7 @@
 <?php namespace Illuminate\Database\Console\Migrations;
 
 use Illuminate\Console\Command;
+use Illuminate\Database\Migrations\Migrator;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Input\InputArgument;
 
@@ -23,7 +24,7 @@ class MigrateCommand extends Command {
 	/**
 	 * The migrator instance.
 	 *
-	 * @var Illuminate\Database\Console\Migrations\Migrator
+	 * @var Illuminate\Database\Migrations\Migrator
 	 */
 	protected $migrator;
 
@@ -42,7 +43,7 @@ class MigrateCommand extends Command {
 	/**
 	 * Create a new migration command instance.
 	 *
-	 * @param  Illuminate\Database\Console\Migrations\Migrator  $migrator
+	 * @param  Illuminate\Database\Migrations\Migrator  $migrator
 	 * @param  array   $paths
 	 * @param  string  $packagePath
 	 * @return void

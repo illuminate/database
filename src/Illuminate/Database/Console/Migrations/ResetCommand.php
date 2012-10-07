@@ -1,6 +1,7 @@
 <?php namespace Illuminate\Database\Console\Migrations;
 
 use Illuminate\Console\Command;
+use Illuminate\Database\Migrations\Migrator;
 use Symfony\Component\Console\Input\InputOption;
 
 class ResetCommand extends Command {
@@ -22,14 +23,14 @@ class ResetCommand extends Command {
 	/**
 	 * The migrator instance.
 	 *
-	 * @var Illuminate\Database\Console\Migrations\Migrator
+	 * @var Illuminate\Database\Migrations\Migrator
 	 */
 	protected $migrator;
 
 	/**
 	 * Create a new migration rollback command instance.
 	 *
-	 * @param  Illuminate\Database\Console\Migrations\Migrator  $migrator
+	 * @param  Illuminate\Database\Migrations\Migrator  $migrator
 	 * @return void
 	 */
 	public function __construct(Migrator $migrator)

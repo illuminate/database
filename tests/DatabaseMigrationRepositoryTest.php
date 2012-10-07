@@ -1,7 +1,7 @@
 <?php
 
 use Mockery as m;
-use Illuminate\Database\Console\Migrations\DatabaseMigrationRepository;
+use Illuminate\Database\Migrations\DatabaseMigrationRepository;
 
 class DatabaseMigrationRepositoryTest extends PHPUnit_Framework_TestCase {
 
@@ -25,7 +25,7 @@ class DatabaseMigrationRepositoryTest extends PHPUnit_Framework_TestCase {
 
 	public function testGetLastMigrationsGetsAllMigrationsWithTheLatestBatchNumber()
 	{
-		$repo = $this->getMock('Illuminate\Database\Console\Migrations\DatabaseMigrationRepository', array('getLastBatchNumber'), array(
+		$repo = $this->getMock('Illuminate\Database\Migrations\DatabaseMigrationRepository', array('getLastBatchNumber'), array(
 			m::mock('Illuminate\Database\Connection'), 'migrations'
 		));
 		$repo->expects($this->once())->method('getLastBatchNumber')->will($this->returnValue(1));
@@ -66,7 +66,7 @@ class DatabaseMigrationRepositoryTest extends PHPUnit_Framework_TestCase {
 
 	public function testGetNextBatchNumberReturnsLastBatchNumberPlusOne()
 	{
-		$repo = $this->getMock('Illuminate\Database\Console\Migrations\DatabaseMigrationRepository', array('getLastBatchNumber'), array(
+		$repo = $this->getMock('Illuminate\Database\Migrations\DatabaseMigrationRepository', array('getLastBatchNumber'), array(
 			m::mock('Illuminate\Database\Connection'), 'migrations'
 		));
 		$repo->expects($this->once())->method('getLastBatchNumber')->will($this->returnValue(1));

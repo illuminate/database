@@ -1,4 +1,4 @@
-<?php namespace Illuminate\Database\Console\Migrations;
+<?php namespace Illuminate\Database\Migrations;
 
 use Closure;
 use Illuminate\Filesystem;
@@ -10,7 +10,7 @@ class Migrator {
 	/**
 	 * The migration repository implementation.
 	 *
-	 * @var Illuminate\Database\Console\Migrations\MigrationRepositoryInterface
+	 * @var Illuminate\Database\Migrations\MigrationRepositoryInterface
 	 */
 	protected $repository;
 
@@ -38,7 +38,7 @@ class Migrator {
 	/**
 	 * Create a new migrator instance.
 	 *
-	 * @param  Illuminate\Database\Console\Migrations\MigrationRepositoryInterface  $repository
+	 * @param  Illuminate\Database\Migrations\MigrationRepositoryInterface  $repository
 	 * @param  Illuminate\Filesystem  $files
 	 */
 	public function __construct(MigrationRepositoryInterface $repository,

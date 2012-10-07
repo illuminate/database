@@ -1,4 +1,4 @@
-<?php namespace Illuminate\Database\Console\Migrations;
+<?php namespace Illuminate\Database\Migrations;
 
 use Closure;
 use Illuminate\Database\Connection;

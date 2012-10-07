@@ -3,6 +3,7 @@
 use Illuminate\Console\Command;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Input\InputArgument;
+use Illuminate\Database\Migrations\MigrationCreator;
 
 class MakeCommand extends Command {
 
@@ -23,7 +24,7 @@ class MakeCommand extends Command {
 	/**
 	 * The migration creaotor instance.
 	 *
-	 * @var Illuminate\Database\Console\Migrations\MigrationCreator
+	 * @var Illuminate\Database\Migrations\MigrationCreator
 	 */
 	protected $creator;
 
@@ -44,7 +45,7 @@ class MakeCommand extends Command {
 	/**
 	 * Create a new migration install command instance.
 	 *
-	 * @param  Illuminate\Database\Console\Migrations\MigrationCreator  $creator
+	 * @param  Illuminate\Database\Migrations\MigrationCreator  $creator
 	 * @param  array  $paths
 	 * @return void
 	 */
@@ -80,7 +81,7 @@ class MakeCommand extends Command {
 
 		$this->creator->create($name, $path, $table, $create);
 
-		$this->info('Enjoy your new migration!');
+		$this->info('Migration created successfully!');
 	}
 
 	/**
