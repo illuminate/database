@@ -50,7 +50,7 @@ class MigrationCreator {
 	{
 		if (is_null($table))
 		{
-			return $this->files->get(__DIR__.'/stubs/blank.php');
+			return $this->files->get($this->getStubPath().'/blank.php');
 		}
 
 		// We also have stubs for creating new tables and modifying existing tables
@@ -60,7 +60,7 @@ class MigrationCreator {
 		{
 			$stub = $create ? 'create.php' : 'update.php';
 
-			return $this->files->get(__DIR__.'/stubs/'.$stub);
+			return $this->files->get($this->getStubPath()."/{$stub}");
 		}
 	}
 
@@ -107,6 +107,26 @@ class MigrationCreator {
 	protected function getDatePrefix()
 	{
 		return date('Y_m_d_His');
+	}
+
+	/**
+	 * Get the path to the stubs.
+	 *
+	 * @return string
+	 */
+	public function getStubPath()
+	{
+		return __DIR__.'/stubs';
+	}
+
+	/**
+	 * Get the filesystem instance.
+	 *
+	 * @return Illuminate\Filesystem
+	 */
+	public function getFilesystem()
+	{
+		return $this->files;
 	}
 
 }
