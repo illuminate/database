@@ -183,6 +183,21 @@ class MigratorTest extends PHPUnit_Framework_TestCase {
 		$migrator->rollbackMigrations($output, true);
 	}
 
+
+	public function testNothingIsRolledBackWhenNothingInRepository()
+	{
+		$migrator = $this->getMock('Illuminate\Database\Migrations\Migrator', array('resolve'), array(
+			m::mock('Illuminate\Database\Migrations\MigrationRepositoryInterface'),
+			m::mock('Illuminate\Filesystem'),
+		));
+		$migrator->getRepository()->shouldReceive('getLast')->once()->andReturn(array());
+
+		$output = m::mock('Symfony\Component\Console\Output\OutputInterface');
+		$output->shouldReceive('writeln')->once()->with('<info>Nothing to rollback.</info>');
+
+		$migrator->rollbackMigrations($output);
+	}
+
 }
 
 
