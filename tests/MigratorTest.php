@@ -140,6 +140,49 @@ class MigratorTest extends PHPUnit_Framework_TestCase {
 		$migrator->rollbackMigrations($output);
 	}
 
+
+	public function testRollbackMigrationsCanBePretended()
+	{
+		$migrator = $this->getMock('Illuminate\Database\Migrations\Migrator', array('resolve'), array(
+			m::mock('Illuminate\Database\Migrations\MigrationRepositoryInterface'),
+			m::mock('Illuminate\Filesystem'),
+		));
+		$migrator->getRepository()->shouldReceive('getLast')->once()->andReturn(array(
+			$fooMigration = new MigratorTestMigrationStub('foo'),
+			$barMigration = new MigratorTestMigrationStub('bar'),
+		));
+
+		$barMock = m::mock('stdClass');
+		$barMock->shouldReceive('getConnection')->once()->andReturn(null);
+		$barMock->shouldReceive('down')->once();
+
+		$fooMock = m::mock('stdClass');
+		$fooMock->shouldReceive('getConnection')->once()->andReturn(null);
+		$fooMock->shouldReceive('down')->once();
+
+		$migrator->expects($this->at(0))->method('resolve')->with($this->equalTo('bar'))->will($this->returnValue($barMock));
+		$migrator->expects($this->at(1))->method('resolve')->with($this->equalTo('foo'))->will($this->returnValue($fooMock));
+
+		$connection = m::mock('stdClass');
+		$connection->shouldReceive('pretend')->with(m::type('Closure'))->andReturnUsing(function($closure)
+		{
+			$closure();
+			return array('bar');
+		},
+		function($closure)
+		{
+			$closure();
+			return array('foo');
+		});
+		$migrator->addConnection('default', function() use ($connection) { return $connection; });
+
+		$output = m::mock('Symfony\Component\Console\Output\OutputInterface');
+		$output->shouldReceive('writeln')->once()->with('<info>bar</info>');
+		$output->shouldReceive('writeln')->once()->with('<info>foo</info>');
+
+		$migrator->rollbackMigrations($output, true);
+	}
+
 }
 
 
