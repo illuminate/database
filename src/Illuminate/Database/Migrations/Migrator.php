@@ -89,7 +89,7 @@ class Migrator {
 		// that all of the migrations have been run against this database system.
 		if (count($migrations) == 0)
 		{
-			$output->writeln('<info>No outstanding migrations.</info>');
+			$output->writeln('<info>Nothing to migrate.</info>');
 
 			return;
 		}
@@ -202,39 +202,6 @@ class Migrator {
 	}
 
 	/**
-	 * Get all of the queries that would be run for a migration.
-	 *
-	 * @param  Symfony\Component\Console\Output\OutputInterface  $output
-	 * @param  object  $migration
-	 * @param  string  $method
-	 * @return array
-	 */
-	protected function getQueries($output, $migration, $method)
-	{
-		// If the migration is marked as not pretendable, we will skip it and make a
-		// note of it in the output. Some migration may be marked like this if it
-		// they do other functions such as interact with things besides the DB.
-		if ( ! $migration->pretend)
-		{
-			$class = get_class($migration);
-
-			$output->writeln("<error>Can't simulate [$class].</error>");
-		}
-
-		$connection = $migration->connection;
-
-		// Now that we have the connections we can resolve it and pretend to run the
-		// queries against the database returning the array of raw SQL statements
-		// that would get fired against the database system for this migration.
-		$db = $this->resolveConnection($connection);
-
-		return $db->pretend(function() use ($migration, $method)
-		{
-			$migration->$method();
-		});
-	}
-
-	/**
 	 * Get all of the migration files in a given path.
 	 *
 	 * @param  string  $path
@@ -276,6 +243,29 @@ class Migrator {
 		{
 			$output->writeln("<info>$query</info>");
 		}
+	}
+
+	/**
+	 * Get all of the queries that would be run for a migration.
+	 *
+	 * @param  Symfony\Component\Console\Output\OutputInterface  $output
+	 * @param  object  $migration
+	 * @param  string  $method
+	 * @return array
+	 */
+	protected function getQueries($output, $migration, $method)
+	{
+		$connection = $migration->getConnection();
+
+		// Now that we have the connections we can resolve it and pretend to run the
+		// queries against the database returning the array of raw SQL statements
+		// that would get fired against the database system for this migration.
+		$db = $this->resolveConnection($connection);
+
+		return $db->pretend(function() use ($migration, $method)
+		{
+			$migration->$method();
+		});
 	}
 
 	/**
