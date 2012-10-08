@@ -57,7 +57,7 @@ class Migrator {
 	 * @param  bool    $pretend
 	 * @return void
 	 */
-	public function runMigrations(OutputInterface $output, $package, $path, $pretend = false)
+	public function run(OutputInterface $output, $package, $path, $pretend = false)
 	{
 		// Once we grab all of the migration files for the path, we will compare them
 		// against the migrations that have already been run for this package then
@@ -142,7 +142,7 @@ class Migrator {
 	 * @param  bool  $pretend
 	 * @return int
 	 */
-	public function rollbackMigrations(OutputInterface $output, $pretend = false)
+	public function rollback(OutputInterface $output, $pretend = false)
 	{
 		// We want to pull in the last batch of migrations that ran on the previous
 		// migration operation. We'll then reverse those migrations and run each

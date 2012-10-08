@@ -38,7 +38,7 @@ class MigratorTest extends PHPUnit_Framework_TestCase {
 		$output->shouldReceive('writeln')->once()->with('<info>Migrated:</info> 2_bar');
 		$output->shouldReceive('writeln')->once()->with('<info>Migrated:</info> 3_baz');
 
-		$migrator->runMigrations($output, 'application', __DIR__);
+		$migrator->run($output, 'application', __DIR__);
 	}
 
 
@@ -86,7 +86,7 @@ class MigratorTest extends PHPUnit_Framework_TestCase {
 		$output->shouldReceive('writeln')->once()->with('<info>foo</info>');
 		$output->shouldReceive('writeln')->once()->with('<info>bar</info>');
 
-		$migrator->runMigrations($output, 'application', __DIR__, true);	
+		$migrator->run($output, 'application', __DIR__, true);	
 	}
 
 
@@ -106,7 +106,7 @@ class MigratorTest extends PHPUnit_Framework_TestCase {
 		$output = m::mock('Symfony\Component\Console\Output\OutputInterface');
 		$output->shouldReceive('writeln')->once()->with('<info>Nothing to migrate.</info>');
 
-		$migrator->runMigrations($output, 'application', __DIR__);
+		$migrator->run($output, 'application', __DIR__);
 	}
 
 
@@ -137,7 +137,7 @@ class MigratorTest extends PHPUnit_Framework_TestCase {
 		$output->shouldReceive('writeln')->once()->with('<info>Rolled back:</info> bar');
 		$output->shouldReceive('writeln')->once()->with('<info>Rolled back:</info> foo');
 
-		$migrator->rollbackMigrations($output);
+		$migrator->rollback($output);
 	}
 
 
@@ -180,7 +180,7 @@ class MigratorTest extends PHPUnit_Framework_TestCase {
 		$output->shouldReceive('writeln')->once()->with('<info>bar</info>');
 		$output->shouldReceive('writeln')->once()->with('<info>foo</info>');
 
-		$migrator->rollbackMigrations($output, true);
+		$migrator->rollback($output, true);
 	}
 
 
@@ -195,7 +195,7 @@ class MigratorTest extends PHPUnit_Framework_TestCase {
 		$output = m::mock('Symfony\Component\Console\Output\OutputInterface');
 		$output->shouldReceive('writeln')->once()->with('<info>Nothing to rollback.</info>');
 
-		$migrator->rollbackMigrations($output);
+		$migrator->rollback($output);
 	}
 
 }
