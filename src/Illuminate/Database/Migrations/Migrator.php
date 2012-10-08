@@ -57,7 +57,7 @@ class Migrator {
 	 * @param  bool    $pretend
 	 * @return void
 	 */
-	public function runMigrations(OuputInterface $output, $package, $path, $pretend = false)
+	public function runMigrations(OutputInterface $output, $package, $path, $pretend = false)
 	{
 		$output->writeln('<info>Running migration path:</info> '.$path);
 
@@ -101,7 +101,7 @@ class Migrator {
 		// that the migration was run so we don't repeat it next time we execute.
 		foreach ($migrations as $file)
 		{
-			$this->runUp($output, $package, $file, $pretend);
+			$this->runUp($output, $package, $file, $batch, $pretend);
 		}
 	}
 
@@ -111,10 +111,11 @@ class Migrator {
 	 * @param  Symfony\Component\Console\Output\OutputInterface  $output
 	 * @param  string  $package
 	 * @param  string  $file
+	 * @param  int     $batch
 	 * @param  bool    $pretend
 	 * @return void
 	 */
-	protected function runUp($output, $package, $file, $pretend)
+	protected function runUp($output, $package, $file, $batch, $pretend)
 	{
 		// First we will resolve a "real" instance of the migration class from this
 		// migration file name. Once we have the instances we can run the actual
@@ -283,7 +284,7 @@ class Migrator {
 	 * @param  string  $file
 	 * @return object
 	 */
-	protected function resolve($file)
+	public function resolve($file)
 	{
 		$class = camel_case(array_slice(explode('_', $file), 1));
 
@@ -325,6 +326,26 @@ class Migrator {
 		}
 
 		throw new \InvalidArgumentException("Undefined connection [$name]");
+	}
+
+	/**
+	 * Get the migration repository instance.
+	 *
+	 * @return Illuminate\Database\Migrations\MigrationRepositoryInterface
+	 */
+	public function getRepository()
+	{
+		return $this->repository;
+	}
+
+	/**
+	 * Get the file system instance.
+	 *
+	 * @return Illuminate\Filesystem
+	 */
+	public function getFilesystem()
+	{
+		return $this->files;
 	}
 
 }
