@@ -59,8 +59,6 @@ class Migrator {
 	 */
 	public function runMigrations(OutputInterface $output, $package, $path, $pretend = false)
 	{
-		$output->writeln('<info>Running migration path:</info> '.$path);
-
 		// Once we grab all of the migration files for the path, we will compare them
 		// against the migrations that have already been run for this package then
 		// run all of the oustanding migrations against the database connection.

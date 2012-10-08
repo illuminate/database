@@ -35,7 +35,6 @@ class MigratorTest extends PHPUnit_Framework_TestCase {
 		$migrator->expects($this->at(1))->method('resolve')->with($this->equalTo('3_baz'))->will($this->returnValue($bazMock));
 
 		$output = m::mock('Symfony\Component\Console\Output\OutputInterface');
-		$output->shouldReceive('writeln')->once()->with('<info>Running migration path:</info> '.__DIR__);
 		$output->shouldReceive('writeln')->once()->with('<info>Migrated:</info> 2_bar');
 		$output->shouldReceive('writeln')->once()->with('<info>Migrated:</info> 3_baz');
 
@@ -84,7 +83,6 @@ class MigratorTest extends PHPUnit_Framework_TestCase {
 		$migrator->addConnection('default', function() use ($connection) { return $connection; });
 
 		$output = m::mock('Symfony\Component\Console\Output\OutputInterface');
-		$output->shouldReceive('writeln')->once()->with('<info>Running migration path:</info> '.__DIR__);
 		$output->shouldReceive('writeln')->once()->with('<info>foo</info>');
 		$output->shouldReceive('writeln')->once()->with('<info>bar</info>');
 
@@ -106,18 +104,46 @@ class MigratorTest extends PHPUnit_Framework_TestCase {
 		));
 
 		$output = m::mock('Symfony\Component\Console\Output\OutputInterface');
-		$output->shouldReceive('writeln')->once()->with('<info>Running migration path:</info> '.__DIR__);
 		$output->shouldReceive('writeln')->once()->with('<info>Nothing to migrate.</info>');
 
 		$migrator->runMigrations($output, 'application', __DIR__);
 	}
 
 
-	protected function getMigrator()
+	public function testLastBatchOfMigrationsCanBeRolledBack()
 	{
-		$repository = m::mock('Illuminate\Database\Migrations\MigrationRepositoryInterface');
-		$files = m::mock('Illuminate\Filesystem');
-		return new Migrator($repository, $files);
+		$migrator = $this->getMock('Illuminate\Database\Migrations\Migrator', array('resolve'), array(
+			m::mock('Illuminate\Database\Migrations\MigrationRepositoryInterface'),
+			m::mock('Illuminate\Filesystem'),
+		));
+		$migrator->getRepository()->shouldReceive('getLast')->once()->andReturn(array(
+			$fooMigration = new MigratorTestMigrationStub('foo'),
+			$barMigration = new MigratorTestMigrationStub('bar'),
+		));
+
+		$barMock = m::mock('stdClass');
+		$barMock->shouldReceive('down')->once();
+
+		$fooMock = m::mock('stdClass');
+		$fooMock->shouldReceive('down')->once();
+
+		$migrator->expects($this->at(0))->method('resolve')->with($this->equalTo('bar'))->will($this->returnValue($barMock));
+		$migrator->expects($this->at(1))->method('resolve')->with($this->equalTo('foo'))->will($this->returnValue($fooMock));
+
+		$migrator->getRepository()->shouldReceive('delete')->once()->with($barMigration);
+		$migrator->getRepository()->shouldReceive('delete')->once()->with($fooMigration);
+
+		$output = m::mock('Symfony\Component\Console\Output\OutputInterface');
+		$output->shouldReceive('writeln')->once()->with('<info>Rolled back:</info> bar');
+		$output->shouldReceive('writeln')->once()->with('<info>Rolled back:</info> foo');
+
+		$migrator->rollbackMigrations($output);
 	}
 
+}
+
+
+class MigratorTestMigrationStub {
+	public function __construct($migration) { $this->migration = $migration; }
+	public $migration;
 }
