@@ -464,7 +464,7 @@ abstract class Model implements ArrayableInterface {
 		{
 			if ($this->incrementing)
 			{
-				$this->id = $query->insertGetId($this->attributes);
+				$this->$key = $query->insertGetId($this->attributes);
 			}
 			else
 			{
