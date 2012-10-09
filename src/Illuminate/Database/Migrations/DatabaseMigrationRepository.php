@@ -109,7 +109,7 @@ class DatabaseMigrationRepository implements MigrationRepositoryInterface {
 	 */
 	public function createRepository()
 	{
-		$schema = $this->getConnection()->getSchema();
+		$schema = $this->getConnection()->getSchemaBuilder();
 
 		$schema->create($this->table, function($table)
 		{

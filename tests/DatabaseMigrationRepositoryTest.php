@@ -90,7 +90,7 @@ class DatabaseMigrationRepositoryTest extends PHPUnit_Framework_TestCase {
 	{
 		$repo = $this->getRepository();
 		$schema = m::mock('stdClass');
-		$repo->getConnection()->shouldReceive('getSchema')->once()->andReturn($schema);
+		$repo->getConnection()->shouldReceive('getSchemaBuilder')->once()->andReturn($schema);
 		$schema->shouldReceive('create')->once()->with('migrations', m::type('Closure'));
 
 		$repo->createRepository();
