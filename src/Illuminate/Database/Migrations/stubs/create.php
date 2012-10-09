@@ -1,6 +1,6 @@
 <?php
 
-use Illuminate\Database\Console\Migrations\Migration;
+use Illuminate\Database\Migrations\Migration;
 
 class {{class}} extends Migration {
 
