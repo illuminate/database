@@ -64,7 +64,7 @@ class MigrateCommand extends Command {
 	 */
 	public function fire()
 	{
-		$package = $this->input->getArgument('package');
+		$package = $this->input->getOption('package');
 
 		// The pretend option can be used for "simulating" the migration and grabbing
 		// the SQL queries that would fire if the migration were to be run against
@@ -73,7 +73,7 @@ class MigrateCommand extends Command {
 
 		$path = $this->getPackageMigrationPath($package);
 
-		$this->migrator->runMigrations($this->output, $package, $path, $pretend);
+		$this->migrator->run($this->output, $package, $path, $pretend);
 	}
 
 	/**
@@ -90,18 +90,6 @@ class MigrateCommand extends Command {
 	}
 
 	/**
-	 * Get the console command arguments.
-	 *
-	 * @return array
-	 */
-	protected function getArguments()
-	{
-		return array(
-			array('package', InputArgument::OPTIONAL, 'The package to migrate', 'application'),
-		);
-	}
-
-	/**
 	 * Get the console command options.
 	 *
 	 * @return array
@@ -109,6 +97,8 @@ class MigrateCommand extends Command {
 	protected function getOptions()
 	{
 		return array(
+			array('package', null, InputOption::VALUE_OPTIONAL, 'The package to migrate', 'application'),
+
 			array('pretend', null, InputOption::VALUE_NONE, 'Dump the SQL queries that would be run'),
 		);
 	}

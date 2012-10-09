@@ -49,7 +49,7 @@ class RollbackCommand extends Command {
 	{
 		$pretend = $this->input->getOption('pretend');
 
-		$this->migrator->rollbackMigrations($this->output, $pretend);
+		$this->migrator->rollback($this->output, $pretend);
 	}
 
 	/**

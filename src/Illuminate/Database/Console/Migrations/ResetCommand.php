@@ -49,7 +49,7 @@ class ResetCommand extends Command {
 	{
 		$pretend = $this->input->getOption('pretend');
 
-		while ($this->migrator->rollbackMigrations($this->output, $pretend)) {}
+		while ($this->migrator->rollback($this->output, $pretend)) {}
 	}
 
 	/**
