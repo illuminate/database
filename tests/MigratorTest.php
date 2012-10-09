@@ -127,8 +127,8 @@ class MigratorTest extends PHPUnit_Framework_TestCase {
 		$fooMock = m::mock('stdClass');
 		$fooMock->shouldReceive('down')->once();
 
-		$migrator->expects($this->at(0))->method('resolve')->with($this->equalTo('bar'))->will($this->returnValue($barMock));
-		$migrator->expects($this->at(1))->method('resolve')->with($this->equalTo('foo'))->will($this->returnValue($fooMock));
+		$migrator->expects($this->at(0))->method('resolve')->with($this->equalTo('foo'))->will($this->returnValue($barMock));
+		$migrator->expects($this->at(1))->method('resolve')->with($this->equalTo('bar'))->will($this->returnValue($fooMock));
 
 		$migrator->getRepository()->shouldReceive('delete')->once()->with($barMigration);
 		$migrator->getRepository()->shouldReceive('delete')->once()->with($fooMigration);
@@ -160,8 +160,8 @@ class MigratorTest extends PHPUnit_Framework_TestCase {
 		$fooMock->shouldReceive('getConnection')->once()->andReturn(null);
 		$fooMock->shouldReceive('down')->once();
 
-		$migrator->expects($this->at(0))->method('resolve')->with($this->equalTo('bar'))->will($this->returnValue($barMock));
-		$migrator->expects($this->at(1))->method('resolve')->with($this->equalTo('foo'))->will($this->returnValue($fooMock));
+		$migrator->expects($this->at(0))->method('resolve')->with($this->equalTo('foo'))->will($this->returnValue($barMock));
+		$migrator->expects($this->at(1))->method('resolve')->with($this->equalTo('bar'))->will($this->returnValue($fooMock));
 
 		$connection = m::mock('stdClass');
 		$connection->shouldReceive('pretend')->with(m::type('Closure'))->andReturnUsing(function($closure)

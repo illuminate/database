@@ -159,7 +159,7 @@ class Migrator {
 		// We need to reverse these migrations so that they are "downed" in reverse
 		// to what they run on "up". It lets us backtrack through the migrations
 		// and properly reverse the entire database schema operation that ran.
-		foreach (array_reverse($migrations) as $migration)
+		foreach ($migrations as $migration)
 		{
 			$this->runDown($output, $migration, $pretend);
 		}
