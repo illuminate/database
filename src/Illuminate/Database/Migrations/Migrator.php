@@ -274,7 +274,9 @@ class Migrator {
 	 */
 	public function resolve($file)
 	{
-		$class = camel_case(array_slice(explode('_', $file), 1));
+		$file = implode('_', array_slice(explode('_', $file), 1));
+
+		$class = camel_case($file);
 
 		return new $class;
 	}
