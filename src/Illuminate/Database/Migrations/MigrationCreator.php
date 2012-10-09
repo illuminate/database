@@ -1,5 +1,6 @@
 <?php namespace Illuminate\Database\Migrations;
 
+use Closure;
 use Illuminate\Filesystem;
 
 class MigrationCreator {
@@ -10,6 +11,13 @@ class MigrationCreator {
 	 * @var Illuminate\Filesystem
 	 */
 	protected $files;
+
+	/**
+	 * The registered post create hooks.
+	 *
+	 * @var array
+	 */
+	protected $postCreate = array();
 
 	/**
 	 * Create a new migration creator instance.
@@ -35,9 +43,14 @@ class MigrationCreator {
 	{
 		$path = $this->getPath($name, $path);
 
+		// First we will get the stub file for the migration, which serves as a type
+		// of template for the migration. Once we have those we will populate the
+		// various place-holders, save the file, and run the post create event.
 		$stub = $this->getStub($table, $create);
 
 		$this->files->put($path, $this->populateStub($name, $stub, $table));
+
+		$this->firePostCreateHooks();
 	}
 
 	/**
@@ -85,6 +98,30 @@ class MigrationCreator {
 		}
 
 		return $stub;
+	}
+
+	/**
+	 * Fire the registered post create hooks.
+	 *
+	 * @return void
+	 */
+	protected function firePostCreateHooks()
+	{
+		foreach ($this->postCreate as $callback)
+		{
+			call_user_func($callback);
+		}
+	}
+
+	/**
+	 * Register a post migration create hook.
+	 *
+	 * @param  Closure  $callback
+	 * @return void
+	 */
+	public function afterCreate(Closure $callback)
+	{
+		$this->postCreate[] = $callback;
 	}
 
 	/**
