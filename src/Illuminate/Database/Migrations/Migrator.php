@@ -203,10 +203,9 @@ class Migrator {
 	 * Get all of the migration files in a given path.
 	 *
 	 * @param  string  $path
-	 * @param  bool    $require
 	 * @return array
 	 */
-	public function getMigrationFiles($path, $require = true)
+	public function getMigrationFiles($path)
 	{
 		$files = $this->files->glob($path.'/*_*.php');
 
@@ -214,11 +213,6 @@ class Migrator {
 		// extension and take the basename of the file which is all we need when
 		// finding the migrations that haven't been run against the databases.
 		if ($files === false) return array();
-
-		if ($require)
-		{
-			$this->requireFiles($files);
-		}
 
 		$files = array_map(function($file)
 		{
