@@ -21,6 +21,9 @@ class MigratorTest extends PHPUnit_Framework_TestCase {
 			__DIR__.'/1_foo.php',
 			__DIR__.'/3_baz.php',
 		));
+		$migrator->getFilesystem()->shouldReceive('requireOnce')->once()->with(__DIR__.'/2_bar.php');
+		$migrator->getFilesystem()->shouldReceive('requireOnce')->once()->with(__DIR__.'/1_foo.php');
+		$migrator->getFilesystem()->shouldReceive('requireOnce')->once()->with(__DIR__.'/3_baz.php');
 		$migrator->getRepository()->shouldReceive('getRan')->once()->with('application')->andReturn(array(
 			'1_foo',
 		));
@@ -53,6 +56,9 @@ class MigratorTest extends PHPUnit_Framework_TestCase {
 			__DIR__.'/1_foo.php',
 			__DIR__.'/3_baz.php',
 		));
+		$migrator->getFilesystem()->shouldReceive('requireOnce')->once()->with(__DIR__.'/2_bar.php');
+		$migrator->getFilesystem()->shouldReceive('requireOnce')->once()->with(__DIR__.'/1_foo.php');
+		$migrator->getFilesystem()->shouldReceive('requireOnce')->once()->with(__DIR__.'/3_baz.php');
 		$migrator->getRepository()->shouldReceive('getRan')->once()->with('application')->andReturn(array(
 			'1_foo',
 		));
@@ -99,6 +105,7 @@ class MigratorTest extends PHPUnit_Framework_TestCase {
 		$migrator->getFilesystem()->shouldReceive('glob')->once()->with(__DIR__.'/*_*.php')->andReturn(array(
 			__DIR__.'/1_foo.php',
 		));
+		$migrator->getFilesystem()->shouldReceive('requireOnce')->once()->with(__DIR__.'/1_foo.php');
 		$migrator->getRepository()->shouldReceive('getRan')->once()->with('application')->andReturn(array(
 			'1_foo',
 		));
