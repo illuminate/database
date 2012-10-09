@@ -14,11 +14,17 @@ class MigrationCreatorTest extends PHPUnit_Framework_TestCase {
 	public function testBasicCreateMethodStoresMigrationFile()
 	{
 		$creator = $this->getCreator();
+		unset($_SERVER['__migration.creator']);
+		$creator->afterCreate(function() { $_SERVER['__migration.creator'] = true; });
 		$creator->expects($this->any())->method('getDatePrefix')->will($this->returnValue('foo'));
 		$creator->getFilesystem()->shouldReceive('get')->once()->with($creator->getStubPath().'/blank.php')->andReturn('{{class}}');
 		$creator->getFilesystem()->shouldReceive('put')->once()->with('foo/foo_create_bar.php', 'CreateBar');
 
 		$creator->create('create_bar', 'foo');
+
+		$this->assertTrue($_SERVER['__migration.creator']);
+
+		unset($_SERVER['__migration.creator']);
 	}
 
 
