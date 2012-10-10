@@ -253,7 +253,9 @@ class Migrator {
 	{
 		foreach ($this->getQueries($output, $migration, $method) as $query)
 		{
-			$output->writeln("<info>$query</info>");
+			$name = get_class($migration);
+
+			$output->writeln("<info>{$name}</info>: {$query['query']}");
 		}
 	}
 
@@ -319,17 +321,44 @@ class Migrator {
 	{
 		$name = $name ?: $this->defaultConnection;
 
-		// We allow connections to be added to the pool as Closures so we can lazily
-		// resolve them so we don't have to connect when we do not really need to
-		// make the connection. So, if we have a Closure we'll execute it here.
 		if (isset($this->connectionPool[$name]))
 		{
-			$value = $this->connectionPool[$name];
-
-			return $value instanceof Closure ? call_user_func($value) : $value;
+			return $this->getFromConnectionPool($name);
 		}
 
 		throw new \InvalidArgumentException("Undefined connection [$name]");
+	}
+
+	/**
+	 * Get a connection from the pool by name.
+	 *
+	 * @param  string  $name
+	 * @return Illuminate\Database\Connection
+	 */
+	protected function getFromConnectionPool($name)
+	{
+		$value = $this->connectionPool[$name];
+
+		// We allow connections to be added to the pool as Closures so we can lazily
+		// resolve them so we don't have to connect when we do not really need to
+		// make the connection. So, if we have a Closure we'll execute it here.
+		if ($value instanceof Closure)
+		{
+			$this->connectionPool[$name] = call_user_func($value);
+		}
+
+		return $this->connectionPool[$name];
+	}
+
+	/**
+	 * Set the default connection name.
+	 *
+	 * @param  string  $name
+	 * @return void
+	 */
+	public function setDefaultConnection($name)
+	{
+		$this->defaultConnection = $name;
 	}
 
 	/**
