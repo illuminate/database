@@ -28,7 +28,7 @@ abstract class Grammar extends BaseGrammar {
 
 		$sql = "alter table {$table} add constraint {$command->index} ";
 
-		$sql .= "foreign key {$columns} references {$on} ({$onColumns})";
+		$sql .= "foreign key ({$columns}) references {$on} ({$onColumns})";
 
 		// Once we have the basic foreign key creation statement constructed we can
 		// build out the syntax for what should happen on an update or delete of

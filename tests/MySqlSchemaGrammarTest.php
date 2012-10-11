@@ -182,7 +182,7 @@ class MySqlSchemaGrammarTest extends PHPUnit_Framework_TestCase {
 		$statements = $blueprint->toSql($this->getGrammar());
 
 		$this->assertEquals(1, count($statements));
-		$this->assertEquals('alter table `users` add constraint users_foo_id_foreign foreign key `foo_id` references `orders` (`id`)', $statements[0]);
+		$this->assertEquals('alter table `users` add constraint users_foo_id_foreign foreign key (`foo_id`) references `orders` (`id`)', $statements[0]);
 	}
 
 
