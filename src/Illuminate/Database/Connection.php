@@ -80,12 +80,15 @@ class Connection implements ConnectionInterface {
 	/**
 	 * Create a new database connection instance.
 	 *
-	 * @param  PDO   $pdo
+	 * @param  PDO     $pdo
+	 * @param  string  $tablePrefix
 	 * @return void
 	 */
-	public function __construct(PDO $pdo)
+	public function __construct(PDO $pdo, $tablePrefix = '')
 	{
 		$this->pdo = $pdo;
+
+		$this->tablePrefix = $tablePrefix;
 
 		// We need to initialize a query grammar and the query post processors
 		// which are both very important parts of the database abstractions.
@@ -598,17 +601,6 @@ class Connection implements ConnectionInterface {
 	public function getQueryLog()
 	{
 		return $this->queryLog;
-	}
-
-	/**
-	 * Set the table prefix for the connection.
-	 *
-	 * @param  string  $prefix
-	 * @return void
-	 */
-	public function setTablePrefix($prefix)
-	{
-		$this->tablePrefix = $prefix;
 	}
 
 	/**
