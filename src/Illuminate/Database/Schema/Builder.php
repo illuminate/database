@@ -53,9 +53,11 @@ class Builder {
 	 */
 	public function create($table, Closure $callback)
 	{
-		$blueprint = $this->createBlueprint($table, $callback);
+		$blueprint = $this->createBlueprint($table);
 
 		$blueprint->create();
+
+		$callback($blueprint);
 
 		$this->build($blueprint);
 	}
