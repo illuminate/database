@@ -73,18 +73,18 @@ class MigratorTest extends PHPUnit_Framework_TestCase {
 		$connection->shouldReceive('pretend')->with(m::type('Closure'))->andReturnUsing(function($closure)
 		{
 			$closure();
-			return array('foo');
+			return array(array('query' => 'foo'));
 		},
 		function($closure)
 		{
 			$closure();
-			return array('bar');
+			return array(array('query' => 'bar'));
 		});
 		$migrator->addConnection('default', function() use ($connection) { return $connection; });
 
 		$output = m::mock('Symfony\Component\Console\Output\OutputInterface');
-		$output->shouldReceive('writeln')->once()->with('<info>foo</info>');
-		$output->shouldReceive('writeln')->once()->with('<info>bar</info>');
+		$output->shouldReceive('writeln')->once()->with('<info>'.get_class($barMock).':</info> foo');
+		$output->shouldReceive('writeln')->once()->with('<info>'.get_class($bazMock).':</info> bar');
 
 		$migrator->run($output, 'application', __DIR__, true);	
 	}
@@ -167,18 +167,18 @@ class MigratorTest extends PHPUnit_Framework_TestCase {
 		$connection->shouldReceive('pretend')->with(m::type('Closure'))->andReturnUsing(function($closure)
 		{
 			$closure();
-			return array('bar');
+			return array(array('query' => 'bar'));
 		},
 		function($closure)
 		{
 			$closure();
-			return array('foo');
+			return array(array('query' => 'foo'));
 		});
 		$migrator->addConnection('default', function() use ($connection) { return $connection; });
 
 		$output = m::mock('Symfony\Component\Console\Output\OutputInterface');
-		$output->shouldReceive('writeln')->once()->with('<info>bar</info>');
-		$output->shouldReceive('writeln')->once()->with('<info>foo</info>');
+		$output->shouldReceive('writeln')->once()->with('<info>'.get_class($barMock).':</info> bar');
+		$output->shouldReceive('writeln')->once()->with('<info>'.get_class($fooMock).':</info> foo');
 
 		$migrator->rollback($output, true);
 	}

@@ -255,7 +255,7 @@ class Migrator {
 		{
 			$name = get_class($migration);
 
-			$output->writeln("<info>{$name}</info>: {$query['query']}");
+			$output->writeln("<info>{$name}:</info> {$query['query']}");
 		}
 	}
 
