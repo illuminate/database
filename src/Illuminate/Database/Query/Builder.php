@@ -294,9 +294,9 @@ class Builder {
 	 */
 	public function whereNested(Closure $callback, $boolean = 'and')
 	{
-		// To handle nested queries we actually will create a brand new query instance
-		// and pass it off to the Closure that we have. The Closures can simply do
-		// do whatever it wants to the quert and we will store it for compiling.
+		// To handle nested queries we'll actually create a brand new query instance
+		// and pass it off to the Closure that we have. The Closure can simply do
+		// do whatever it wants to a query then we will store it for compiling.
 		$type = 'Nested';
 
 		$query = $this->newQuery();
@@ -306,8 +306,8 @@ class Builder {
 		call_user_func($callback, $query);
 
 		// Once we have let the Closure do its things, we can gather the bindings on
-		// the nested query builder and merge them into this bindings since they
-		// need to get extracted out of the childs and assigend to this array.
+		// the nested query builder and merge them into these bindings since they
+		// need to get extracted out of the children and assigend to the array.
 		$this->wheres[] = compact('type', 'query', 'boolean');
 
 		$this->mergeBindings($query);
