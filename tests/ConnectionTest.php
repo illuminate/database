@@ -13,18 +13,20 @@ class ConnectionTest extends PHPUnit_Framework_TestCase {
 	public function testSettingDefaultCallsGetDefaultGrammar()
 	{
 		$connection = $this->getMockConnection();
-		$connection->expects($this->once())->method('getDefaultQueryGrammar')->will($this->returnValue('foo'));
+		$mock = m::mock('StdClass');
+		$connection->expects($this->once())->method('getDefaultQueryGrammar')->will($this->returnValue($mock));
 		$connection->useDefaultQueryGrammar();
-		$this->assertEquals('foo', $connection->getQueryGrammar());
+		$this->assertEquals($mock, $connection->getQueryGrammar());
 	}
 
 
 	public function testSettingDefaultCallsGetDefaultPostProcessor()
 	{
 		$connection = $this->getMockConnection();
-		$connection->expects($this->once())->method('getDefaultPostProcessor')->will($this->returnValue('foo'));
+		$mock = m::mock('StdClass');
+		$connection->expects($this->once())->method('getDefaultPostProcessor')->will($this->returnValue($mock));
 		$connection->useDefaultPostProcessor();
-		$this->assertEquals('foo', $connection->getPostProcessor());
+		$this->assertEquals($mock, $connection->getPostProcessor());
 	}
 
 

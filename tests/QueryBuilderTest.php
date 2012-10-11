@@ -20,6 +20,15 @@ class QueryBuilderTest extends PHPUnit_Framework_TestCase {
 	}
 
 
+	public function testBasicSelectWithPrefix()
+	{
+		$builder = $this->getBuilder();
+		$builder->getGrammar()->setTablePrefix('prefix_');
+		$builder->select('*')->from('users');
+		$this->assertEquals('select * from "prefix_users"', $builder->toSql());
+	}
+
+
 	public function testBasicSelectDistinct()
 	{
 		$builder = $this->getBuilder();

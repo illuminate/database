@@ -32,6 +32,21 @@ class MySqlSchemaGrammarTest extends PHPUnit_Framework_TestCase {
 	}
 
 
+	public function testBasicCreateTableWithPrefix()
+	{
+		$blueprint = new Blueprint('users');
+		$blueprint->create();
+		$blueprint->increments('id');
+		$blueprint->string('email');
+		$grammar = $this->getGrammar();
+		$grammar->setTablePrefix('prefix_');
+		$statements = $blueprint->toSql($grammar);
+
+		$this->assertEquals(1, count($statements));
+		$this->assertEquals('create table `prefix_users` (`id` int not null auto_increment primary key, `email` varchar(255) not null)', $statements[0]);
+	}
+
+
 	public function testDropTable()
 	{
 		$blueprint = new Blueprint('users');

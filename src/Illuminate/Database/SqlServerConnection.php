@@ -9,7 +9,7 @@ class SqlServerConnection extends Connection {
 	 */
 	protected function getDefaultQueryGrammar()
 	{
-		return new Query\Grammars\SqlServerGrammar;
+		return $this->withTablePrefix(new Query\Grammars\SqlServerGrammar);
 	}
 
 	/**
@@ -19,7 +19,7 @@ class SqlServerConnection extends Connection {
 	 */
 	protected function getDefaultSchemaGrammar()
 	{
-		return new Schema\Grammars\SqlServerGrammar;
+		return $this->withTablePrefix(new Schema\Grammars\SqlServerGrammar);
 	}
 
 }

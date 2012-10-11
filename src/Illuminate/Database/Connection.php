@@ -71,6 +71,13 @@ class Connection implements ConnectionInterface {
 	protected $pretending = false;
 
 	/**
+	 * The table prefix for the connection.
+	 *
+	 * @var string
+	 */
+	protected $tablePrefix = '';
+
+	/**
 	 * Create a new database connection instance.
 	 *
 	 * @param  PDO   $pdo
@@ -591,6 +598,30 @@ class Connection implements ConnectionInterface {
 	public function getQueryLog()
 	{
 		return $this->queryLog;
+	}
+
+	/**
+	 * Set the table prefix for the connection.
+	 *
+	 * @param  string  $prefix
+	 * @return void
+	 */
+	public function setTablePrefix($prefix)
+	{
+		$this->tablePrefix = $prefix;
+	}
+
+	/**
+	 * Set the table prefix and return the grammar.
+	 *
+	 * @param  Illuminate\Database\Grammar  $grammar
+	 * @return Illuminate\Database\Grammar
+	 */
+	public function withTablePrefix(Grammar $grammar)
+	{
+		$grammar->setTablePrefix($this->tablePrefix);
+
+		return $grammar;
 	}
 
 }

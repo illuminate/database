@@ -165,11 +165,13 @@ abstract class Grammar {
 	 * Set the grammar's table prefix.
 	 *
 	 * @param  string  $prefix
-	 * @return void
+	 * @return Illuminate\Database\Grammar
 	 */
 	public function setTablePrefix($prefix)
 	{
 		$this->tablePrefix = $prefix;
+
+		return $this;
 	}
 
 }

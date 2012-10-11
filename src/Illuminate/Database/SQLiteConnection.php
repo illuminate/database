@@ -9,7 +9,7 @@ class SQLiteConnection extends Connection {
 	 */
 	protected function getDefaultQueryGrammar()
 	{
-		return new Query\Grammars\SQLiteGrammar;
+		return $this->withTablePrefix(new Query\Grammars\SQLiteGrammar);
 	}
 
 	/**
@@ -19,7 +19,7 @@ class SQLiteConnection extends Connection {
 	 */
 	protected function getDefaultSchemaGrammar()
 	{
-		return new Schema\Grammars\SQLiteGrammar;
+		return $this->withTablePrefix(new Schema\Grammars\SQLiteGrammar);
 	}
 
 }

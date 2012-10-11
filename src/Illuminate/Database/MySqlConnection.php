@@ -9,7 +9,7 @@ class MySqlConnection extends Connection {
 	 */
 	protected function getDefaultQueryGrammar()
 	{
-		return new Query\Grammars\MySqlGrammar;
+		return $this->withTablePrefix(new Query\Grammars\MySqlGrammar);
 	}
 
 	/**
@@ -19,7 +19,7 @@ class MySqlConnection extends Connection {
 	 */
 	protected function getDefaultSchemaGrammar()
 	{
-		return new Schema\Grammars\MySqlGrammar;
+		return $this->withTablePrefix(new Schema\Grammars\MySqlGrammar);
 	}
 
 }

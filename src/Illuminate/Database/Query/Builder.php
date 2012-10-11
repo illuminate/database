@@ -1070,4 +1070,14 @@ class Builder {
 		return $this->processor;
 	}
 
+	/**
+	 * Get the query grammar instance.
+	 *
+	 * @return Illuminate\Database\Grammar
+	 */
+	public function getGrammar()
+	{
+		return $this->grammar;
+	}
+
 }
