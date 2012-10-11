@@ -160,6 +160,17 @@ class MySqlSchemaGrammarTest extends PHPUnit_Framework_TestCase {
 	}
 
 
+	public function testAddingForeignKey()
+	{
+		$blueprint = new Blueprint('users');
+		$blueprint->foreign('foo_id')->references('id')->on('orders');
+		$statements = $blueprint->toSql($this->getGrammar());
+
+		$this->assertEquals(1, count($statements));
+		$this->assertEquals('alter table `users` add constraint users_foo_id_foreign foreign key `foo_id` references `orders` (`id`)', $statements[0]);
+	}
+
+
 	public function testAddingIncrementingID()
 	{
 		$blueprint = new Blueprint('users');

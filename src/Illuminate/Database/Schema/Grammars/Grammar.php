@@ -19,11 +19,14 @@ abstract class Grammar extends BaseGrammar {
 
 		$on = $this->wrapTable($command->on);
 
+		// We need to prepare several of the elements of the foreign key definition
+		// before we can create the SQL, such as wrapping the tables and convert
+		// an array of columns to comma-delimited strings for the SQL queries.
 		$columns = $this->columnize($command->columns);
 
-		$onColumns = $this->columnize($command->references);
+		$onColumns = $this->columnize((array) $command->references);
 
-		$sql = "alter table {$table} add constraint {$command->name} ";
+		$sql = "alter table {$table} add constraint {$command->index} ";
 
 		$sql .= "foreign key {$columns} references {$on} ({$onColumns})";
 
