@@ -437,6 +437,8 @@ abstract class Model implements ArrayableInterface {
 	 */
 	public function save()
 	{
+		$keyName = $this->getKeyName();
+
 		// First we need to create a fresh query instance and touch the creation and
 		// update timestamp on the model which are maintained by us for developer
 		// convenience. Then we will just continue saving the model instances.
@@ -452,7 +454,7 @@ abstract class Model implements ArrayableInterface {
 		// clause to only update this model. Otherwise, we'll just insert them.
 		if ($this->exists)
 		{
-			$query->where($this->getKeyName(), '=', $this->getKey());
+			$query->where($keyName, '=', $this->getKey());
 
 			$query->update($this->attributes);
 		}
@@ -464,7 +466,7 @@ abstract class Model implements ArrayableInterface {
 		{
 			if ($this->incrementing)
 			{
-				$this->{$this->getKeyName()} = $query->insertGetId($this->attributes);
+				$this->$keyName = $query->insertGetId($this->attributes);
 			}
 			else
 			{
