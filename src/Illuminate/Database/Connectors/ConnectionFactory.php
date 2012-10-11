@@ -16,9 +16,13 @@ class ConnectionFactory {
 	 */
 	public function make(array $config)
 	{
-		$connection = $this->createConnector($config)->connect($config);
+		$pdo = $this->createConnector($config)->connect($config);
 
-		return $this->createConnection($config['driver'], $connection);
+		$connection = $this->createConnection($config['driver'], $pdo);
+
+		$connection->setTablePrefix($config['prefix']);
+
+		return $connection;
 	}
 
 	/**
