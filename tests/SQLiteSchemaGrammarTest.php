@@ -99,6 +99,20 @@ class SQLiteSchemaGrammarTest extends PHPUnit_Framework_TestCase {
 	}
 
 
+	public function testAddingForeignKey()
+	{
+		$blueprint = new Blueprint('users');
+		$blueprint->create();
+		$blueprint->string('foo')->primary();
+		$blueprint->string('order_id');
+		$blueprint->foreign('order_id')->references('id')->on('orders');
+		$statements = $blueprint->toSql($this->getGrammar());
+
+		$this->assertEquals(1, count($statements));
+		$this->assertEquals('create table "users" ("foo" varchar not null, "order_id" varchar not null, foreign key("order_id") references "orders"("id"), primary key ("foo"))', $statements[0]);
+	}
+
+
 	public function testAddingUniqueKey()
 	{
 		$blueprint = new Blueprint('users');

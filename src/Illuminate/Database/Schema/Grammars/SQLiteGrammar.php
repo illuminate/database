@@ -35,30 +35,58 @@ class SQLiteGrammar extends Grammar {
 		// SQLite forces primary keys to be added when the table is initially created
 		// so we will need to check for a primary key commands and add the columns
 		// to the table's declaration here so they can be created on the tables.
-		$primary = $this->getPrimaryCommand($blueprint);
+		$sql .= (string) $this->addForeignKeys($blueprint);
 
-		if ( ! is_null($primary))
-		{
-			$columns = $this->columnize($primary->columns);
-
-			$sql .= ", primary key ({$columns})";
-		}
+		$sql .= (string) $this->addPrimaryKeys($blueprint);
 
 		return $sql .= ')';
 	}
 
 	/**
-	 * Get the primary key command if it exists on the blueprint.
+	 * Get the foreign key syntax for a table creation statement.
 	 *
 	 * @param  Illuminate\Database\Schema\Blueprint  $blueprint
-	 * @return Illuminate\Support\Fluent|null
+	 * @return string|null
 	 */
-	protected function getPrimaryCommand(Blueprint $blueprint)
+	protected function addForeignKeys(Blueprint $blueprint)
 	{
-		return array_first($blueprint->getCommands(), function($key, $value)
+		$sql = '';
+
+		$foreigns = $this->getCommandsByName($blueprint, 'foreign');
+
+		// Once we have all the foreign key commands for the table creation statement
+		// we'll loop through each of them and add them to the create table SQL we
+		// are building, since SQLite needs foreign keys on the tables creation.
+		foreach ($foreigns as $foreign)
 		{
-			return $value->name == 'primary';
-		});
+			$on = $this->wrapTable($foreign->on);
+
+			$columns = $this->columnize($foreign->columns);
+
+			$onColumns = $this->columnize((array) $foreign->references);
+
+			$sql .= ", foreign key($columns) references $on($onColumns)";
+		}
+
+		return $sql;
+	}
+
+	/**
+	 * Get the primary key syntax for a table creation statement.
+	 *
+	 * @param  Illuminate\Database\Schema\Blueprint  $blueprint
+	 * @return string|null
+	 */
+	protected function addPrimaryKeys(Blueprint $blueprint)
+	{
+		$primary = $this->getCommandByName($blueprint, 'primary');
+
+		if ( ! is_null($primary))
+		{
+			$columns = $this->columnize($primary->columns);
+
+			return ", primary key ({$columns})";
+		}
 	}
 
 	/**
@@ -107,6 +135,18 @@ class SQLiteGrammar extends Grammar {
 		$table = $this->wrapTable($blueprint);
 
 		return "create index {$command->index} on {$table} ({$columns})";
+	}
+
+	/**
+	 * Compile a foreign key command.
+	 *
+	 * @param  Illuminate\Database\Schema\Blueprint  $blueprint
+	 * @param  Illuminate\Support\Fluent  $command
+	 * @return string
+	 */
+	public function compileForeign(Blueprint $blueprint, Fluent $command)
+	{
+		// Handled on table creation...
 	}
 
 	/**

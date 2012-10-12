@@ -88,6 +88,37 @@ abstract class Grammar extends BaseGrammar {
 	}
 
 	/**
+	 * Get the primary key command if it exists on the blueprint.
+	 *
+	 * @param  Illuminate\Database\Schema\Blueprint  $blueprint
+	 * @return Illuminate\Support\Fluent|null
+	 */
+	protected function getCommandByName(Blueprint $blueprint, $name)
+	{
+		$commands = $this->getCommandsByName($blueprint, $name);
+
+		if (count($commands) > 0)
+		{
+			return reset($commands);
+		}
+	}
+
+	/**
+	 * Get all of the commands with a given name.
+	 *
+	 * @param  Illuminate\Database\Schema\Blueprint  $blueprint
+	 * @param  string  $name
+	 * @return array
+	 */
+	protected function getCommandsByName(Blueprint $blueprint, $name)
+	{
+		return array_filter($blueprint->getCommands(), function($value) use ($name)
+		{
+			return $value->name == $name;
+		});
+	}
+
+	/**
 	 * Get the SQL for the column data type.
 	 *
 	 * @param  Illuminate\Support\Fluent  $column

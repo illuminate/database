@@ -78,9 +78,10 @@ class Blueprint {
 
 			if (method_exists($grammar, $method))
 			{
-				$sql = $grammar->$method($this, $command);
-
-				$statements = array_merge($statements, (array) $sql);
+				if ( ! is_null($sql = $grammar->$method($this, $command)))
+				{
+					$statements = array_merge($statements, (array) $sql);
+				}
 			}
 		}
 
