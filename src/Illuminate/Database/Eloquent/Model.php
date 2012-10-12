@@ -3,6 +3,7 @@
 use Closure;
 use DateTime;
 use Illuminate\Database\Connection;
+use Illuminate\Support\JsonableInterface;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\MorphOne;
@@ -11,7 +12,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Query\Builder as QueryBuilder;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 
-abstract class Model implements ArrayableInterface {
+abstract class Model implements ArrayableInterface, JsonableInterface {
 
 	/**
 	 * The connection for the model.

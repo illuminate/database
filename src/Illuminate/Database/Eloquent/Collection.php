@@ -4,8 +4,9 @@ use Countable;
 use ArrayAccess;
 use ArrayIterator;
 use IteratorAggregate;
+use Illuminate\Support\JsonableInterface;
 
-class Collection implements ArrayAccess, ArrayableInterface, Countable, IteratorAggregate {
+class Collection implements ArrayAccess, ArrayableInterface, Countable, IteratorAggregate, JsonableInterface {
 
 	/**
 	 * The items contained in the collection.

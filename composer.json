@@ -17,6 +17,7 @@
         "illuminate/console": ">=1.0.0",
         "illuminate/filesystem": ">=1.0.0",
         "illuminate/pagination": ">=1.0.0",
+        "illuminate/support": ">=1.0.0",
         "mockery/mockery": "0.7.2"
     },
     "autoload": {
