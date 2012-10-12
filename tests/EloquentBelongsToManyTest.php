@@ -15,10 +15,10 @@ class EloquentBelongsToManyTest extends PHPUnit_Framework_TestCase {
 	public function testModelsAreProperlyHydrated()
 	{
 		$model1 = new EloquentBelongsToManyModelStub;
-		$model1->fill(array('name' => 'taylor', 'pivot_user_id' => 1, 'pivot_role_id' => 2));
+		$model1->fill(array('id' => 1, 'name' => 'taylor', 'pivot_user_id' => 1, 'pivot_role_id' => 2));
 		$model2 = new EloquentBelongsToManyModelStub;
-		$model2->fill(array('name' => 'dayle', 'pivot_user_id' => 3, 'pivot_role_id' => 4));
-		$models = array($model1, $model2);
+		$model2->fill(array('id' => 12, 'name' => 'dayle', 'pivot_user_id' => 3, 'pivot_role_id' => 4));
+		$models = array(1 => $model1, 12 => $model2);
 
 		$relation = $this->getRelation();
 		$relation->getParent()->shouldReceive('getConnectionName')->andReturn('foo.connection');
@@ -29,19 +29,19 @@ class EloquentBelongsToManyTest extends PHPUnit_Framework_TestCase {
 		$this->assertInstanceOf('Illuminate\Database\Eloquent\Collection', $results);
 
 		// Make sure the foreign keys were set on the pivot models...
-		$this->assertEquals('user_id', $results[0]->pivot->getForeignKey());
-		$this->assertEquals('role_id', $results[0]->pivot->getOtherKey());
+		$this->assertEquals('user_id', $results[1]->pivot->getForeignKey());
+		$this->assertEquals('role_id', $results[12]->pivot->getOtherKey());
 		
-		$this->assertEquals('taylor', $results[0]->name);
-		$this->assertEquals(1, $results[0]->pivot->user_id);
-		$this->assertEquals(2, $results[0]->pivot->role_id);
-		$this->assertEquals('foo.connection', $results[0]->pivot->getConnectionName());
-		$this->assertEquals('dayle', $results[1]->name);
-		$this->assertEquals(3, $results[1]->pivot->user_id);
-		$this->assertEquals(4, $results[1]->pivot->role_id);
+		$this->assertEquals('taylor', $results[1]->name);
+		$this->assertEquals(1, $results[1]->pivot->user_id);
+		$this->assertEquals(2, $results[1]->pivot->role_id);
 		$this->assertEquals('foo.connection', $results[1]->pivot->getConnectionName());
-		$this->assertEquals('user_role', $results[0]->pivot->getTable());
-		$this->assertTrue($results[0]->pivot->exists);
+		$this->assertEquals('dayle', $results[12]->name);
+		$this->assertEquals(3, $results[12]->pivot->user_id);
+		$this->assertEquals(4, $results[12]->pivot->role_id);
+		$this->assertEquals('foo.connection', $results[12]->pivot->getConnectionName());
+		$this->assertEquals('user_role', $results[1]->pivot->getTable());
+		$this->assertTrue($results[1]->pivot->exists);
 	}
 
 
