@@ -48,6 +48,17 @@ class Collection implements ArrayAccess, ArrayableInterface, Countable, Iterator
 	}
 
 	/**
+	 * Check whether the collection contains an item with the given key.
+	 * 
+	 * @param  mixed  $key
+	 * @return bool
+	 */
+	public function contains($key)
+	{
+		return array_key_exists($key, $this->items);
+	}
+
+	/**
 	 * Get the collection of items as a plain array.
 	 *
 	 * @return array
