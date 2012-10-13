@@ -26,7 +26,7 @@ class EloquentCollectionTest extends PHPUnit_Framework_TestCase {
 	}
 
 
-	public function testContains()
+	public function testContainsMethod()
 	{
 		$c = new Collection(array(1 => new stdClass, 2 => null, 4 => false));
 		$this->assertTrue($c->contains(1));
