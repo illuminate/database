@@ -64,6 +64,10 @@ class Migrator {
 		// run all of the oustanding migrations against the database connection.
 		$files = $this->getMigrationFiles($path);
 
+		//print_r($path);
+		set_include_path(get_include_path() . PATH_SEPARATOR . $path);
+		$this->requireFiles($files);
+
 		$ran = $this->repository->getRan($package);
 
 		$migrations = array_diff($files, $ran);
@@ -238,7 +242,7 @@ class Migrator {
 	{
 		foreach ($files as $file)
 		{
-			$this->files->requireOnce($file);
+			$this->files->requireOnce($file . ".php");
 		}
 	}
 
