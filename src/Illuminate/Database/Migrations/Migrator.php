@@ -64,12 +64,12 @@ class Migrator {
 		// run all of the oustanding migrations against the database connection.
 		$files = $this->getMigrationFiles($path);
 
-		// Includes the files so we can call each of the migration classes
-		$this->requireFiles($files, $path);
-
 		$ran = $this->repository->getRan($package);
 
 		$migrations = array_diff($files, $ran);
+
+		// Includes the files so we can call each of the migration classes
+		$this->requireFiles($migrations, $path);
 
 		$this->runMigrationList($output, $migrations, $package, $pretend);
 	}
