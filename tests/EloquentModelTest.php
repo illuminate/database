@@ -112,6 +112,7 @@ class EloquentModelTest extends PHPUnit_Framework_TestCase {
 		$model->exists = false;
 		$this->assertTrue($model->save());
 		$this->assertEquals(1, $model->id);
+		$this->assertTrue($model->exists);
 
 		$model = $this->getMock('EloquentModelStub', array('newQuery', 'updateTimestamps'));
 		$query = m::mock('Illuminate\Database\Eloquent\Builder');
@@ -124,6 +125,7 @@ class EloquentModelTest extends PHPUnit_Framework_TestCase {
 		$model->exists = false;
 		$this->assertTrue($model->save());
 		$this->assertNull($model->id);
+		$this->assertTrue($model->exists);
 	}
 
 

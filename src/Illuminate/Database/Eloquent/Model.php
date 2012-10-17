@@ -475,7 +475,7 @@ abstract class Model implements ArrayableInterface, JsonableInterface {
 			}
 		}
 
-		return true;
+		return $this->exists = true;
 	}
 
 	/**
