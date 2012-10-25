@@ -525,7 +525,9 @@ class Grammar extends BaseGrammar {
 	{
 		$table = $this->wrapTable($query->from);
 
-		return trim("delete from $table ".$this->compileWheres($query));
+		$where = is_array($query->wheres) ? $this->compileWheres($query) : '';
+
+		return trim("delete from $table ".$where);
 	}
 
 	/**
