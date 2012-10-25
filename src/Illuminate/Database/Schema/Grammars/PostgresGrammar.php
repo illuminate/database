@@ -219,7 +219,7 @@ class PostgresGrammar extends Grammar {
 	 */
 	protected function typeInteger(Fluent $column)
 	{
-		return $column->autoIncrement ? 'serial' : 'bigint';
+		return $column->autoIncrement ? 'serial' : 'integer';
 	}
 
 	/**
