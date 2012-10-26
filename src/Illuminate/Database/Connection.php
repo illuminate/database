@@ -287,6 +287,30 @@ class Connection implements ConnectionInterface {
 	}
 
 	/**
+	 * Execute an SQL statement and returns an array containing all of the
+	 * remaining rows in the result set. The array represents each row as
+	 * either an array of column values or an object with properties corresponding
+	 * to each column name.
+	 *
+	 * @param  string  $query
+	 * @param  array   $bindings
+	 * @return array
+	 */
+	public function query($query, $bindings = array())
+	{
+		return $this->run($query, $bindings, function($me, $query, $bindings)
+		{
+			if ($me->pretending()) return true;
+
+			$bindings = $me->prepareBindings($bindings);
+
+			$preparedStatement = $me->getPdo()->prepare($query);
+			$preparedStatement->execute($bindings);
+			return $preparedStatement->fetchAll();
+		});
+	}
+
+	/**
 	 * Run an SQL statement and get the number of rows affected.
 	 *
 	 * @param  string  $query
