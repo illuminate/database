@@ -52,10 +52,13 @@ class EloquentHasManyTest extends PHPUnit_Framework_TestCase {
 		$relation = $this->getRelation();
 
 		$result1 = new EloquentHasManyModelStub;
+		$result1->id = 1;
 		$result1->foreign_key = 1;
 		$result2 = new EloquentHasManyModelStub;
+		$result2->id = 2;
 		$result2->foreign_key = 2;
 		$result3 = new EloquentHasManyModelStub;
+		$result3->id = 3;
 		$result3->foreign_key = 2;
 
 		$model1 = new EloquentHasManyModelStub;
@@ -67,10 +70,10 @@ class EloquentHasManyTest extends PHPUnit_Framework_TestCase {
 
 		$models = $relation->match(array($model1, $model2, $model3), new Collection(array($result1, $result2, $result3)), 'foo');
 
-		$this->assertEquals(1, $models[0]->foo[0]->foreign_key);
+		$this->assertEquals(1, $models[0]->foo[1]->foreign_key);
 		$this->assertEquals(1, count($models[0]->foo));
-		$this->assertEquals(2, $models[1]->foo[0]->foreign_key);
-		$this->assertEquals(2, $models[1]->foo[1]->foreign_key);
+		$this->assertEquals(2, $models[1]->foo[2]->foreign_key);
+		$this->assertEquals(2, $models[1]->foo[3]->foreign_key);
 		$this->assertEquals(2, count($models[1]->foo));
 		$this->assertEquals(0, count($models[2]->foo));
 	}

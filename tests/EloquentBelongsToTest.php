@@ -12,7 +12,7 @@ class EloquentBelongsToTest extends PHPUnit_Framework_TestCase {
 	}
 
 
-	public function testUpdateMethodRetreievesModelAndUpdates()
+	public function testUpdateMethodRetrievesModelAndUpdates()
 	{
 		$relation = $this->getRelation();
 		$mock = m::mock('Illuminate\Database\Eloquent\Model');

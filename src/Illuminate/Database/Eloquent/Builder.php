@@ -156,11 +156,13 @@ class Builder {
 		// also set the proper connection name for the model after we create it.
 		foreach ($results as $result)
 		{
-			$models[] = $model = $this->model->newExisting();
+			$model = $this->model->newExisting();
 
 			$model->setAttributes((array) $result);
 
 			$model->setConnection($connection);
+
+			$models[$model->getKey()] = $model;
 		}
 
 		return $models;

@@ -26,6 +26,16 @@ class EloquentCollectionTest extends PHPUnit_Framework_TestCase {
 	}
 
 
+	public function testContainsMethod()
+	{
+		$c = new Collection(array(1 => new stdClass, 2 => null, 4 => false));
+		$this->assertTrue($c->contains(1));
+		$this->assertTrue($c->contains(2));
+		$this->assertFalse($c->contains(3));
+		$this->assertTrue($c->contains(4));
+	}
+
+
 	public function testToArrayCallsToArrayOnEachItemInCollection()
 	{
 		$item1 = m::mock('stdClass');
