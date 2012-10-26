@@ -11,7 +11,7 @@ class ResetCommand extends Command {
 	 *
 	 * @var string
 	 */
-	protected $name = 'migrate:reset';
+	protected $name = 'db:migrate:reset';
 
 	/**
 	 * The console command description.

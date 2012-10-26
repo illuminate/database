@@ -48,7 +48,7 @@ class Seeder {
 			// We'll grab the table name here, which could either come from the array or
 			// from the filename itself. Then, we will simply insert the records into
 			// the databases via a connection and fire an event noting the seeding.
-			$table = $this->getTable($records);
+			$table = $this->getTable($records, $file);
 
 			$connection->table($table)->insert($records);
 

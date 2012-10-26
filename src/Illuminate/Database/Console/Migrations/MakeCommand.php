@@ -12,7 +12,7 @@ class MakeCommand extends Command {
 	 *
 	 * @var string
 	 */
-	protected $name = 'migrate:make';
+	protected $name = 'db:migrate:make';
 
 	/**
 	 * The console command description.

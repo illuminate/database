@@ -14,7 +14,7 @@ class SeedCommand extends Command {
 	 *
 	 * @var string
 	 */
-	protected $name = 'seed';
+	protected $name = 'db:seed';
 
 	/**
 	 * The console command description.
@@ -62,6 +62,8 @@ class SeedCommand extends Command {
 	 */
 	public function __construct(Resolver $resolver, Seeder $seeder, Dispatcher $events, $path)
 	{
+		parent::__construct();
+
 		$this->path = $path;
 		$this->seeder = $seeder;
 		$this->events = $events;
@@ -78,7 +80,7 @@ class SeedCommand extends Command {
 	{
 		$name = $this->input->getOption('database');
 
-		$this->seeder->seed($this->resolver->connection($name), $path);
+		$this->seeder->seed($this->resolver->connection($name), $this->path);
 	}
 
 	/**

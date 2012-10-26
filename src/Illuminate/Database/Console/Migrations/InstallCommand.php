@@ -10,7 +10,7 @@ class InstallCommand extends Command {
 	 *
 	 * @var string
 	 */
-	protected $name = 'migrate:install';
+	protected $name = 'db:migrate:install';
 
 	/**
 	 * The console command description.
