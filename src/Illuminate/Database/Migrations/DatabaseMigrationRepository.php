@@ -2,15 +2,16 @@
 
 use Closure;
 use Illuminate\Database\Connection;
+use Illuminate\Database\ConnectionResolverInterface as Resolver;
 
 class DatabaseMigrationRepository implements MigrationRepositoryInterface {
 
 	/**
-	 * The database connection instance.
+	 * The database connection resolver instance.
 	 *
-	 * @var Illuminate\Database\Connection|Closure
+	 * @var Illuminate\Database\ConnectionResolverInterface
 	 */
-	protected $connection;
+	protected $resolver;
 
 	/**
 	 * The name of the migration table.
@@ -20,15 +21,22 @@ class DatabaseMigrationRepository implements MigrationRepositoryInterface {
 	protected $table;
 
 	/**
+	 * The name of the database connection to use.
+	 *
+	 * @var string
+	 */
+	protected $connection;
+
+	/**
 	 * Create a new database migration repository instance.
 	 *
-	 * @param  Illuminate\Database\Connection|Closure  $connection
+	 * @param  Illuminate\Database\ConnectionResolverInterface  $resolver
 	 * @return void
 	 */
-	public function __construct($connection, $table)
+	public function __construct(Resolver $resolver, $table)
 	{
 		$this->table = $table;
-		$this->connection = $connection;
+		$this->resolver = $resolver;
 	}
 
 	/**
@@ -135,18 +143,34 @@ class DatabaseMigrationRepository implements MigrationRepositoryInterface {
 	}
 
 	/**
+	 * Get the connection resolver instance.
+	 *
+	 * @return Illuminate\Database\ConnectionResolverInterface
+	 */
+	public function getConnectionResolver()
+	{
+		return $this->resolver;
+	}
+
+	/**
 	 * Resolve the database connection instance.
 	 *
 	 * @return Illuminate\Database\Connection
 	 */
 	public function getConnection()
 	{
-		if ($this->connection instanceof Closure)
-		{
-			$this->connection = call_user_func($this->connection);
-		}
+		return $this->resolver->connection($this->connection);
+	}
 
-		return $this->connection;
+	/**
+	 * Set the information source to gather data.
+	 *
+	 * @param  string  $name
+	 * @return void
+	 */
+	public function setSource($name)
+	{
+		$this->connection = $name;
 	}
 
 }

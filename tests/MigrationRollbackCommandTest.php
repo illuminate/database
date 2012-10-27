@@ -14,6 +14,7 @@ class MigrationRollbackCommandTest extends PHPUnit_Framework_TestCase {
 	public function testRollbackCommandCallsMigratorWithProperArguments()
 	{
 		$command = new RollbackCommand($migrator = m::mock('Illuminate\Database\Migrations\Migrator'));
+		$migrator->shouldReceive('setConnection')->once()->with(null);
 		$migrator->shouldReceive('rollback')->once()->with(m::type('Symfony\Component\Console\Output\OutputInterface'), false);
 
 		$this->runCommand($command);
@@ -23,9 +24,10 @@ class MigrationRollbackCommandTest extends PHPUnit_Framework_TestCase {
 	public function testRollbackCommandCanBePretended()
 	{
 		$command = new RollbackCommand($migrator = m::mock('Illuminate\Database\Migrations\Migrator'));
+		$migrator->shouldReceive('setConnection')->once()->with('foo');
 		$migrator->shouldReceive('rollback')->once()->with(m::type('Symfony\Component\Console\Output\OutputInterface'), true);
 
-		$this->runCommand($command, array('--pretend' => true));
+		$this->runCommand($command, array('--pretend' => true, '--database' => 'foo'));
 	}
 
 

@@ -1,6 +1,7 @@
 <?php namespace Illuminate\Database\Console\Migrations;
 
 use Illuminate\Console\Command;
+use Symfony\Component\Console\Input\InputOption;
 use Illuminate\Database\Migrations\MigrationRepositoryInterface;
 
 class InstallCommand extends Command {
@@ -46,9 +47,23 @@ class InstallCommand extends Command {
 	 */
 	public function fire()
 	{
+		$this->repository->setSource($this->input->getOption('database'));
+
 		$this->repository->createRepository();
 
 		$this->info("Nice! Now we're ready to do some migrating!");
+	}
+
+	/**
+	 * Get the console command options.
+	 *
+	 * @return array
+	 */
+	protected function getOptions()
+	{
+		return array(
+			array('database', null, InputOption::VALUE_OPTIONAL, 'The database connection to use'),
+		);
 	}
 
 }

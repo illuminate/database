@@ -14,6 +14,7 @@ class MigrationMigrateCommandTest extends PHPUnit_Framework_TestCase {
 	public function testBasicMigrationsCallMigratorWithProperArguments()
 	{
 		$command = new MigrateCommand($migrator = m::mock('Illuminate\Database\Migrations\Migrator'), array('application' => __DIR__), __DIR__.'/vendor');
+		$migrator->shouldReceive('setConnection')->once()->with(null);
 		$migrator->shouldReceive('run')->once()->with(m::type('Symfony\Component\Console\Output\OutputInterface'), 'application', __DIR__, false);
 
 		$this->runCommand($command);
@@ -23,6 +24,7 @@ class MigrationMigrateCommandTest extends PHPUnit_Framework_TestCase {
 	public function testPackageIsRespectedWhenMigrating()
 	{
 		$command = new MigrateCommand($migrator = m::mock('Illuminate\Database\Migrations\Migrator'), array('application' => __DIR__, 'bar' => __DIR__.'/bar'), __DIR__.'/vendor');
+		$migrator->shouldReceive('setConnection')->once()->with(null);
 		$migrator->shouldReceive('run')->once()->with(m::type('Symfony\Component\Console\Output\OutputInterface'), 'bar', __DIR__.'/bar', false);
 
 		$this->runCommand($command, array('--package' => 'bar'));
@@ -32,6 +34,7 @@ class MigrationMigrateCommandTest extends PHPUnit_Framework_TestCase {
 	public function testVendorPackageIsRespectedWhenMigrating()
 	{
 		$command = new MigrateCommand($migrator = m::mock('Illuminate\Database\Migrations\Migrator'), array('application' => __DIR__, 'bar' => __DIR__.'/bar'), __DIR__.'/vendor');
+		$migrator->shouldReceive('setConnection')->once()->with(null);
 		$migrator->shouldReceive('run')->once()->with(m::type('Symfony\Component\Console\Output\OutputInterface'), 'foo/bar', __DIR__.'/vendor/foo/bar/src/migrations', false);
 
 		$this->runCommand($command, array('--package' => 'foo/bar'));
@@ -41,9 +44,20 @@ class MigrationMigrateCommandTest extends PHPUnit_Framework_TestCase {
 	public function testTheCommandMayBePretended()
 	{
 		$command = new MigrateCommand($migrator = m::mock('Illuminate\Database\Migrations\Migrator'), array('application' => __DIR__), __DIR__.'/vendor');
+		$migrator->shouldReceive('setConnection')->once()->with(null);
 		$migrator->shouldReceive('run')->once()->with(m::type('Symfony\Component\Console\Output\OutputInterface'), 'application', __DIR__, true);
 
 		$this->runCommand($command, array('--pretend' => true));
+	}
+
+
+	public function testTheDatabaseMayBeSet()
+	{
+		$command = new MigrateCommand($migrator = m::mock('Illuminate\Database\Migrations\Migrator'), array('application' => __DIR__), __DIR__.'/vendor');
+		$migrator->shouldReceive('setConnection')->once()->with('foo');
+		$migrator->shouldReceive('run')->once()->with(m::type('Symfony\Component\Console\Output\OutputInterface'), 'application', __DIR__, false);
+
+		$this->runCommand($command, array('--database' => 'foo'));
 	}
 
 

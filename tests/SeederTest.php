@@ -18,10 +18,12 @@ class SeederTest extends PHPUnit_Framework_TestCase {
 		$files->shouldReceive('getRequire')->once()->with('path/a.php')->andReturn(array('table' => 'a_table', array('name' => 'Taylor')));
 		$files->shouldReceive('getRequire')->once()->with('path/b.php')->andReturn(array(array('name' => 'Dayle')));
 		$connection = m::mock('Illuminate\Database\Connection');
-		$connection->shouldReceive('table')->once()->with('a_table')->andReturn($connection);
-		$connection->shouldReceive('insert')->once()->with(array(array('name' => 'Taylor')));
-		$connection->shouldReceive('table')->once()->with('b')->andReturn($connection);
-		$connection->shouldReceive('insert')->once()->with(array(array('name' => 'Dayle')));
+		$table = m::mock('Illuminate\Database\Query\Builder');
+		$connection->shouldReceive('table')->with('a_table')->andReturn($table);
+		$table->shouldReceive('delete')->twice();
+		$table->shouldReceive('insert')->once()->with(array(array('name' => 'Taylor')));
+		$connection->shouldReceive('table')->with('b')->andReturn($table);
+		$table->shouldReceive('insert')->once()->with(array(array('name' => 'Dayle')));
 		$events->shouldReceive('fire')->once()->with('illuminate.seeding', array('a_table', 1));
 		$events->shouldReceive('fire')->once()->with('illuminate.seeding', array('b', 1));
 

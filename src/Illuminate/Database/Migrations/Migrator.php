@@ -4,6 +4,7 @@ use Closure;
 use Illuminate\Filesystem;
 use Illuminate\Database\Connection;
 use Symfony\Component\Console\Output\OutputInterface;
+use Illuminate\Database\ConnectionResolverInterface as Resolver;
 
 class Migrator {
 
@@ -22,29 +23,32 @@ class Migrator {
 	protected $files;
 
 	/**
-	 * The connection pool array.
+	 * The connection resolver instance.
 	 *
-	 * @var array
+	 * @var Illuminate\Database\ConnectionResolverInterface
 	 */
-	protected $connectionPool = array();
+	protected $resolver;
 
 	/**
 	 * The name of the default connection.
 	 *
 	 * @var string
 	 */
-	protected $defaultConnection;
+	protected $connection;
 
 	/**
 	 * Create a new migrator instance.
 	 *
 	 * @param  Illuminate\Database\Migrations\MigrationRepositoryInterface  $repository
+	 * @param  Illuminate\Database\ConnectionResolverInterface  $resolver
 	 * @param  Illuminate\Filesystem  $files
 	 */
 	public function __construct(MigrationRepositoryInterface $repository,
+								Resolver $resolver,
                                 Filesystem $files)
 	{
 		$this->files = $files;
+		$this->resolver = $resolver;
 		$this->repository = $repository;
 	}
 
@@ -298,56 +302,13 @@ class Migrator {
 	}
 
 	/**
-	 * Add a connection to the connection pool.
+	 * Resolve the database connection instance.
 	 *
-	 * @param  string  $name
-	 * @param  Illuminate\Database\Connection|Closure  $connection
-	 * @return void
-	 */
-	public function addConnection($name, $connection)
-	{
-		if (is_null($this->defaultConnection)) $this->defaultConnection = $name;
-
-		$this->connectionPool[$name] = $connection;
-	}
-
-	/**
-	 * Resolve a connection by name.
-	 *
-	 * @param  string  $name
 	 * @return Illuminate\Database\Connection
 	 */
-	public function resolveConnection($name = null)
+	public function resolveConnection()
 	{
-		$name = $name ?: $this->defaultConnection;
-
-		if (isset($this->connectionPool[$name]))
-		{
-			return $this->getFromConnectionPool($name);
-		}
-
-		throw new \InvalidArgumentException("Undefined connection [$name]");
-	}
-
-	/**
-	 * Get a connection from the pool by name.
-	 *
-	 * @param  string  $name
-	 * @return Illuminate\Database\Connection
-	 */
-	protected function getFromConnectionPool($name)
-	{
-		$value = $this->connectionPool[$name];
-
-		// We allow connections to be added to the pool as Closures so we can lazily
-		// resolve them so we don't have to connect when we do not really need to
-		// make the connection. So, if we have a Closure we'll execute it here.
-		if ($value instanceof Closure)
-		{
-			$this->connectionPool[$name] = call_user_func($value);
-		}
-
-		return $this->connectionPool[$name];
+		return $this->resolver->connection($this->connection);
 	}
 
 	/**
@@ -356,9 +317,11 @@ class Migrator {
 	 * @param  string  $name
 	 * @return void
 	 */
-	public function setDefaultConnection($name)
+	public function setConnection($name)
 	{
-		$this->defaultConnection = $name;
+		$this->repository->setSource($name);
+
+		$this->connection = $name;
 	}
 
 	/**

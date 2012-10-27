@@ -15,6 +15,8 @@ class DatabaseMigrationRepositoryTest extends PHPUnit_Framework_TestCase {
 	{
 		$repo = $this->getRepository();
 		$query = m::mock('stdClass');
+		$connectionMock = m::mock('Illuminate\Database\Connection');
+		$repo->getConnectionResolver()->shouldReceive('connection')->with(null)->andReturn($connectionMock);
 		$repo->getConnection()->shouldReceive('table')->once()->with('migrations')->andReturn($query);
 		$query->shouldReceive('where')->once()->with('package', 'foo')->andReturn($query);
 		$query->shouldReceive('lists')->once()->with('migration')->andReturn('bar');
@@ -26,10 +28,12 @@ class DatabaseMigrationRepositoryTest extends PHPUnit_Framework_TestCase {
 	public function testGetLastMigrationsGetsAllMigrationsWithTheLatestBatchNumber()
 	{
 		$repo = $this->getMock('Illuminate\Database\Migrations\DatabaseMigrationRepository', array('getLastBatchNumber'), array(
-			m::mock('Illuminate\Database\Connection'), 'migrations'
+			$resolver = m::mock('Illuminate\Database\ConnectionResolverInterface'), 'migrations'
 		));
 		$repo->expects($this->once())->method('getLastBatchNumber')->will($this->returnValue(1));
 		$query = m::mock('stdClass');
+		$connectionMock = m::mock('Illuminate\Database\Connection');
+		$repo->getConnectionResolver()->shouldReceive('connection')->with(null)->andReturn($connectionMock);
 		$repo->getConnection()->shouldReceive('table')->once()->with('migrations')->andReturn($query);
 		$query->shouldReceive('where')->once()->with('batch', 1)->andReturn($query);
 		$query->shouldReceive('orderBy')->once()->with('migration', 'desc')->andReturn($query);
@@ -43,6 +47,8 @@ class DatabaseMigrationRepositoryTest extends PHPUnit_Framework_TestCase {
 	{
 		$repo = $this->getRepository();
 		$query = m::mock('stdClass');
+		$connectionMock = m::mock('Illuminate\Database\Connection');
+		$repo->getConnectionResolver()->shouldReceive('connection')->with(null)->andReturn($connectionMock);
 		$repo->getConnection()->shouldReceive('table')->once()->with('migrations')->andReturn($query);
 		$query->shouldReceive('insert')->once()->with(array('package' => 'foo', 'migration' => 'bar', 'batch' => 1));
 
@@ -54,6 +60,8 @@ class DatabaseMigrationRepositoryTest extends PHPUnit_Framework_TestCase {
 	{
 		$repo = $this->getRepository();
 		$query = m::mock('stdClass');
+		$connectionMock = m::mock('Illuminate\Database\Connection');
+		$repo->getConnectionResolver()->shouldReceive('connection')->with(null)->andReturn($connectionMock);
 		$repo->getConnection()->shouldReceive('table')->once()->with('migrations')->andReturn($query);
 		$query->shouldReceive('where')->once()->with('migration', 'foo')->andReturn($query);
 		$query->shouldReceive('where')->once()->with('package', 'bar')->andReturn($query);
@@ -67,7 +75,7 @@ class DatabaseMigrationRepositoryTest extends PHPUnit_Framework_TestCase {
 	public function testGetNextBatchNumberReturnsLastBatchNumberPlusOne()
 	{
 		$repo = $this->getMock('Illuminate\Database\Migrations\DatabaseMigrationRepository', array('getLastBatchNumber'), array(
-			m::mock('Illuminate\Database\Connection'), 'migrations'
+			m::mock('Illuminate\Database\ConnectionResolverInterface'), 'migrations'
 		));
 		$repo->expects($this->once())->method('getLastBatchNumber')->will($this->returnValue(1));
 
@@ -79,6 +87,8 @@ class DatabaseMigrationRepositoryTest extends PHPUnit_Framework_TestCase {
 	{
 		$repo = $this->getRepository();
 		$query = m::mock('stdClass');
+		$connectionMock = m::mock('Illuminate\Database\Connection');
+		$repo->getConnectionResolver()->shouldReceive('connection')->with(null)->andReturn($connectionMock);
 		$repo->getConnection()->shouldReceive('table')->once()->with('migrations')->andReturn($query);
 		$query->shouldReceive('max')->once()->andReturn(1);
 
@@ -90,6 +100,8 @@ class DatabaseMigrationRepositoryTest extends PHPUnit_Framework_TestCase {
 	{
 		$repo = $this->getRepository();
 		$schema = m::mock('stdClass');
+		$connectionMock = m::mock('Illuminate\Database\Connection');
+		$repo->getConnectionResolver()->shouldReceive('connection')->with(null)->andReturn($connectionMock);
 		$repo->getConnection()->shouldReceive('getSchemaBuilder')->once()->andReturn($schema);
 		$schema->shouldReceive('create')->once()->with('migrations', m::type('Closure'));
 
@@ -99,7 +111,7 @@ class DatabaseMigrationRepositoryTest extends PHPUnit_Framework_TestCase {
 
 	protected function getRepository()
 	{
-		return new DatabaseMigrationRepository(m::mock('Illuminate\Database\Connection'), 'migrations');
+		return new DatabaseMigrationRepository(m::mock('Illuminate\Database\ConnectionResolverInterface'), 'migrations');
 	}
 
 }

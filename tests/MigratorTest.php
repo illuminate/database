@@ -14,6 +14,7 @@ class MigratorTest extends PHPUnit_Framework_TestCase {
 	{
 		$migrator = $this->getMock('Illuminate\Database\Migrations\Migrator', array('resolve'), array(
 			m::mock('Illuminate\Database\Migrations\MigrationRepositoryInterface'),
+			$resolver = m::mock('Illuminate\Database\ConnectionResolverInterface'),
 			m::mock('Illuminate\Filesystem'),
 		));
 		$migrator->getFilesystem()->shouldReceive('glob')->once()->with(__DIR__.'/*_*.php')->andReturn(array(
@@ -46,6 +47,7 @@ class MigratorTest extends PHPUnit_Framework_TestCase {
 	{
 		$migrator = $this->getMock('Illuminate\Database\Migrations\Migrator', array('resolve'), array(
 			m::mock('Illuminate\Database\Migrations\MigrationRepositoryInterface'),
+			$resolver = m::mock('Illuminate\Database\ConnectionResolverInterface'),
 			m::mock('Illuminate\Filesystem'),
 		));
 		$migrator->getFilesystem()->shouldReceive('glob')->once()->with(__DIR__.'/*_*.php')->andReturn(array(
@@ -80,7 +82,7 @@ class MigratorTest extends PHPUnit_Framework_TestCase {
 			$closure();
 			return array(array('query' => 'bar'));
 		});
-		$migrator->addConnection('default', function() use ($connection) { return $connection; });
+		$resolver->shouldReceive('connection')->with(null)->andReturn($connection);
 
 		$output = m::mock('Symfony\Component\Console\Output\OutputInterface');
 		$output->shouldReceive('writeln')->once()->with('<info>'.get_class($barMock).':</info> foo');
@@ -94,6 +96,7 @@ class MigratorTest extends PHPUnit_Framework_TestCase {
 	{
 		$migrator = $this->getMock('Illuminate\Database\Migrations\Migrator', array('resolve'), array(
 			m::mock('Illuminate\Database\Migrations\MigrationRepositoryInterface'),
+			$resolver = m::mock('Illuminate\Database\ConnectionResolverInterface'),
 			m::mock('Illuminate\Filesystem'),
 		));
 		$migrator->getFilesystem()->shouldReceive('glob')->once()->with(__DIR__.'/*_*.php')->andReturn(array(
@@ -114,6 +117,7 @@ class MigratorTest extends PHPUnit_Framework_TestCase {
 	{
 		$migrator = $this->getMock('Illuminate\Database\Migrations\Migrator', array('resolve'), array(
 			m::mock('Illuminate\Database\Migrations\MigrationRepositoryInterface'),
+			$resolver = m::mock('Illuminate\Database\ConnectionResolverInterface'),
 			m::mock('Illuminate\Filesystem'),
 		));
 		$migrator->getRepository()->shouldReceive('getLast')->once()->andReturn(array(
@@ -145,6 +149,7 @@ class MigratorTest extends PHPUnit_Framework_TestCase {
 	{
 		$migrator = $this->getMock('Illuminate\Database\Migrations\Migrator', array('resolve'), array(
 			m::mock('Illuminate\Database\Migrations\MigrationRepositoryInterface'),
+			$resolver = m::mock('Illuminate\Database\ConnectionResolverInterface'),
 			m::mock('Illuminate\Filesystem'),
 		));
 		$migrator->getRepository()->shouldReceive('getLast')->once()->andReturn(array(
@@ -174,7 +179,7 @@ class MigratorTest extends PHPUnit_Framework_TestCase {
 			$closure();
 			return array(array('query' => 'foo'));
 		});
-		$migrator->addConnection('default', function() use ($connection) { return $connection; });
+		$resolver->shouldReceive('connection')->with(null)->andReturn($connection);
 
 		$output = m::mock('Symfony\Component\Console\Output\OutputInterface');
 		$output->shouldReceive('writeln')->once()->with('<info>'.get_class($barMock).':</info> bar');
@@ -188,6 +193,7 @@ class MigratorTest extends PHPUnit_Framework_TestCase {
 	{
 		$migrator = $this->getMock('Illuminate\Database\Migrations\Migrator', array('resolve'), array(
 			m::mock('Illuminate\Database\Migrations\MigrationRepositoryInterface'),
+			$resolver = m::mock('Illuminate\Database\ConnectionResolverInterface'),
 			m::mock('Illuminate\Filesystem'),
 		));
 		$migrator->getRepository()->shouldReceive('getLast')->once()->andReturn(array());

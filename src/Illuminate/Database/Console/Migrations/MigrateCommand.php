@@ -64,6 +64,8 @@ class MigrateCommand extends Command {
 	 */
 	public function fire()
 	{
+		$this->migrator->setConnection($this->input->getOption('database'));
+
 		$package = $this->input->getOption('package');
 
 		// The pretend option can be used for "simulating" the migration and grabbing
@@ -97,6 +99,8 @@ class MigrateCommand extends Command {
 	protected function getOptions()
 	{
 		return array(
+			array('database', null, InputOption::VALUE_OPTIONAL, 'The database connection to use'),
+
 			array('package', null, InputOption::VALUE_OPTIONAL, 'The package to migrate', 'application'),
 
 			array('pretend', null, InputOption::VALUE_NONE, 'Dump the SQL queries that would be run'),

@@ -47,6 +47,8 @@ class RollbackCommand extends Command {
 	 */
 	public function fire()
 	{
+		$this->migrator->setConnection($this->input->getOption('database'));
+
 		$pretend = $this->input->getOption('pretend');
 
 		$this->migrator->rollback($this->output, $pretend);
@@ -60,6 +62,8 @@ class RollbackCommand extends Command {
 	protected function getOptions()
 	{
 		return array(
+			array('database', null, InputOption::VALUE_OPTIONAL, 'The database connection to use'),
+
 			array('pretend', null, InputOption::VALUE_NONE, 'Dump the SQL queries that would be run'),
 		);
 	}

@@ -49,4 +49,12 @@ interface MigrationRepositoryInterface {
 	 */
 	public function createRepository();
 
+	/**
+	 * Set the information source to gather data.
+	 *
+	 * @param  string  $name
+	 * @return void
+	 */
+	public function setSource($name);
+
 }

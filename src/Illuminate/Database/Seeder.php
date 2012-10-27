@@ -20,6 +20,13 @@ class Seeder {
 	protected $events;
 
 	/**
+	 * The database seed file list.
+	 *
+	 * @var array
+	 */
+	protected $seeds;
+
+	/**
 	 * Create a new database seeder instance.
 	 *
 	 * @param  Illuminate\Filesystem  $files
@@ -50,8 +57,13 @@ class Seeder {
 			// the databases via a connection and fire an event noting the seeding.
 			$table = $this->getTable($records, $file);
 
+			$connection->table($table)->delete();
+
 			$connection->table($table)->insert($records);
 
+			// Once we have seeded the table, we will fire an event to let any listeners
+			// know the tables have been seeded and how many records were inserted so
+			// information can be presented to the developer about the seeding run.
 			if (isset($this->events))
 			{
 				$count = count($records);
@@ -69,11 +81,16 @@ class Seeder {
 	 */
 	protected function getFiles($path)
 	{
+		if (isset($this->seeds)) return $this->seeds;
+
+		// If the seeds haven't been read before, we will glob the directory and sort
+		// them alphabetically just in case the developer is using numbers to make
+		// the seed run in a certain order based on their database design needs.
 		$files = $this->files->glob($path.'/*.php');
 
 		sort($files);
 
-		return $files;
+		return $this->seeds = $files;
 	}
 
 	/**
