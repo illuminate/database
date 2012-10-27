@@ -44,7 +44,7 @@ class Seeder {
 	 *
 	 * @param  Illuminate\Database\Connection  $connection
 	 * @param  string  $path
-	 * @return void
+	 * @return int
 	 */
 	public function seed(Connection $connection, $path)
 	{
