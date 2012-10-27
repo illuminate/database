@@ -7,7 +7,6 @@ class EloquentModelTest extends PHPUnit_Framework_TestCase {
 	public function tearDown()
 	{
 		m::close();
-		EloquentModelStub::clearConnections();
 	}
 
 
@@ -149,11 +148,11 @@ class EloquentModelTest extends PHPUnit_Framework_TestCase {
 		$processor = m::mock('Illuminate\Database\Query\Processors\Processor');
 		$conn->shouldReceive('getQueryGrammar')->once()->andReturn($grammar);
 		$conn->shouldReceive('getPostProcessor')->once()->andReturn($processor);
-		EloquentModelStub::addConnection('main', $conn);
+		EloquentModelStub::setConnectionResolver($resolver = m::mock('Illuminate\Database\ConnectionResolverInterface'));
+		$resolver->shouldReceive('connection')->andReturn($conn);
 		$model = new EloquentModelStub;
 		$builder = $model->newQuery();
 		$this->assertInstanceOf('Illuminate\Database\Eloquent\Builder', $builder);
-		EloquentModelStub::clearConnections();
 	}
 
 
@@ -177,15 +176,12 @@ class EloquentModelTest extends PHPUnit_Framework_TestCase {
 
 	public function testConnectionManagement()
 	{
-		$conn = m::mock('Illuminate\Database\Connection');
-		EloquentModelStub::addConnection('main', $conn);
+		EloquentModelStub::setConnectionResolver($resolver = m::mock('Illuminate\Database\ConnectionResolverInterface'));
 		$model = new EloquentModelStub;
-		$this->assertTrue($model->getConnection() === $conn);
-		$conn2 = m::mock('Illuminate\Database\Connection');
-		EloquentModelStub::addConnection('sub', $conn2);
-		$model = new EloquentModelStub;
-		$model->setConnection('sub');
-		$this->assertTrue($model->getConnection() === $conn2);
+		$model->setConnection('foo');
+		$resolver->shouldReceive('connection')->once()->with('foo')->andReturn('bar');
+
+		$this->assertEquals('bar', $model->getConnection());
 	}
 
 
@@ -228,7 +224,6 @@ class EloquentModelTest extends PHPUnit_Framework_TestCase {
 		$this->addMockConnection($model);
 		$relation = $model->hasOne('EloquentModelSaveStub');
 		$this->assertEquals('eloquent_model_stub_id', $relation->getForeignKey());
-		EloquentModelStub::clearConnections();
 
 		$model = new EloquentModelStub;
 		$this->addMockConnection($model);
@@ -247,7 +242,6 @@ class EloquentModelTest extends PHPUnit_Framework_TestCase {
 		$this->assertEquals('morph_id', $relation->getForeignKey());
 		$this->assertEquals('morph_type', $relation->getMorphType());
 		$this->assertEquals('EloquentModelStub', $relation->getMorphClass());
-		EloquentModelStub::clearConnections();
 	}
 
 
@@ -257,7 +251,6 @@ class EloquentModelTest extends PHPUnit_Framework_TestCase {
 		$this->addMockConnection($model);
 		$relation = $model->hasMany('EloquentModelSaveStub');
 		$this->assertEquals('eloquent_model_stub_id', $relation->getForeignKey());
-		EloquentModelStub::clearConnections();
 
 		$model = new EloquentModelStub;
 		$this->addMockConnection($model);
@@ -276,7 +269,6 @@ class EloquentModelTest extends PHPUnit_Framework_TestCase {
 		$this->assertEquals('morph_id', $relation->getForeignKey());
 		$this->assertEquals('morph_type', $relation->getMorphType());
 		$this->assertEquals('EloquentModelStub', $relation->getMorphClass());
-		EloquentModelStub::clearConnections();
 	}
 
 
@@ -288,7 +280,6 @@ class EloquentModelTest extends PHPUnit_Framework_TestCase {
 		$this->assertEquals('belongs_to_stub_id', $relation->getForeignKey());
 		$this->assertTrue($relation->getParent() === $model);
 		$this->assertTrue($relation->getQuery()->getModel() instanceof EloquentModelSaveStub);
-		EloquentModelStub::clearConnections();
 
 		$model = new EloquentModelStub;
 		$this->addMockConnection($model);
@@ -320,7 +311,6 @@ class EloquentModelTest extends PHPUnit_Framework_TestCase {
 		$this->assertEquals('eloquent_model_save_stub_eloquent_model_stub.eloquent_model_save_stub_id', $relation->getOtherKey());
 		$this->assertTrue($relation->getParent() === $model);
 		$this->assertTrue($relation->getQuery()->getModel() instanceof EloquentModelSaveStub);
-		EloquentModelStub::clearConnections();
 
 		$model = new EloquentModelStub;
 		$this->addMockConnection($model);
@@ -334,7 +324,8 @@ class EloquentModelTest extends PHPUnit_Framework_TestCase {
 
 	protected function addMockConnection($model)
 	{
-		$model->addConnection('main', m::mock('Illuminate\Database\Connection'));
+		$model->setConnectionResolver($resolver = m::mock('Illuminate\Database\ConnectionResolverInterface'));
+		$resolver->shouldReceive('connection')->andReturn(m::mock('Illuminate\Database\Connection'));
 		$model->getConnection()->shouldReceive('getQueryGrammar')->andReturn(m::mock('Illuminate\Database\Query\Grammars\Grammar'));
 		$model->getConnection()->shouldReceive('getPostProcessor')->andReturn(m::mock('Illuminate\Database\Query\Processors\Processor'));
 	}

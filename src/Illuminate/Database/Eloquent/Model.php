@@ -11,11 +11,12 @@ use Illuminate\Database\Eloquent\Relations\MorphMany;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Query\Builder as QueryBuilder;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use Illuminate\Database\ConnectionResolverInterface as Resolver;
 
 abstract class Model implements ArrayableInterface, JsonableInterface {
 
 	/**
-	 * The connection for the model.
+	 * The connection name for the model.
 	 *
 	 * @var string
 	 */
@@ -92,18 +93,11 @@ abstract class Model implements ArrayableInterface, JsonableInterface {
 	public $exists = false;
 
 	/**
-	 * The connections registered with Eloquent.
+	 * The connection resolver instance.
 	 *
-	 * @var array
+	 * @var Illuminate\Database\ConnectionResolverInterface
 	 */
-	protected static $connections = array();
-
-	/**
-	 * The default connection name.
-	 *
-	 * @var string
-	 */
-	protected static $defaultConnection;
+	protected static $resolver;
 
 	/**
 	 * Create a new Eloquent model instance.
@@ -681,105 +675,6 @@ abstract class Model implements ArrayableInterface, JsonableInterface {
 	}
 
 	/**
-	 * Get the database connection for the model.
-	 *
-	 * @return Illuminate\Database\Connection
-	 */
-	public function getConnection()
-	{
-		return static::resolveConnection($this->getConnectionName());
-	}
-
-	/**
-	 * Get the current connection name for the model.
-	 *
-	 * @return string
-	 */
-	public function getConnectionName()
-	{
-		return $this->connection ?: static::$defaultConnection;
-	}
-
-	/**
-	 * Set the connection associated with the model.
-	 *
-	 * @param  string  $name
-	 * @return void
-	 */
-	public function setConnection($name)
-	{
-		$this->connection = $name;
-	}
-
-	/**
-	 * Register a connection with Eloquent.
-	 *
-	 * @param  string  $name
-	 * @param  Illuminate\Database\Connection|Closure  $connection
-	 * @return void
-	 */
-	public static function addConnection($name, $connection)
-	{
-		if (count(static::$connections) == 0)
-		{
-			static::$defaultConnection = $name;
-		}
-
-		static::$connections[$name] = $connection;
-	}
-
-	/**
-	 * Get the default connection instance.
-	 *
-	 * @return Illuminate\Database\Connection
-	 */
-	public static function getDefaultConnection()
-	{
-		if (is_null(static::$defaultConnection))
-		{
-			throw new \RuntimeException("No default connection is registered.");
-		}
-
-		return static::resolveConnection(static::$defaultConnection);
-	}
-
-	/**
-	 * Set the default connection name.
-	 *
-	 * @param  string  $name
-	 * @return void
-	 */
-	public static function setDefaultConnectionName($name)
-	{
-		static::$defaultConnection = $name;
-	}
-
-	/**
-	 * Clear the array of registered collections.
-	 *
-	 * @return void
-	 */
-	public static function clearConnections()
-	{
-		static::$connections = array();
-
-		static::$defaultConnection = null;
-	}
-
-	/**
-	 * Resolve a connection instance by name.
-	 *
-	 * @param  string  $connection
-	 * @return Illuminate\Database\Connection
-	 */
-	public static function resolveConnection($connection)
-	{
-		$connection = static::$connections[$connection];
-
-		return $connection instanceof Closure ? $connection() : $connection;
-	}
-
-	/**
 	 * Conver the model instance to JSON.
 	 *
 	 * @return string
@@ -905,9 +800,9 @@ abstract class Model implements ArrayableInterface, JsonableInterface {
 	 */
 	public function setAttribute($key, $value)
 	{
-		// First we will check for the presence of a mutator for the set operation.
-		// This simply lets the developer tweak the attribute as it is set on
-		// the model, such as json_encoding an array of data for storage.
+		// First we will check for the presence of a mutator for the set operation
+		// which simply lets the developers tweak the attribute as it is set on
+		// the model, such as "json_encoding" an listing of data for storage.
 		if ($this->hasSetMutator($key))
 		{
 			$method = 'set'.camel_case($key);
@@ -971,6 +866,69 @@ abstract class Model implements ArrayableInterface, JsonableInterface {
 	public function setRelation($relation, $value)
 	{
 		$this->relations[$relation] = $value;
+	}
+
+	/**
+	 * Get the database connection for the model.
+	 *
+	 * @return Illuminate\Database\Connection
+	 */
+	public function getConnection()
+	{
+		return static::resolveConnection($this->connection);
+	}
+
+	/**
+	 * Get the current connection name for the model.
+	 *
+	 * @return string
+	 */
+	public function getConnectionName()
+	{
+		return $this->connection;
+	}
+
+	/**
+	 * Set the connection associated with the model.
+	 *
+	 * @param  string  $name
+	 * @return void
+	 */
+	public function setConnection($name)
+	{
+		$this->connection = $name;
+	}
+
+	/**
+	 * Resolve a connection instance by name.
+	 *
+	 * @param  string  $connection
+	 * @return Illuminate\Database\Connection
+	 */
+	public static function resolveConnection($connection)
+	{
+		return static::$resolver->connection($connection);
+	}
+
+	/**
+	 * Get the connection resolver instance.
+	 *
+	 * @return Illuminate\Database\ConnectionResolverInterface
+	 */
+	public static function getConnectionResolver()
+	{
+		return static::$resolver;
+	}
+
+	/**
+	 * Set the connection resolver instance.
+	 *
+	 * @param  Illuminate\Database\ConnectionResolverInterface  $resolver
+	 * @return void
+	 */
+	public static function setConnectionResolver(Resolver $resolver)
+	{
+		static::$resolver = $resolver;
 	}
 
 	/**
