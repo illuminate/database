@@ -11,7 +11,7 @@ class RollbackCommand extends Command {
 	 *
 	 * @var string
 	 */
-	protected $name = 'db:migrate:rollback';
+	protected $name = 'migrate:rollback';
 
 	/**
 	 * The console command description.

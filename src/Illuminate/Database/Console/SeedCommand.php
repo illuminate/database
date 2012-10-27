@@ -14,7 +14,7 @@ class SeedCommand extends Command {
 	 *
 	 * @var string
 	 */
-	protected $name = 'db:seed';
+	protected $name = 'seed';
 
 	/**
 	 * The console command description.
