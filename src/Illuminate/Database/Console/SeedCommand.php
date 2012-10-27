@@ -90,13 +90,13 @@ class SeedCommand extends Command {
 	 */
 	protected function registerSeedEventListener()
 	{
-		$output = $this->output;
+		$me = $this;
 
-		$this->events->listen('illuminate.seeding', function($table, $count) use ($output)
+		$this->events->listen('illuminate.seeding', function($table, $count) use ($me)
 		{
 			$message = "<info>Seeded table:</info> {$table} ({$count} records)";
 
-			$output->writeln($message);
+			$me->getOutput()->writeln($message);
 		});
 	}
 
