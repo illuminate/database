@@ -48,6 +48,8 @@ class Seeder {
 	 */
 	public function seed(Connection $connection, $path)
 	{
+		$total = 0;
+
 		foreach ($this->getFiles($path) as $file)
 		{
 			$records = $this->files->getRequire($file);
@@ -61,16 +63,18 @@ class Seeder {
 
 			$connection->table($table)->insert($records);
 
+			$total += $count = count($records);
+
 			// Once we have seeded the table, we will fire an event to let any listeners
 			// know the tables have been seeded and how many records were inserted so
 			// information can be presented to the developer about the seeding run.
 			if (isset($this->events))
 			{
-				$count = count($records);
-
 				$this->events->fire('illuminate.seeding', array($table, $count));
 			}
 		}
+
+		return $total;
 	}
 
 	/**

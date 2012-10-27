@@ -68,6 +68,7 @@ class SeedCommand extends Command {
 		$this->seeder = $seeder;
 		$this->events = $events;
 		$this->resolver = $resolver;
+
 		$this->registerSeedEventListener();
 	}
 
@@ -80,7 +81,9 @@ class SeedCommand extends Command {
 	{
 		$name = $this->input->getOption('database');
 
-		$this->seeder->seed($this->resolver->connection($name), $this->path);
+		$total = $this->seeder->seed($this->resolver->connection($name), $this->path);
+
+		if ($total == 0) $this->info('Nothing to seed.');
 	}
 
 	/**
@@ -92,9 +95,9 @@ class SeedCommand extends Command {
 	{
 		$me = $this;
 
-		$this->events->listen('illuminate.seeding', function($table, $count) use ($me)
+		$this->events->listen('illuminate.seeding', function($t, $c) use ($me)
 		{
-			$message = "<info>Seeded table:</info> {$table} ({$count} records)";
+			$message = "<info>Seeded table:</info> {$t} ({$c} records)";
 
 			$me->getOutput()->writeln($message);
 		});

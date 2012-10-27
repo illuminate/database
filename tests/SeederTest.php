@@ -27,7 +27,7 @@ class SeederTest extends PHPUnit_Framework_TestCase {
 		$events->shouldReceive('fire')->once()->with('illuminate.seeding', array('a_table', 1));
 		$events->shouldReceive('fire')->once()->with('illuminate.seeding', array('b', 1));
 
-		$seeder->seed($connection, 'path');
+		$this->assertEquals(2, $seeder->seed($connection, 'path'));
 	}
 
 }
