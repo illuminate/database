@@ -1,6 +1,5 @@
 <?php namespace Illuminate\Database\Schema\Grammars;
 
-
 use Illuminate\Support\Fluent;
 use Illuminate\Database\Schema\Blueprint;
 
