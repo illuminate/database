@@ -217,6 +217,15 @@ class EloquentModelTest extends PHPUnit_Framework_TestCase {
 		$this->assertEquals('bar', $model->age);
 	}
 
+	public function testUnfillable()
+	{
+		$model = new EloquentModelStub;
+		$model->setUnfillable(array('password'));
+		$model->fill(array('name' => 'foo', 'age' => 'bar', 'password' => 'baz'));
+		$this->assertFalse(isset($model->password));
+		$this->assertEquals('foo', $model->name);
+		$this->assertEquals('bar', $model->age);
+	}
 
 	public function testHasOneCreatesProperRelation()
 	{
