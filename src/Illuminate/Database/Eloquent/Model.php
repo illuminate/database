@@ -1,5 +1,6 @@
 <?php namespace Illuminate\Database\Eloquent;
 
+use ArrayAccess;
 use Closure;
 use DateTime;
 use Illuminate\Database\Connection;
@@ -13,7 +14,7 @@ use Illuminate\Database\Query\Builder as QueryBuilder;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\ConnectionResolverInterface as Resolver;
 
-abstract class Model implements ArrayableInterface, JsonableInterface {
+abstract class Model implements ArrayAccess, ArrayableInterface, JsonableInterface {
 
 	/**
 	 * The connection name for the model.
@@ -929,6 +930,51 @@ abstract class Model implements ArrayableInterface, JsonableInterface {
 	public static function setConnectionResolver(Resolver $resolver)
 	{
 		static::$resolver = $resolver;
+	}
+
+	/**
+	 * Retrieve attributes on the model.
+	 *
+	 * @param  string  $key
+	 * @return mixed
+	 */
+	public function offsetGet($key)
+	{
+		return $this->getAttribute($key);
+	}
+
+	/**
+	 * Set attributes on the model.
+	 *
+	 * @param  string  $key
+	 * @param  mixed   $value
+	 * @return void
+	 */
+	public function offsetSet($key, $value)
+	{
+		$this->setAttribute($key, $value);
+	}
+
+	/**
+	 * Determine if an attribute exists on the model.
+	 *
+	 * @param  string  $key
+	 * @return void
+	 */
+	public function offsetExists($key)
+	{
+		return isset($this->attributes[$key]);
+	}
+
+	/**
+	 * Unset an attribute on the model.
+	 *
+	 * @param  string  $key
+	 * @return void
+	 */
+	public function offsetUnset($key)
+	{
+		unset($this->attributes[$key]);
 	}
 
 	/**
