@@ -25,7 +25,7 @@ class MorphMany extends MorphOneOrMany {
 	{
 		foreach ($models as $model)
 		{
-			$model->setRelation($relation, new Collection);
+			$model->setRelation($relation, $this->related->newCollection());
 		}
 
 		return $models;

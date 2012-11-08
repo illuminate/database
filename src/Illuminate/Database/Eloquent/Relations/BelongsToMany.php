@@ -84,7 +84,7 @@ class BelongsToMany extends Relation {
 			$models = $this->query->eagerLoadRelations($models);
 		}
 
-		return new Collection($models);
+		return $this->related->newCollection($models);
 	}
 
 	/**
@@ -233,7 +233,7 @@ class BelongsToMany extends Relation {
 	{
 		foreach ($models as $model)
 		{
-			$model->setRelation($relation, new Collection);
+			$model->setRelation($relation, $this->related->newCollection());
 		}
 
 		return $models;
@@ -258,7 +258,9 @@ class BelongsToMany extends Relation {
 		{;
 			if (isset($dictionary[$key = $model->getKey()]))
 			{
-				$model->setRelation($relation, new Collection($dictionary[$key]));
+				$collection = $this->related->newCollection($dictionary[$key]);
+
+				$model->setRelation($relation, $collection);
 			}
 		}
 

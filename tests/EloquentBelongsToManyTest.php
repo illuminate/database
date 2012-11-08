@@ -24,6 +24,7 @@ class EloquentBelongsToManyTest extends PHPUnit_Framework_TestCase {
 		$relation->getParent()->shouldReceive('getConnectionName')->andReturn('foo.connection');
 		$relation->getQuery()->shouldReceive('getModels')->once()->with(array('roles.*', 'user_role.user_id as pivot_user_id', 'user_role.role_id as pivot_role_id'))->andReturn($models);
 		$relation->getQuery()->shouldReceive('eagerLoadRelations')->once()->with($models)->andReturn($models);
+		$relation->getRelated()->shouldReceive('newCollection')->andReturnUsing(function($array) { return new Collection($array); });
 		$results = $relation->get();
 
 		$this->assertInstanceOf('Illuminate\Database\Eloquent\Collection', $results);
@@ -63,6 +64,7 @@ class EloquentBelongsToManyTest extends PHPUnit_Framework_TestCase {
 			'user_role.updated_at as pivot_updated_at',
 		))->andReturn($models);
 		$relation->getQuery()->shouldReceive('eagerLoadRelations')->once()->with($models)->andReturn($models);
+		$relation->getRelated()->shouldReceive('newCollection')->andReturnUsing(function($array) { return new Collection($array); });
 		$results = $relation->get();
 	}
 
@@ -85,6 +87,7 @@ class EloquentBelongsToManyTest extends PHPUnit_Framework_TestCase {
 		$model3 = new EloquentBelongsToManyModelStub;
 		$model3->id = 3;
 
+		$relation->getRelated()->shouldReceive('newCollection')->andReturnUsing(function($array) { return new Collection($array); });
 		$models = $relation->match(array($model1, $model2, $model3), new Collection(array($result1, $result2, $result3)), 'foo');
 
 		$this->assertEquals(1, $models[0]->foo[0]->pivot->user_id);
@@ -99,6 +102,7 @@ class EloquentBelongsToManyTest extends PHPUnit_Framework_TestCase {
 	public function testRelationIsProperlyInitialized()
 	{
 		$relation = $this->getRelation();
+		$relation->getRelated()->shouldReceive('newCollection')->andReturnUsing(function($array = array()) { return new Collection($array); });
 		$model = m::mock('Illuminate\Database\Eloquent\Model');
 		$model->shouldReceive('setRelation')->once()->with('foo', m::type('Illuminate\Database\Eloquent\Collection'));
 		$models = $relation->initRelation(array($model), 'foo');

@@ -529,6 +529,17 @@ abstract class Model implements ArrayableInterface, JsonableInterface {
 	}
 
 	/**
+	 * Create a new Eloquent Collection instance.
+	 *
+	 * @param  array  $models
+	 * @return Illuminate\Database\Eloquent\Collection
+	 */
+	public function newCollection(array $models = array())
+	{
+		return new Collection($models);
+	}
+
+	/**
 	 * Get the table associated with the model.
 	 *
 	 * @return string

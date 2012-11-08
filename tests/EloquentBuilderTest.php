@@ -44,6 +44,11 @@ class EloquentBuilderTest extends PHPUnit_Framework_TestCase {
 		$builder = $this->getMock('Illuminate\Database\Eloquent\Builder', array('getModels', 'eagerLoadRelations'), $this->getMocks());
 		$builder->expects($this->once())->method('getModels')->with($this->equalTo(array('foo')))->will($this->returnValue(array('bar')));
 		$builder->expects($this->once())->method('eagerLoadRelations')->with($this->equalTo(array('bar')))->will($this->returnValue(array('bar', 'baz')));
+		$model = m::mock('Illuminate\Database\Eloquent\Model');
+		$model->shouldReceive('newCollection')->with(array('bar', 'baz'))->andReturn(new Illuminate\Database\Eloquent\Collection(array('bar', 'baz')));
+		$model->shouldReceive('getTable')->once()->andReturn('foo');
+		$builder->getQuery()->shouldReceive('from')->once()->with('foo');
+		$builder->setModel($model);
 		$results = $builder->get(array('foo'));
 
 		$this->assertEquals(array('bar', 'baz'), $results->all());
@@ -55,6 +60,11 @@ class EloquentBuilderTest extends PHPUnit_Framework_TestCase {
 		$builder = $this->getMock('Illuminate\Database\Eloquent\Builder', array('getModels', 'eagerLoadRelations'), $this->getMocks());
 		$builder->expects($this->once())->method('getModels')->with($this->equalTo(array('foo')))->will($this->returnValue(array()));
 		$builder->expects($this->never())->method('eagerLoadRelations');
+		$model = m::mock('Illuminate\Database\Eloquent\Model');
+		$model->shouldReceive('newCollection')->with(array())->andReturn(new Illuminate\Database\Eloquent\Collection(array()));
+		$model->shouldReceive('getTable')->once()->andReturn('foo');
+		$builder->getQuery()->shouldReceive('from')->once()->with('foo');
+		$builder->setModel($model);
 		$results = $builder->get(array('foo'));
 
 		$this->assertEquals(array(), $results->all());
