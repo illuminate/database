@@ -91,7 +91,7 @@ class Builder {
 			$models = $this->eagerLoadRelations($models);
 		}
 
-		return new Collection($models);
+		return $this->model->newCollection($models);
 	}
 
 	/**
