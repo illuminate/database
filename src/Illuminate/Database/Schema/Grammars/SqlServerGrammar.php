@@ -249,7 +249,7 @@ class SqlServerGrammar extends Grammar {
 	 */
 	protected function typeDecimal(Fluent $column)
 	{
-		return "decimal({$column->places}, {$column->total})";
+		return "decimal({$column->total}, {$column->places})";
 	}
 
 	/**

@@ -258,7 +258,7 @@ class MySqlSchemaGrammarTest extends PHPUnit_Framework_TestCase {
 		$statements = $blueprint->toSql($this->getGrammar());
 
 		$this->assertEquals(1, count($statements));
-		$this->assertEquals('alter table `users` add `foo` float(2, 5) not null', $statements[0]);		
+		$this->assertEquals('alter table `users` add `foo` float(5, 2) not null', $statements[0]);
 	}
 
 
@@ -269,7 +269,7 @@ class MySqlSchemaGrammarTest extends PHPUnit_Framework_TestCase {
 		$statements = $blueprint->toSql($this->getGrammar());
 
 		$this->assertEquals(1, count($statements));
-	$this->assertEquals('alter table `users` add `foo` decimal(2, 5) not null', $statements[0]);
+		$this->assertEquals('alter table `users` add `foo` decimal(5, 2) not null', $statements[0]);
 	}
 
 

@@ -241,7 +241,7 @@ class MySqlGrammar extends Grammar {
 	 */
 	protected function typeFloat(Fluent $column)
 	{
-		return "float({$column->places}, {$column->total})";
+		return "float({$column->total}, {$column->places})";
 	}
 
 	/**
@@ -252,7 +252,7 @@ class MySqlGrammar extends Grammar {
 	 */
 	protected function typeDecimal(Fluent $column)
 	{
-		return "decimal({$column->places}, {$column->total})";
+		return "decimal({$column->total}, {$column->places})";
 	}
 
 	/**
