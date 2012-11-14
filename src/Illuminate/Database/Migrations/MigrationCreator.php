@@ -90,7 +90,7 @@ class MigrationCreator {
 		$stub = str_replace('{{class}}', camel_case($name), $stub);
 
 		// Here we will replace the table place-holders with the table specified by
-		// the developer. This is useful for quickly creaeting a tables creation
+		// the developer. This is useful for quickly creating a tables creation
 		// or update migration from the console instead of typing it manually
 		if ( ! is_null($table))
 		{

@@ -201,7 +201,7 @@ class Grammar extends BaseGrammar {
 		}
 
 		// If we actually have some where clauses, we will strip off the first boolean
-		// opeartor, which is added by the query builders for convenience so we can
+		// operator, which is added by the query builders for convenience so we can
 		// avoid checking for the first clauses in each of the compilers methods.
 		if (count($sql) > 0)
 		{
