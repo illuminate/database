@@ -82,6 +82,17 @@ class Collection implements ArrayAccess, ArrayableInterface, Countable, Iterator
 	}
 
 	/**
+	 * Determine if the collection is empty or not.
+	 *
+	 * @return bool
+	 */
+	public function isEmpty()
+	{
+		return empty($this->items);
+	}
+
+
+	/**
 	 * Get an iterator for the items.
 	 *
 	 * @return ArrayIterator
