@@ -158,7 +158,7 @@ class SqlServerGrammar extends Grammar {
 	}
 
 	/**
-	 * Get the format for databsae stored dates.
+	 * Get the format for database stored dates.
 	 *
 	 * @return string
 	 */

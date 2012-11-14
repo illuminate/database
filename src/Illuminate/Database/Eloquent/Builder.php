@@ -122,7 +122,7 @@ class Builder {
 	{
 		$paginator = $this->query->getConnection()->getPaginator();
 
-		// Once we have the paginator we need to set the limit and offet values for
+		// Once we have the paginator we need to set the limit and offset values for
 		// the query so we can get the properly paginated items. Once we have an
 		// array of items we can create the paginator instances for the items.
 		$page = $paginator->getCurrentPage();
@@ -234,7 +234,7 @@ class Builder {
 	{
 		$query = $this->getModel()->$relation();
 
-		// If there are nosted relationships set on the query, we will put those onto
+		// If there are nested relationships set on the query, we will put those onto
 		// the query instances so that they can be handled after this relationship
 		// is loaded. In this way they will all trickle down as they are loaded.
 		$nested = $this->nestedRelations($relation);
@@ -272,7 +272,7 @@ class Builder {
 	}
 
 	/**
-	 * Set the relationships that should be eaager loaded.
+	 * Set the relationships that should be eager loaded.
 	 *
 	 * @param  array  $relations
 	 * @return Illuminate\Database\Eloquent\Builder
@@ -307,7 +307,7 @@ class Builder {
 			}
 
 			// We need to separate out any nested includes. Which allows the developers
-			// to load deep relatoinships using "dots" without stating each level of
+			// to load deep relationships using "dots" without stating each level of
 			// the relationship with its own key in the array of eager load names.
 			$progress = array();
 
@@ -338,7 +338,7 @@ class Builder {
 	}
 
 	/**
-	 * Get the relationships being eagerly laoded.
+	 * Get the relationships being eagerly loaded.
 	 *
 	 * @return array
 	 */
@@ -348,7 +348,7 @@ class Builder {
 	}
 
 	/**
-	 * Set the relationships being eagerly laoded.
+	 * Set the relationships being eagerly loaded.
 	 *
 	 * @param  array  $eagerLoad
 	 * @return void

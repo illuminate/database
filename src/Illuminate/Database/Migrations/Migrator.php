@@ -65,7 +65,7 @@ class Migrator {
 	{
 		// Once we grab all of the migration files for the path, we will compare them
 		// against the migrations that have already been run for this package then
-		// run all of the oustanding migrations against the database connection.
+		// run all of the outstanding migrations against the database connection.
 		$files = $this->getMigrationFiles($path);
 
 		$ran = $this->repository->getRan($package);

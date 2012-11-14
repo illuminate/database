@@ -245,7 +245,7 @@ class Builder {
 		}
 
 		// If the given operator is not found in the list of valid operators we will
-		// assume that the develoepr is just short-cutting the '=' operators and
+		// assume that the developer is just short-cutting the '=' operators and
 		// we will set the operators to '=' and set the values appropriately.
 		if ( ! in_array($operator, $this->operators))
 		{
@@ -307,7 +307,7 @@ class Builder {
 
 		// Once we have let the Closure do its things, we can gather the bindings on
 		// the nested query builder and merge them into these bindings since they
-		// need to get extracted out of the children and assigend to the array.
+		// need to get extracted out of the children and assigned to the array.
 		$this->wheres[] = compact('type', 'query', 'boolean');
 
 		$this->mergeBindings($query);
@@ -383,7 +383,7 @@ class Builder {
 	/**
 	 * Add a where not exists clause to the query.
 	 *
-	 * @param  Closure  $calback
+	 * @param  Closure  $callback
 	 * @param  string   $boolean
 	 * @return Illuminate\Database\Query\Builder
 	 */
@@ -395,7 +395,7 @@ class Builder {
 	/**
 	 * Add a where not exists clause to the query.
 	 *
-	 * @param  Closure  $calback
+	 * @param  Closure  $callback
 	 * @return Illuminate\Database\Query\Builder
 	 */
 	public function orWhereNotExists(Closure $callback)
@@ -418,7 +418,7 @@ class Builder {
 
 		// If the value of the where in clause is actually a Closure, we will assume that
 		// the developer is using a full sub-select for this "in" statement, and will
-		// execute those Closures and we can re-constructure the full sub-selects.
+		// execute those Closures and we can re-construct the full sub-selects.
 		if ($values instanceof Closure)
 		{
 			return $this->whereInSub($column, $values, $boolean, $not);
@@ -668,7 +668,7 @@ class Builder {
 	 */
 	public function get($columns = array('*'))
 	{
-		// If no columns have been specified for the select staement, we will set them
+		// If no columns have been specified for the select statement, we will set them
 		// here to either the passed columns of the standard default of retrieving
 		// all of the columns on the table using the wildcard column character.
 		if (is_null($this->columns))
@@ -696,7 +696,7 @@ class Builder {
 
 		// First we will just get all of the column values for the record result set
 		// then we can associate those values with the column if it was specified
-		// otherwise we can jsut give these values back without a specific key.
+		// otherwise we can just give these values back without a specific key.
 		$values = array_map(function($row) use ($column)
 		{
 			$row = (object) $row;
@@ -852,7 +852,7 @@ class Builder {
 	{
 		// Since every insert gets treated like a batch insert, we will make sure the
 		// bindings are structured in a way that is convenient for building these
-		// inserts statements by verifying the elements are dactually an array.
+		// inserts statements by verifying the elements are actually an array.
 		if ( ! is_array(reset($values)))
 		{
 			$values = array($values);
@@ -872,7 +872,7 @@ class Builder {
 
 		// Once we have compiled the insert statement's SQL we can execute it on the
 		// connection and return a result as a boolean success indicator as that
-		// is the same type of result returned by the raw connection instnace.
+		// is the same type of result returned by the raw connection instance.
 		$bindings = $this->cleanBindings($bindings);
 
 		return $this->connection->insert($sql, $bindings);
