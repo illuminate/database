@@ -71,6 +71,23 @@ class QueryBuilderTest extends PHPUnit_Framework_TestCase {
 	}
 
 
+	public function testRawWheres()
+	{
+		$builder = $this->getBuilder();
+		$builder->select('*')->from('users')->whereRaw('id = ? or email = ?', array(1, 'foo'));
+		$this->assertEquals('select * from "users" where id = ? or email = ?', $builder->toSql());
+		$this->assertEquals(array(0 => 1, 1 => 'foo'), $builder->getBindings());	
+	}
+
+	public function testRawOrWheres()
+	{
+		$builder = $this->getBuilder();
+		$builder->select('*')->from('users')->where('id', '=', 1)->orWhereRaw('email = ?', array('foo'));
+		$this->assertEquals('select * from "users" where "id" = ? or email = ?', $builder->toSql());
+		$this->assertEquals(array(0 => 1, 1 => 'foo'), $builder->getBindings());	
+	}
+
+
 	public function testBasicWhereIns()
 	{
 		$builder = $this->getBuilder();

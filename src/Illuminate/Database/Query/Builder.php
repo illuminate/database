@@ -286,6 +286,37 @@ class Builder {
 	}
 
 	/**
+	 * Add a raw where clause to the query.
+	 *
+	 * @param  string  $sql
+	 * @param  array   $bindings
+	 * @param  string  $boolean
+	 * @return Illuminate\Database\Query\Builder
+	 */
+	public function whereRaw($sql, array $bindings = array(), $boolean = 'and')
+	{
+		$type = 'raw';
+
+		$this->wheres[] = compact('type', 'sql', 'boolean');
+
+		$this->bindings = array_merge($this->bindings, $bindings);
+
+		return $this;
+	}
+
+	/**
+	 * Add a raw or where clause to the query.
+	 *
+	 * @param  string  $sql
+	 * @param  array   $bindings
+	 * @return Illuminate\Database\Query\Builder
+	 */
+	public function orWhereRaw($sql, array $bindings = array())
+	{
+		return $this->whereRaw($sql, $bindings, 'or');
+	}
+
+	/**
 	 * Add a nested where statement to the query.
 	 *
 	 * @param  Closure  $callback
