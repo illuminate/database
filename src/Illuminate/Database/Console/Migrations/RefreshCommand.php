@@ -26,13 +26,13 @@ class RefreshCommand extends Command {
 	 */
 	public function fire()
 	{
-		$database = $this->getOption('database');
+		$database = $this->input->getOption('database');
 
 		$this->call('migrate:reset', array('--database' => $database));
 
 		$this->call('migrate', array('--database' => $database));
 
-		if ($this->getOption('seed'))
+		if ($this->input->getOption('seed'))
 		{
 			$this->call('db:seed', array('--database' => $database));
 		}
