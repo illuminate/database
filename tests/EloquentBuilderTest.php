@@ -96,6 +96,34 @@ class EloquentBuilderTest extends PHPUnit_Framework_TestCase {
 	}
 
 
+	public function testPaginateMethodWithGroupedQuery()
+	{
+		$builder = $this->getMock('Illuminate\Database\Eloquent\Builder', array('get'), $this->getMocks());
+		$model = m::mock('Illuminate\Database\Eloquent\Model');
+		$model->shouldReceive('getPerPage')->once()->andReturn(2);
+		$model->shouldReceive('getTable')->once()->andReturn('foo_table');
+		$query = $this->getMock('Illuminate\Database\Query\Builder', array('from', 'getConnection'), array(
+			m::mock('Illuminate\Database\ConnectionInterface'),
+			m::mock('Illuminate\Database\Query\Grammars\Grammar'),
+			m::mock('Illuminate\Database\Query\Processors\Processor'),
+		));
+		$builder->setQuery($query);
+		$query->expects($this->once())->method('from')->will($this->returnValue('foo_table'));
+		$builder->setModel($model);
+		$conn = m::mock('stdClass');
+		$paginator = m::mock('stdClass');
+		$paginator->shouldReceive('getCurrentPage')->once()->andReturn(2);
+		$conn->shouldReceive('getPaginator')->once()->andReturn($paginator);
+		$query->expects($this->once())->method('getConnection')->will($this->returnValue($conn));
+		$collection = m::mock('stdClass');
+		$collection->shouldReceive('all')->once()->andReturn(array('foo', 'bar', 'baz'));
+		$builder->expects($this->once())->method('get')->with($this->equalTo(array('*')))->will($this->returnValue($collection));
+		$paginator->shouldReceive('make')->once()->with(array('baz'), 3, 2)->andReturn(array('results'));
+
+		$this->assertEquals(array('results'), $builder->groupBy('foo')->paginate());
+	}
+
+
 	public function testGetModelsProperlyHydratesModels()
 	{
 		$builder = $this->getMock('Illuminate\Database\Eloquent\Builder', array('get'), $this->getMocks());

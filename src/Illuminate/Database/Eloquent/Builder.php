@@ -105,22 +105,44 @@ class Builder {
 	{
 		$perPage = $perPage ?: $this->model->getPerPage();
 
-		$total = $this->query->getPaginationCount();
+		$paginator = $this->query->getConnection()->getPaginator();
 
-		return $this->createPaginator($total, $perPage, $columns);
+		if (isset($this->query->groups))
+		{
+			return $this->groupedPaginate($paginator, $perPage, $columns);
+		}
+		else
+		{
+			return $this->ungroupedPaginate($paginator, $perPage, $columns);
+		}
 	}
 
 	/**
-	 * Create the paginator instance for the given totals.
+	 * Get a paginator for a grouped statement.
 	 *
-	 * @param  int    $total
+	 * @param  Illuminate\Pagination\Environment  $paginator
 	 * @param  int    $perPage
 	 * @param  array  $columns
 	 * @return Illuminate\Pagination\Paginator
 	 */
-	protected function createPaginator($total, $perPage, $columns)
+	protected function groupedPaginate($paginator, $perPage, $columns)
 	{
-		$paginator = $this->query->getConnection()->getPaginator();
+		$results = $this->get($columns)->all();
+
+		return $this->query->buildPaginatorFromResults($paginator, $results, $perPage);
+	}
+
+	/**
+	 * Get a paginator for an ungrouped statement.
+	 *
+	 * @param  Illuminate\Pagination\Environment  $paginator
+	 * @param  int    $perPage
+	 * @param  array  $columns
+	 * @return Illuminate\Pagination\Paginator
+	 */
+	protected function ungroupedPaginate($paginator, $perPage, $columns)
+	{
+		$total = $this->query->getPaginationCount();
 
 		// Once we have the paginator we need to set the limit and offet values for
 		// the query so we can get the properly paginated items. Once we have an
@@ -129,9 +151,7 @@ class Builder {
 
 		$this->query->forPage($page, $perPage);
 
-		$results = $this->get($columns)->all();
-
-		return $paginator->make($results, $total, $perPage);
+		return $paginator->make($this->get($columns)->all(), $total, $perPage);
 	}
 
 	/**
@@ -335,6 +355,17 @@ class Builder {
 	public function getQuery()
 	{
 		return $this->query;
+	}
+
+	/**
+	 * Set the underlying query builder instance.
+	 *
+	 * @param  Illuminate\Database\Query\Builder  $query
+	 * @return void
+	 */
+	public function setQuery($query)
+	{
+		$this->query = $query;
 	}
 
 	/**

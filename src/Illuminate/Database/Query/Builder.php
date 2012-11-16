@@ -123,7 +123,7 @@ class Builder {
 	 * Create a new query builder instance.
 	 *
 	 * @param  Illuminate\Database\ConnectionInterface  $connection
-	 * @param  Illuminate\Databaase\Query\Grammar  $grammar
+	 * @param  Illuminate\Databaase\Query\Grammars\Grammar  $grammar
 	 * @param  Illuminate\Database\Query\Processors\Processor  $processor
 	 * @return void
 	 */
