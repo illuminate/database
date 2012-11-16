@@ -787,7 +787,7 @@ class Builder {
 	{
 		$results = $this->get($columns);
 
-		return $this->buildPaginatorFromResults($paginator, $results, $perPage);
+		return $this->buildRawPaginator($paginator, $results, $perPage);
 	}
 
 	/**
@@ -798,7 +798,7 @@ class Builder {
 	 * @param  int    $perPage
 	 * @return Illuminate\Pagination\Paginator
 	 */
-	public function buildPaginatorFromResults($paginator, $results, $perPage)
+	public function buildRawPaginator($paginator, $results, $perPage)
 	{
 		// For queries which have a group by, we will actually retrieve the entire set
 		// of rows from the table and "slice" them via PHP. This is inefficient and

@@ -129,7 +129,7 @@ class Builder {
 	{
 		$results = $this->get($columns)->all();
 
-		return $this->query->buildPaginatorFromResults($paginator, $results, $perPage);
+		return $this->query->buildRawPaginator($paginator, $results, $perPage);
 	}
 
 	/**
