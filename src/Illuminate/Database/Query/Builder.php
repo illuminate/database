@@ -700,8 +700,8 @@ class Builder {
 	public function get($columns = array('*'))
 	{
 		// If no columns have been specified for the select staement, we will set them
-		// here to either the passed columns of the standard default of retrieving
-		// all of the columns on the table using the wildcard column character.
+		// here to either the passed columns, or the standard default of retrieving
+		// all of the columns on the table using the "wildcard" column character.
 		if (is_null($this->columns))
 		{
 			$this->columns = $columns;
