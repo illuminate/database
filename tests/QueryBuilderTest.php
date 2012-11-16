@@ -339,6 +339,22 @@ class QueryBuilderTest extends PHPUnit_Framework_TestCase {
 	}
 
 
+	public function testPaginateCorrectlyCreatesPaginatorInstanceForGroupedQuery()
+	{
+		$connection = m::mock('Illuminate\Database\ConnectionInterface');
+		$grammar = m::mock('Illuminate\Database\Query\Grammars\Grammar');
+		$processor = m::mock('Illuminate\Database\Query\Processors\Processor');
+		$builder = $this->getMock('Illuminate\Database\Query\Builder', array('get'), array($connection, $grammar, $processor));
+		$paginator = m::mock('Illuminate\Pagination\Environment');
+		$paginator->shouldReceive('getCurrentPage')->once()->andReturn(2);
+		$connection->shouldReceive('getPaginator')->once()->andReturn($paginator);
+		$builder->expects($this->once())->method('get')->with($this->equalTo(array('*')))->will($this->returnValue(array('foo', 'bar', 'baz')));
+		$paginator->shouldReceive('make')->once()->with(array('baz'), 3, 2)->andReturn(array('results'));
+
+		$this->assertEquals(array('results'), $builder->groupBy('foo')->paginate(2, array('*')));
+	}
+
+
 	public function testGetPaginationCountGetsResultCount()
 	{
 		unset($_SERVER['orders']);

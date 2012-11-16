@@ -765,6 +765,61 @@ class Builder {
 	{
 		$paginator = $this->connection->getPaginator();
 
+		if (isset($this->groups))
+		{
+			return $this->groupedPaginate($paginator, $perPage, $columns);
+		}
+		else
+		{
+			return $this->ungroupedPaginate($paginator, $perPage, $columns);
+		}
+	}
+
+	/**
+	 * Create a paginator for a grouped pagination statement.
+	 *
+	 * @param  Illuminate\Pagination\Environment  $paginator
+	 * @param  int    $perPage
+	 * @param  array  $columns
+	 * @return Illuminate\Pagination\Paginator
+	 */
+	protected function groupedPaginate($paginator, $perPage, $columns)
+	{
+		$results = $this->get($columns);
+
+		return $this->buildPaginatorFromResults($paginator, $results, $perPage);
+	}
+
+	/**
+	 * Build a paginator instance from a raw result array.
+	 *
+	 * @param  Illuminate\Pagination\Environment  $paginator
+	 * @param  array  $results
+	 * @param  int    $perPage
+	 * @return Illuminate\Pagination\Paginator
+	 */
+	protected function buildPaginatorFromResults($paginator, $results, $perPage)
+	{
+		// For queries which have a group by, we will actually retrieve the entire set
+		// of rows from the table and "slice" them via PHP. This is inefficient and
+		// the developer must be aware of this behavior; however, it's an option.
+		$start = ($paginator->getCurrentPage() - 1) * $perPage;
+
+		$sliced = array_slice($results, $start, $perPage);
+
+		return $paginator->make($sliced, count($results), $perPage);
+	}
+
+	/**
+	 * Create a paginator for an un-grouped pagination statement.
+	 *
+	 * @param  Illuminate\Pagination\Environment  $paginator
+	 * @param  int    $perPage
+	 * @param  array  $columns
+	 * @return Illuminate\Pagination\Paginator
+	 */
+	protected function ungroupedPaginate($paginator, $perPage, $columns)
+	{
 		$total = $this->getPaginationCount();
 
 		// Once we have the total number of records to be paginated, we can grab the
