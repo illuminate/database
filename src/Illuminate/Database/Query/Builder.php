@@ -798,7 +798,7 @@ class Builder {
 	 * @param  int    $perPage
 	 * @return Illuminate\Pagination\Paginator
 	 */
-	protected function buildPaginatorFromResults($paginator, $results, $perPage)
+	public function buildPaginatorFromResults($paginator, $results, $perPage)
 	{
 		// For queries which have a group by, we will actually retrieve the entire set
 		// of rows from the table and "slice" them via PHP. This is inefficient and
