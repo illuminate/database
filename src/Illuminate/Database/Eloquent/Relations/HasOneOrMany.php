@@ -65,7 +65,23 @@ abstract class HasOneOrMany extends Relation {
 
 		$instance->save();
 
-		return $instance->getKey();
+		return $instance;
+	}
+
+	/**
+	 * Perform an update on all the related models.
+	 *
+	 * @param  array  $attributes
+	 * @return int
+	 */
+	public function update(array $attributes)
+	{
+		if ($this->related->usesTimestamps())
+		{
+			$attributes['updated_at'] = $this->related->freshTimestamp();
+		}
+
+		return $this->query->update($attributes);
 	}
 
 	/**

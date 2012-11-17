@@ -17,10 +17,19 @@ class EloquentHasManyTest extends PHPUnit_Framework_TestCase {
 		$relation = $this->getRelation();
 		$created = $this->getMock('Illuminate\Database\Eloquent\Model', array('save', 'getKey'));
 		$created->expects($this->once())->method('save')->will($this->returnValue(true));
-		$created->expects($this->once())->method('getKey')->will($this->returnValue(1));
 		$relation->getRelated()->shouldReceive('newInstance')->once()->with(array('name' => 'taylor', 'foreign_key' => 1))->andReturn($created);
 
-		$this->assertEquals(1, $relation->create(array('name' => 'taylor')));
+		$this->assertEquals($created, $relation->create(array('name' => 'taylor')));
+	}
+
+	public function testUpdateMethodUpdatesModelsWithTimestamps()
+	{
+		$relation = $this->getRelation();
+		$relation->getRelated()->shouldReceive('usesTimestamps')->once()->andReturn(true);
+		$relation->getRelated()->shouldReceive('freshTimestamp')->once()->andReturn(100);
+		$relation->getQuery()->shouldReceive('update')->once()->with(array('foo' => 'bar', 'updated_at' => 100))->andReturn('results');
+
+		$this->assertEquals('results', $relation->update(array('foo' => 'bar')));
 	}
 
 

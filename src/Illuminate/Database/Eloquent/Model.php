@@ -581,6 +581,16 @@ abstract class Model implements ArrayableInterface, JsonableInterface {
 	}
 
 	/**
+	 * Determine if the model uses timestamps.
+	 *
+	 * @return bool
+	 */
+	public function usesTimestamps()
+	{
+		return $this->timestamps;
+	}
+
+	/**
 	 * Get the number of models to return per page.
 	 *
 	 * @return int
