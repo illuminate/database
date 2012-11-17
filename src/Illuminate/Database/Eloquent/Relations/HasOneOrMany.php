@@ -52,39 +52,6 @@ abstract class HasOneOrMany extends Relation {
 	}
 
 	/**
-	 * Create a new instance of the related model.
-	 *
-	 * @param  array  $attributes
-	 * @return mixed
-	 */
-	public function create(array $attributes)
-	{
-		$foreign = array($this->foreignKey => $this->parent->getKey());
-
-		$instance = $this->related->newInstance(array_merge($attributes, $foreign));
-
-		$instance->save();
-
-		return $instance;
-	}
-
-	/**
-	 * Perform an update on all the related models.
-	 *
-	 * @param  array  $attributes
-	 * @return int
-	 */
-	public function update(array $attributes)
-	{
-		if ($this->related->usesTimestamps())
-		{
-			$attributes['updated_at'] = $this->related->freshTimestamp();
-		}
-
-		return $this->query->update($attributes);
-	}
-
-	/**
 	 * Match the eagerly loaded results to their single parents.
 	 *
 	 * @param  array   $models
@@ -174,6 +141,39 @@ abstract class HasOneOrMany extends Relation {
 		}
 
 		return $dictionary;
+	}
+
+	/**
+	 * Create a new instance of the related model.
+	 *
+	 * @param  array  $attributes
+	 * @return mixed
+	 */
+	public function create(array $attributes)
+	{
+		$foreign = array($this->foreignKey => $this->parent->getKey());
+
+		$instance = $this->related->newInstance(array_merge($attributes, $foreign));
+
+		$instance->save();
+
+		return $instance;
+	}
+
+	/**
+	 * Perform an update on all the related models.
+	 *
+	 * @param  array  $attributes
+	 * @return int
+	 */
+	public function update(array $attributes)
+	{
+		if ($this->related->usesTimestamps())
+		{
+			$attributes['updated_at'] = $this->related->freshTimestamp();
+		}
+
+		return $this->query->update($attributes);
 	}
 
 	/**
