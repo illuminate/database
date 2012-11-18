@@ -48,7 +48,7 @@ abstract class Model implements ArrayableInterface, JsonableInterface {
 	 *
 	 * @var bool
 	 */
-	public $incrementing = true;
+	protected $incrementing = true;
 
 	/**
 	 * Indicates if the model should be timestamped.
@@ -679,7 +679,7 @@ abstract class Model implements ArrayableInterface, JsonableInterface {
 	 *
 	 * @return bool
 	 */
-	public function getIncrementing()
+	public function isIncrementing()
 	{
 		return $this->incrementing;
 	}
