@@ -27,7 +27,7 @@ class ConnectorTest extends PHPUnit_Framework_TestCase {
 		$connection = m::mock('stdClass');
 		$connector->expects($this->once())->method('getOptions')->with($this->equalTo($config))->will($this->returnValue(array('options')));
 		$connector->expects($this->once())->method('createConnection')->with($this->equalTo($dsn), $this->equalTo($config), $this->equalTo(array('options')))->will($this->returnValue($connection));
-		$connection->shouldReceive('prepare')->once()->with('set names \'utf8\'')->andReturn($connection);
+		$connection->shouldReceive('prepare')->once()->with('set names \'utf8\' collate \'utf8_unicode_ci\'')->andReturn($connection);
 		$connection->shouldReceive('execute')->once();
 		$result = $connector->connect($config);
 
@@ -38,9 +38,9 @@ class ConnectorTest extends PHPUnit_Framework_TestCase {
 	public function mySqlConnectProvider()
 	{
 		return array(
-			array('mysql:host=foo;dbname=bar', array('host' => 'foo', 'database' => 'bar')),
-			array('mysql:host=foo;dbname=bar;port=111', array('host' => 'foo', 'database' => 'bar', 'port' => 111)),
-			array('mysql:host=foo;dbname=bar;port=111;unix_socket=baz', array('host' => 'foo', 'database' => 'bar', 'port' => 111, 'unix_socket' => 'baz')),
+			array('mysql:host=foo;dbname=bar', array('host' => 'foo', 'database' => 'bar', 'collation' => 'utf8_unicode_ci')),
+			array('mysql:host=foo;dbname=bar;port=111', array('host' => 'foo', 'database' => 'bar', 'port' => 111, 'collation' => 'utf8_unicode_ci')),
+			array('mysql:host=foo;dbname=bar;port=111;unix_socket=baz', array('host' => 'foo', 'database' => 'bar', 'port' => 111, 'unix_socket' => 'baz', 'collation' => 'utf8_unicode_ci')),
 		);
 	}
 

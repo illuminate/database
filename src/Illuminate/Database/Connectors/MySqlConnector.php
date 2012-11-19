@@ -19,7 +19,9 @@ class MySqlConnector extends Connector implements ConnectorInterface {
 
 		$connection = $this->createConnection($dsn, $config, $options);
 
-		$connection->prepare("set names 'utf8'")->execute();
+		$collation = $config['collation'];
+
+		$connection->prepare("set names 'utf8' collate '$collation'")->execute();
 
 		return $connection;
 	}
