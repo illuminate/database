@@ -333,6 +333,17 @@ class SQLiteGrammar extends Grammar {
 	}
 
 	/**
+	 * Create the column definition for a enum type.
+	 *
+	 * @param  Illuminate\Support\Fluent  $column
+	 * @return string
+	 */
+	protected function typeEnum(Fluent $column)
+	{
+		return 'text';
+	}
+
+	/**
 	 * Get the SQL for a nullable column modifier.
 	 *
 	 * @param  Illuminate\Database\Schema\Blueprint  $blueprint

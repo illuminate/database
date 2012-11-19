@@ -319,6 +319,18 @@ class SqlServerGrammar extends Grammar {
 	}
 
 	/**
+	 * Create the column definition for a enum type.
+	 *
+	 * @param  Illuminate\Support\Fluent  $column
+	 * @return string
+	 */
+	protected function typeEnum(Fluent $column)
+	{
+		$length = max(array_map('strlen', $column->options));
+		return 'varchar('.$length.') CHECK ('.$column->name.' IN(\''.implode("','", $column->options).'\')';
+	}
+
+	/**
 	 * Get the SQL for a nullable column modifier.
 	 *
 	 * @param  Illuminate\Database\Schema\Blueprint  $blueprint
