@@ -162,17 +162,6 @@ class BelongsTo extends Relation {
 	}
 
 	/**
-	 * Perform an update on the parent model without retrieving it.
-	 *
-	 * @param  array  $attributes
-	 * @return int
-	 */
-	public function fastUpdate(array $attributes)
-	{
-		return $this->query->update($attributes);
-	}
-
-	/**
 	 * Get the foreign key of the relationship.
 	 *
 	 * @return string

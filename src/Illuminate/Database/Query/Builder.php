@@ -117,7 +117,7 @@ class Builder {
 	 *
 	 * @var array
 	 */
-	protected $operators = array('=', '<', '>', '<=', '>=', 'like', 'not like');
+	protected $operators = array('=', '<', '>', '<=', '>=', '<>', '!=', 'like', 'not like');
 
 	/**
 	 * Create a new query builder instance.
