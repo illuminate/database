@@ -71,7 +71,7 @@ class ConnectionResolver implements ConnectionResolverInterface {
 	 */
 	public function setDefaultConnection($name)
 	{
-		$this->default = $default;
+		$this->default = $name;
 	}
 
 }
