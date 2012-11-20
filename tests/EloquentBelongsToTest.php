@@ -24,16 +24,6 @@ class EloquentBelongsToTest extends PHPUnit_Framework_TestCase {
 	}
 
 
-	public function testFastUpdateJustCallsQueryWithoutRetrieval()
-	{
-		$relation = $this->getRelation();
-		$relation->getQuery()->shouldReceive('update')->once()->with(array('attributes'))->andReturn(true);
-		$relation->getQuery()->shouldReceive('first')->never();
-
-		$this->assertTrue($relation->fastUpdate(array('attributes')));	
-	}
-
-
 	public function testEagerConstraintsAreProperlyAdded()
 	{
 		$relation = $this->getRelation();
