@@ -595,6 +595,23 @@ class Builder {
 	 * Add an "order by" clause to the query.
 	 *
 	 * @param  string  $column
+	 * @param  string  $operator
+	 * @param  string  $value
+	 * @return Illuminate\Database\Query\Builder
+	 */
+	public function having($column, $operator = null, $value = null)
+	{
+		$this->havings[] = compact('column', 'operator', 'value');
+
+		$this->bindings[] = $value;
+
+		return $this;
+	}
+
+	/**
+	 * Add an "order by" clause to the query.
+	 *
+	 * @param  string  $column
 	 * @param  string  $direction
 	 * @return Illuminate\Database\Query\Builder
 	 */
