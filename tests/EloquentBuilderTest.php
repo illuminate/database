@@ -204,6 +204,14 @@ class EloquentBuilderTest extends PHPUnit_Framework_TestCase {
 		$this->assertInstanceOf('Closure', $eagers['orders.lines']);
 
 		$builder = $this->getBuilder();
+		$builder->with('orders', 'orders.lines');
+		$eagers = $builder->getEagerLoads();
+
+		$this->assertEquals(array('orders', 'orders.lines'), array_keys($eagers));
+		$this->assertInstanceOf('Closure', $eagers['orders']);
+		$this->assertInstanceOf('Closure', $eagers['orders.lines']);
+
+		$builder = $this->getBuilder();
 		$builder->with(array('orders.lines'));
 		$eagers = $builder->getEagerLoads();
 
