@@ -14,8 +14,8 @@ class EloquentCollectionTest extends PHPUnit_Framework_TestCase {
 	public function testAddingItemsToCollection()
 	{
 		$c = new Collection(array('foo'));
-		$c->add('bar');
-		$this->assertEquals(array('foo', 'bar'), $c->all());
+		$c->add('bar')->add('baz');
+		$this->assertEquals(array('foo', 'bar', 'baz'), $c->all());
 	}
 
 
