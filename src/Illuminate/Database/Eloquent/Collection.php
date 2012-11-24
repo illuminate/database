@@ -29,10 +29,10 @@ class Collection implements ArrayAccess, ArrayableInterface, Countable, Iterator
 	/**
 	 * Add an item to the collection.
 	 *
-	 * @param  mixed  $item
+	 * @param  ArrayableInterface  $item
 	 * @return void
 	 */
-	public function add($item)
+	public function add(ArrayableInterface $item)
 	{
 		$this->items[] = $item;
 	}
