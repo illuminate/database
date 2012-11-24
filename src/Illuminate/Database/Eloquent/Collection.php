@@ -30,11 +30,13 @@ class Collection implements ArrayAccess, ArrayableInterface, Countable, Iterator
 	 * Add an item to the collection.
 	 *
 	 * @param  mixed  $item
-	 * @return void
+	 * @return Illuminate\Database\Eloquent\Collection
 	 */
 	public function add($item)
 	{
 		$this->items[] = $item;
+
+		return $this;
 	}
 
 	/**
