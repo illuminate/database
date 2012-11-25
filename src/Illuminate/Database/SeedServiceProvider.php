@@ -8,14 +8,13 @@ class SeedServiceProvider extends ServiceProvider {
 	/**
 	 * Register the service provider.
 	 *
-	 * @param  Illuminate\Foundation\Application  $app
 	 * @return void
 	 */
-	public function register($app)
+	public function register()
 	{
-		$this->registerSeedCommand($app);
+		$this->registerSeedCommand();
 
-		$app['seeder'] = $app->share(function($app)
+		$this->app['seeder'] = $this->app->share(function($app)
 		{
 			return new Seeder($app['files'], $app['events']);
 		});
@@ -24,12 +23,11 @@ class SeedServiceProvider extends ServiceProvider {
 	/**
 	 * Register the seed console command.
 	 *
-	 * @param  Illuminate\Foundation\Application  $app
 	 * @return void
 	 */
-	protected function registerSeedCommand($app)
+	protected function registerSeedCommand()
 	{
-		$app['command.seed'] = $app->share(function($app)
+		$this->app['command.seed'] = $this->app->share(function($app)
 		{
 			$path = $app['path'].'/database/seeds';
 
