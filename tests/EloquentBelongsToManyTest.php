@@ -23,7 +23,7 @@ class EloquentBelongsToManyTest extends PHPUnit_Framework_TestCase {
 		$relation = $this->getRelation();
 		$relation->getParent()->shouldReceive('getConnectionName')->andReturn('foo.connection');
 		$relation->getQuery()->shouldReceive('getModels')->once()->with(array('roles.*', 'user_role.user_id as pivot_user_id', 'user_role.role_id as pivot_role_id'))->andReturn($models);
-		$relation->getQuery()->shouldReceive('eagerLoadRelations')->once()->with($models)->andReturn($models);
+		$relation->getQuery()->shouldReceive('eagerLoadRelations')->once()->with(m::type('Illuminate\Database\Eloquent\Collection'));
 		$relation->getRelated()->shouldReceive('newCollection')->andReturnUsing(function($array) { return new Collection($array); });
 		$results = $relation->get();
 
@@ -46,7 +46,7 @@ class EloquentBelongsToManyTest extends PHPUnit_Framework_TestCase {
 	}
 
 
-	public function testTimestampsCanBeRetrieveProperly()
+	public function testTimestampsCanBeRetrievedProperly()
 	{
 		$model1 = new EloquentBelongsToManyModelStub;
 		$model1->fill(array('name' => 'taylor', 'pivot_user_id' => 1, 'pivot_role_id' => 2));
@@ -63,7 +63,7 @@ class EloquentBelongsToManyTest extends PHPUnit_Framework_TestCase {
 			'user_role.created_at as pivot_created_at',
 			'user_role.updated_at as pivot_updated_at',
 		))->andReturn($models);
-		$relation->getQuery()->shouldReceive('eagerLoadRelations')->once()->with($models)->andReturn($models);
+		$relation->getQuery()->shouldReceive('eagerLoadRelations')->once()->with(m::type('Illuminate\Database\Eloquent\Collection'));
 		$relation->getRelated()->shouldReceive('newCollection')->andReturnUsing(function($array) { return new Collection($array); });
 		$results = $relation->get();
 	}
