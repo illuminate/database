@@ -28,16 +28,14 @@ class DatabaseServiceProvider extends ServiceProvider {
 		{
 			return new DatabaseManager($app, $app['db.factory']);
 		});
-
-		$this->registerEloquent();
 	}
 
 	/**
-	 * Register the database connections with the Eloquent ORM.
+	 * Bootstrap the application events.
 	 *
 	 * @return void
 	 */
-	protected function registerEloquent()
+	public function boot()
 	{
 		Model::setConnectionResolver($this->app['db']);
 	}
