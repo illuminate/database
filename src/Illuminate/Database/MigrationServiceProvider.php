@@ -16,32 +16,30 @@ class MigrationServiceProvider extends ServiceProvider {
 	/**
 	 * Register the service provider.
 	 *
-	 * @param  Illuminate\Foundation\Application  $app
 	 * @return void
 	 */
-	public function register($app)
+	public function register()
 	{
-		$this->registerRepository($app);
+		$this->registerRepository();
 
-		$this->registerMigrator($app);
+		$this->registerMigrator();
 
 		// Once we have registered the migrator instance we will go ahead and register
 		// all of the migration related commands that are used by the "Artisan" CLI
 		// so that they may be easily accessed for registering with the consoles.
-		$this->registerCommands($app);
+		$this->registerCommands();
 
-		$this->registerPostCreationHook($app);
+		$this->registerPostCreationHook();
 	}
 
 	/**
 	 * Register the migration repository service.
 	 *
-	 * @param  Illuminate\Foundation\Application  $app
 	 * @return void
 	 */
-	protected function registerRepository($app)
+	protected function registerRepository()
 	{
-		$app['migration.repository'] = $app->share(function($app)
+		$this->app['migration.repository'] = $this->app->share(function($app)
 		{
 			$table = $app['config']['database.migration.table'];
 
@@ -52,15 +50,14 @@ class MigrationServiceProvider extends ServiceProvider {
 	/**
 	 * Register the migrator service.
 	 *
-	 * @param  Illuminate\Foundation\Application  $app
 	 * @return void
 	 */
-	protected function registerMigrator($app)
+	protected function registerMigrator()
 	{
 		// The migrator is responsible for actually running and rollback the migration
 		// files in the application. We'll pass in our database connection resolver
 		// so the migrator can resolve any of these connections when it needs to.
-		$app['migrator'] = $app->share(function($app)
+		$this->app['migrator'] = $this->app->share(function($app)
 		{
 			$repository = $app['migration.repository'];
 
@@ -71,10 +68,9 @@ class MigrationServiceProvider extends ServiceProvider {
 	/**
 	 * Register all of the migration commands.
 	 *
-	 * @param  Illuminate\Foundation\Application  $app
 	 * @return void
 	 */
-	protected function registerCommands($app)
+	protected function registerCommands()
 	{
 		$commands = array('Migrate', 'Rollback', 'Reset', 'Refresh', 'Install', 'Make');
 
@@ -83,19 +79,18 @@ class MigrationServiceProvider extends ServiceProvider {
 		// be resolved in the Artisan start file and registered on the console.
 		foreach ($commands as $command)
 		{
-			$this->{'register'.$command.'Command'}($app);
+			$this->{'register'.$command.'Command'}();
 		}
 	}
 
 	/**
 	 * Register the "migrate" migration command.
 	 *
-	 * @param  Illuminate\Foundation\Application  $app
 	 * @return void
 	 */
-	protected function registerMigrateCommand($app)
+	protected function registerMigrateCommand()
 	{
-		$app['command.migrate'] = $app->share(function($app)
+		$this->app['command.migrate'] = $this->app->share(function($app)
 		{
 			$paths = $app['config']['database.migration.paths'];
 
@@ -108,12 +103,11 @@ class MigrationServiceProvider extends ServiceProvider {
 	/**
 	 * Register the "rollback" migration command.
 	 *
-	 * @param  Illuminate\Foundation\Application  $app
 	 * @return void
 	 */
-	protected function registerRollbackCommand($app)
+	protected function registerRollbackCommand()
 	{
-		$app['command.migrate.rollback'] = $app->share(function($app)
+		$this->app['command.migrate.rollback'] = $this->app->share(function($app)
 		{
 			return new RollbackCommand($app['migrator']);
 		});
@@ -122,12 +116,11 @@ class MigrationServiceProvider extends ServiceProvider {
 	/**
 	 * Register the "reset" migration command.
 	 *
-	 * @param  Illuminate\Foundation\Application  $app
 	 * @return void
 	 */
-	protected function registerResetCommand($app)
+	protected function registerResetCommand()
 	{
-		$app['command.migrate.reset'] = $app->share(function($app)
+		$this->app['command.migrate.reset'] = $this->app->share(function($app)
 		{
 			return new ResetCommand($app['migrator']);
 		});
@@ -136,12 +129,11 @@ class MigrationServiceProvider extends ServiceProvider {
 	/**
 	 * Register the "refresh" migration command.
 	 *
-	 * @param  Illuminate\Foundation\Application  $app
 	 * @return void
 	 */
-	protected function registerRefreshCommand($app)
+	protected function registerRefreshCommand()
 	{
-		$app['command.migrate.refresh'] = $app->share(function($app)
+		$this->app['command.migrate.refresh'] = $this->app->share(function($app)
 		{
 			return new RefreshCommand;
 		});
@@ -150,12 +142,11 @@ class MigrationServiceProvider extends ServiceProvider {
 	/**
 	 * Register the "install" migration command.
 	 *
-	 * @param  Illuminate\Foundation\Application  $app
 	 * @return void
 	 */
-	protected function registerInstallCommand($app)
+	protected function registerInstallCommand()
 	{
-		$app['command.migrate.install'] = $app->share(function($app)
+		$this->app['command.migrate.install'] = $this->app->share(function($app)
 		{
 			return new InstallCommand($app['migration.repository']);
 		});
@@ -164,17 +155,16 @@ class MigrationServiceProvider extends ServiceProvider {
 	/**
 	 * Register the "install" migration command.
 	 *
-	 * @param  Illuminate\Foundation\Application  $app
 	 * @return void
 	 */
-	protected function registerMakeCommand($app)
+	protected function registerMakeCommand()
 	{
-		$app['migration.creator'] = $app->share(function($app)
+		$this->app['migration.creator'] = $this->app->share(function($app)
 		{
 			return new MigrationCreator($app['files']);
 		});
 
-		$app['command.migrate.make'] = $app->share(function($app)
+		$this->app['command.migrate.make'] = $this->app->share(function($app)
 		{
 			// Once we have the migration creator registered, we will create the command
 			// and inject the creator. The creator is responsible for the actual file
@@ -192,12 +182,11 @@ class MigrationServiceProvider extends ServiceProvider {
 	/**
 	 * Register the migration post create hook.
 	 *
-	 * @param  Illuminate\Foundation\Application  $app
 	 * @return void
 	 */
-	protected function registerPostCreationHook($app)
+	protected function registerPostCreationHook()
 	{
-		$app->extend('migration.creator', function($creator, $app)
+		$this->app->extend('migration.creator', function($creator, $app)
 		{
 			// After a new migration is created, we will tell the Composer manager to
 			// regenerate the auto-load files for the framework. This simply makes
