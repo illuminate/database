@@ -83,15 +83,22 @@ class Builder {
 	{
 		$models = $this->getModels($columns);
 
+		$collection = $this->model->newCollection($models);
+
+		// Once we have the collection, we will set the builder instance so it
+		// can easily access any information it may need for things like eagerly
+		// loading relationships.
+		$collection->setBuilder($this);
+
 		// If we actually found models we will also eager load any relationships that
 		// have been specified as needing to be eager loaded, which will solve the
 		// n+1 query issue for the developers to avoid running a lot of queries.
 		if (count($models) > 0)
 		{
-			$models = $this->eagerLoadRelations($models);
+			$this->eagerLoadRelations($collection);
 		}
 
-		return $this->model->newCollection($models);
+		return $collection;
 	}
 
 	/**
@@ -189,10 +196,10 @@ class Builder {
 	/**
 	 * Eager load the relationships for the models.
 	 *
-	 * @param  array  $models
-	 * @return array
+	 * @param  Illuminate\Database\Eloquent\Collection  $models
+	 * @return void
 	 */
-	public function eagerLoadRelations(array $models)
+	public function eagerLoadRelations(Collection $models)
 	{
 		foreach ($this->eagerLoad as $name => $constraints)
 		{
@@ -201,70 +208,9 @@ class Builder {
 			// loaded on that query, because that is where they get hydrated as models.
 			if (strpos($name, '.') === false)
 			{
-				$models = $this->loadRelation($models, $name, $constraints);
+				$models->load($name, $constraints);
 			}
 		}
-
-		return $models;
-	}
-
-	/**
-	 * Eagerly load the relationship on a set of models.
-	 *
-	 * @param  string   $relation
-	 * @param  array    $models
-	 * @param  Closure  $constraints
-	 * @return array
-	 */
-	protected function loadRelation(array $models, $name, Closure $constraints)
-	{
-		// First we will "back up" the existing where conditions on the query so we can
-		// add our eager constraints. Then we will merge the wheres that were on the
-		// query back to it in order that any where conditions might be specified.
-		$relation = $this->getRelation($name);
-
-		list($wheres, $bindings) = $relation->getAndResetWheres();
-
-		$relation->addEagerConstraints($models);
-
-		// We allow the developers to specify constraints on eager loads and we'll just
-		// call the constraints Closure, passing along the query so they will simply
-		// do all they need to the queries, and even may specify non-where things.
-		$relation->mergeWheres($wheres, $bindings);
-
-		call_user_func($constraints, $relation);
-
-		$models = $relation->initRelation($models, $name);
-
-		// Once we have the results, we just match those back up to their parent models
-		// using the relationship instance. Then we just return the finished arrays
-		// of models which have been eagerly hydrated and are readied for return.
-		$results = $relation->get();
-
-		return $relation->match($models, $results, $name);
-	}
-
-	/**
-	 * Get the relation instance for the given relation name.
-	 *
-	 * @param  string  $relation
-	 * @return Illuminate\Database\Eloquent\Relations\Relation
-	 */
-	public function getRelation($relation)
-	{
-		$query = $this->getModel()->$relation();
-
-		// If there are nosted relationships set on the query, we will put those onto
-		// the query instances so that they can be handled after this relationship
-		// is loaded. In this way they will all trickle down as they are loaded.
-		$nested = $this->nestedRelations($relation);
-
-		if (count($nested) > 0)
-		{
-			$query->getQuery()->with($nested);
-		}
-
-		return $query;
 	}
 
 	/**
@@ -273,7 +219,7 @@ class Builder {
 	 * @param  string  $relation
 	 * @return array
 	 */
-	protected function nestedRelations($relation)
+	public function nestedRelations($relation)
 	{
 		$nested = array();
 
