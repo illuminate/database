@@ -39,7 +39,7 @@ class Collection implements ArrayAccess, ArrayableInterface, Countable, Iterator
 		if (count($this->items) > 0)
 		{
 			$args = array(
-				$relation => is_null($constraints) ? function() {} : $constraints;
+				$relation => is_null($constraints) ? function() {} : $constraints,
 			);
 			$query = $this->first()->newQuery()->with($args);
 
