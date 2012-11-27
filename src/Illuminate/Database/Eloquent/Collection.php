@@ -34,7 +34,7 @@ class Collection implements ArrayAccess, ArrayableInterface, Countable, Iterator
 	 */
 	public function load()
 	{
-		if (count($items) > 0)
+		if (count($this->items) > 0)
 		{
 			$query = $this->items->first()->newQuery()->with(func_get_args());
 
