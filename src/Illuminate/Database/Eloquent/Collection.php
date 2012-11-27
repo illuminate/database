@@ -1,5 +1,6 @@
 <?php namespace Illuminate\Database\Eloquent;
 
+use Closure;
 use Countable;
 use ArrayAccess;
 use ArrayIterator;
@@ -27,19 +28,25 @@ class Collection implements ArrayAccess, ArrayableInterface, Countable, Iterator
 	}
 
 	/**
-	 * Load a set of relationships onto the collection.
+	 * Load a relationship onto the collection.
 	 *
-	 * @param  dynamic  string
-	 * @return void
+	 * @param  string  	$relation
+	 * @param  Closure  $constraints
+	 * @return Illuminate\Database\Eloquent\Collection
 	 */
-	public function load()
+	public function load($relation, Closure $constraints = null)
 	{
 		if (count($this->items) > 0)
 		{
-			$query = $this->first()->newQuery()->with(func_get_args());
+			$args = array(
+				$relation => is_null($constraints) ? function() {} : $constraints;
+			);
+			$query = $this->first()->newQuery()->with($args);
 
 			$this->items = $query->eagerLoadRelations($this->items);
 		}
+
+		return $this;
 	}
 
 	/**
