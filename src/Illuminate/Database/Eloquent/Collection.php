@@ -36,7 +36,7 @@ class Collection implements ArrayAccess, ArrayableInterface, Countable, Iterator
 	{
 		if (count($this->items) > 0)
 		{
-			$query = $this->items->first()->newQuery()->with(func_get_args());
+			$query = $this->first()->newQuery()->with(func_get_args());
 
 			$this->items = $query->eagerLoadRelations($this->items);
 		}
