@@ -23,8 +23,12 @@ class EloquentBelongsToManyTest extends PHPUnit_Framework_TestCase {
 		$relation = $this->getRelation();
 		$relation->getParent()->shouldReceive('getConnectionName')->andReturn('foo.connection');
 		$relation->getQuery()->shouldReceive('getModels')->once()->with(array('roles.*', 'user_role.user_id as pivot_user_id', 'user_role.role_id as pivot_role_id'))->andReturn($models);
-		$relation->getQuery()->shouldReceive('eagerLoadRelations')->once()->with($models)->andReturn($models);
-		$relation->getRelated()->shouldReceive('newCollection')->andReturnUsing(function($array) { return new Collection($array); });
+		$relation->getQuery()->shouldReceive('getEagerLoad')->once()->andReturn(array('roles' => function() {}));
+
+		$collection = $this->getMock('Illuminate\Database\Eloquent\Collection', array('eagerLoadRelation'), array($models));
+		$collection->expects($this->once())->method('eagerLoadRelation')->with('roles')->will($this->returnValue($models));
+
+		$relation->getRelated()->shouldReceive('newCollection')->andReturn($collection);
 		$results = $relation->get();
 
 		$this->assertInstanceOf('Illuminate\Database\Eloquent\Collection', $results);
@@ -46,7 +50,7 @@ class EloquentBelongsToManyTest extends PHPUnit_Framework_TestCase {
 	}
 
 
-	public function testTimestampsCanBeRetrieveProperly()
+	public function testTimestampsCanBeRetrievedProperly()
 	{
 		$model1 = new EloquentBelongsToManyModelStub;
 		$model1->fill(array('name' => 'taylor', 'pivot_user_id' => 1, 'pivot_role_id' => 2));
@@ -63,8 +67,12 @@ class EloquentBelongsToManyTest extends PHPUnit_Framework_TestCase {
 			'user_role.created_at as pivot_created_at',
 			'user_role.updated_at as pivot_updated_at',
 		))->andReturn($models);
-		$relation->getQuery()->shouldReceive('eagerLoadRelations')->once()->with($models)->andReturn($models);
-		$relation->getRelated()->shouldReceive('newCollection')->andReturnUsing(function($array) { return new Collection($array); });
+		$relation->getQuery()->shouldReceive('getEagerLoad')->once()->andReturn(array('roles' => function() {}));
+
+		$collection = $this->getMock('Illuminate\Database\Eloquent\Collection', array('eagerLoadRelation'), array($models));
+		$collection->expects($this->once())->method('eagerLoadRelation')->with('roles')->will($this->returnValue($models));
+
+		$relation->getRelated()->shouldReceive('newCollection')->andReturn($collection);
 		$results = $relation->get();
 	}
 

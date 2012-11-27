@@ -536,7 +536,9 @@ abstract class Model implements ArrayableInterface, JsonableInterface {
 	 */
 	public function newCollection(array $models = array())
 	{
-		return new Collection($models);
+		$collection = new Collection($models);
+
+		return $collection;
 	}
 
 	/**
