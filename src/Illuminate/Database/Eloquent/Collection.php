@@ -10,13 +10,6 @@ use Illuminate\Support\JsonableInterface;
 class Collection implements ArrayAccess, ArrayableInterface, Countable, IteratorAggregate, JsonableInterface {
 
 	/**
-	 * The builder for our queries.
-	 *
-	 * @var Illuminate\Database\Eloquent\Model
-	 */
-	protected $model;
-
-	/**
 	 * The relationships that should be eager loaded.
 	 *
 	 * @var array
@@ -39,17 +32,6 @@ class Collection implements ArrayAccess, ArrayableInterface, Countable, Iterator
 	public function __construct(array $items = array())
 	{
 		$this->items = $items;
-	}
-
-	/**
-	 * Set a model instance that created the query.
-	 *
-	 * @param  Illuminate\Database\Eloquent\Model  $model
-	 * @return void
-	 */
-	public function setModel(Model $model)
-	{
-		$this->model = $model;
 	}
 
 	/**
@@ -167,35 +149,38 @@ class Collection implements ArrayAccess, ArrayableInterface, Countable, Iterator
 	 */
 	public function load($name, Closure $constraints = null)
 	{
-		$models = $this->items;
-
-		// First we will "back up" the existing where conditions on the query so we can
-		// add our eager constraints. Then we will merge the wheres that were on the
-		// query back to it in order that any where conditions might be specified.
-		$relation = $this->getRelation($name);
-
-		list($wheres, $bindings) = $relation->getAndResetWheres();
-
-		$relation->addEagerConstraints($models);
-
-		// We allow the developers to specify constraints on eager loads and we'll just
-		// call the constraints Closure, passing along the query so they will simply
-		// do all they need to the queries, and even may specify non-where things.
-		$relation->mergeWheres($wheres, $bindings);
-
-		if ( ! is_null($constraints))
+		if (count($this->items) > 0)
 		{
-			call_user_func($constraints, $relation);
+			$models = $this->items;
+
+			// First we will "back up" the existing where conditions on the query so we can
+			// add our eager constraints. Then we will merge the wheres that were on the
+			// query back to it in order that any where conditions might be specified.
+			$relation = $this->getRelation($name);
+
+			list($wheres, $bindings) = $relation->getAndResetWheres();
+
+			$relation->addEagerConstraints($models);
+
+			// We allow the developers to specify constraints on eager loads and we'll just
+			// call the constraints Closure, passing along the query so they will simply
+			// do all they need to the queries, and even may specify non-where things.
+			$relation->mergeWheres($wheres, $bindings);
+
+			if ( ! is_null($constraints))
+			{
+				call_user_func($constraints, $relation);
+			}
+
+			$models = $relation->initRelation($models, $name);
+
+			// Once we have the results, we just match those back up to their parent models
+			// using the relationship instance. Then we just return the finished arrays
+			// of models which have been eagerly hydrated and are readied for return.
+			$results = $relation->get();
+
+			$this->items = $relation->match($models, $results, $name);
 		}
-
-		$models = $relation->initRelation($models, $name);
-
-		// Once we have the results, we just match those back up to their parent models
-		// using the relationship instance. Then we just return the finished arrays
-		// of models which have been eagerly hydrated and are readied for return.
-		$results = $relation->get();
-
-		$this->items = $relation->match($models, $results, $name);
 
 		return $this;
 	}
@@ -208,7 +193,7 @@ class Collection implements ArrayAccess, ArrayableInterface, Countable, Iterator
 	 */
 	public function getRelation($relation)
 	{
-		$query = $this->model->$relation();
+		$query = $this->first()->$relation();
 
 		// If there are nosted relationships set on the query, we will put those onto
 		// the query instances so that they can be handled after this relationship

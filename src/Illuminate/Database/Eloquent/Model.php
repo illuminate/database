@@ -522,11 +522,6 @@ abstract class Model implements ArrayableInterface, JsonableInterface {
 	public function newCollection(array $models = array())
 	{
 		$collection = new Collection($models);
-		
-		// Once we have the collection, we will set the model instance so it
-		// can easily access any information it may need for eagerly loading
-		// relationships.
-		$collection->setModel($this);
 
 		return $collection;
 	}
