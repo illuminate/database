@@ -198,6 +198,11 @@ class QueryBuilderTest extends PHPUnit_Framework_TestCase {
 		$builder->select('*')->from('users')->where('id', 1)->orWhere('name', 'foo');
 		$this->assertEquals('select * from "users" where "id" = ? or "name" = ?', $builder->toSql());
 		$this->assertEquals(array(0 => 1, 1 => 'foo'), $builder->getBindings());
+
+		$builder = $this->getBuilder();
+		$builder->select('*')->from('users')->where('id', 0)->orWhere('name', 'foo');
+		$this->assertEquals('select * from "users" where "id" = ? or "name" = ?', $builder->toSql());
+		$this->assertEquals(array(0 => 0, 1 => 'foo'), $builder->getBindings());
 	}
 
 
