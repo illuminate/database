@@ -33,8 +33,8 @@ class Builder {
 	 * @var array
 	 */
 	protected $passthru = array(
-		'lists', 'insert', 'insertGetId', 'update', 'delete', 'increment',
-		'decrement', 'pluck', 'count', 'min', 'max', 'avg', 'sum',
+		'lists', 'insert', 'insertGetId', 'update', 'delete',
+		'pluck', 'count', 'min', 'max', 'avg', 'sum',
 	);
 
 	/**
@@ -92,6 +92,34 @@ class Builder {
 		}
 
 		return $this->model->newCollection($models);
+	}
+
+	/**
+	 * Increment a column's value by a given amount.
+	 *
+	 * @param  string  $column
+	 * @param  int     $amount
+	 * @return int
+	 */
+	public function increment($column, $amount = 1)
+	{
+		$this->query->where($this->model->getKeyName(), '=', $this->model->getKey());
+
+		return $this->query->increment($column, $amount);
+	}
+
+	/**
+	 * Decrement a column's value by a given amount.
+	 *
+	 * @param  string  $column
+	 * @param  int     $amount
+	 * @return int
+	 */
+	public function decrement($column, $amount = 1)
+	{
+		$this->query->where($this->model->getKeyName(), '=', $this->model->getKey());
+
+		return $this->query->decrement($column, $amount);
 	}
 
 	/**
