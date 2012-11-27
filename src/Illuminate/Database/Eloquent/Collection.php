@@ -12,9 +12,16 @@ class Collection implements ArrayAccess, ArrayableInterface, Countable, Iterator
 	/**
 	 * The builder for our queries.
 	 *
-	 * @var Illuminate\Database\Eloquent\Builder
+	 * @var Illuminate\Database\Eloquent\Model
 	 */
-	protected $builder;
+	protected $model;
+
+	/**
+	 * The relationships that should be eager loaded.
+	 *
+	 * @var array
+	 */
+	protected $eagerLoad = array();
 
 	/**
 	 * The items contained in the collection.
@@ -35,14 +42,14 @@ class Collection implements ArrayAccess, ArrayableInterface, Countable, Iterator
 	}
 
 	/**
-	 * Set a builder instance that is responsible for querying the model.
+	 * Set a model instance that created the query.
 	 *
-	 * @param  Illuminate\Database\Eloquent\Builder  $builder
+	 * @param  Illuminate\Database\Eloquent\Model  $model
 	 * @return void
 	 */
-	public function setBuilder(Builder $builder)
+	public function setModel(Model $model)
 	{
-		$this->builder = $builder;
+		$this->model = $model;
 	}
 
 	/**
@@ -54,6 +61,101 @@ class Collection implements ArrayAccess, ArrayableInterface, Countable, Iterator
 	public function add($item)
 	{
 		$this->items[] = $item;
+	}
+
+	/**
+	 * Set the relationships that should be eager loaded.
+	 *
+	 * @param  array  $relations
+	 * @return Illuminate\Database\Eloquent\Collection
+	 */
+	public function with(array $relations)
+	{
+		if (count($this->items) > 0)
+		{
+			$this->eagerLoad = $this->parseRelations($relations);
+
+			foreach ($this->eagerLoad as $name => $constraints)
+			{
+				// For nested eager loads we'll skip loading them here and they
+				// will be set as an eager load on the query to retrieve the
+				// relation so that they will be eager loaded on that query,
+				// because that is where they get hydrated as models.
+				if (strpos($name, '.') === false)
+				{
+					$this->load($name, $constraints);
+				}
+			}
+		}
+
+		return $this;
+	}
+
+	/**
+	 * Parse a list of relations into individuals.
+	 *
+	 * @param  array  $relations
+	 * @return array
+	 */
+	protected function parseRelations(array $relations)
+	{
+		$results = array();
+
+		foreach ($relations as $relation => $constraints)
+		{
+			// If the "relation" value is actually a numeric key, we can assume that no
+			// constraints have been specified for the eager load and we'll just put
+			// an empty Closure with the loader so that we can treat all the same.
+			if (is_numeric($relation))
+			{
+				$f = function() {};
+
+				list($relation, $constraints) = array($constraints, $f);
+			}
+
+			// We need to separate out any nested includes. Which allows the developers
+			// to load deep relatoinships using "dots" without stating each level of
+			// the relationship with its own key in the array of eager load names.
+			$progress = array();
+
+			foreach (explode('.', $relation) as $segment)
+			{
+				$progress[] = $segment;
+
+				$results[$last = implode('.', $progress)] = function() {};
+			}
+
+			// The eager load could have had constrains specified on it. We'll put them
+			// on the last eager load segment, which means that for the nested eager
+			// load includes only the final segments will get constrained queries.
+			$results[$last] = $constraints;
+		}
+
+		return $results;
+	}
+
+	/**
+	 * Get the deeply nested relations for a given top-level relation.
+	 *
+	 * @param  string  $relation
+	 * @return array
+	 */
+	public function nestedRelations($relation)
+	{
+		$nested = array();
+
+		// We are basically looking for any relationships that are nested deeper than
+		// the given top-level relationship. We will just check for any relations
+		// that start with the given top relations and adds them to our arrays.
+		foreach ($this->eagerLoad as $name => $constraints)
+		{
+			if (strpos($name, $relation) === 0 and $name !== $relation)
+			{
+				$nested[substr($name, strlen($relation.'.'))] = $constraints;
+			}
+		}
+
+		return $nested;
 	}
 
 	/**
@@ -106,16 +208,16 @@ class Collection implements ArrayAccess, ArrayableInterface, Countable, Iterator
 	 */
 	public function getRelation($relation)
 	{
-		$query = $this->builder->getModel()->$relation();
+		$query = $this->model->$relation();
 
 		// If there are nosted relationships set on the query, we will put those onto
 		// the query instances so that they can be handled after this relationship
 		// is loaded. In this way they will all trickle down as they are loaded.
-		$nested = $this->builder->nestedRelations($relation);
+		$nested = $this->nestedRelations($relation);
 
 		if (count($nested) > 0)
 		{
-			$query->getQuery()->with($nested);
+			$query->with($nested);
 		}
 
 		return $query;

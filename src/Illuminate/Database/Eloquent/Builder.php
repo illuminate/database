@@ -85,18 +85,10 @@ class Builder {
 
 		$collection = $this->model->newCollection($models);
 
-		// Once we have the collection, we will set the builder instance so it
-		// can easily access any information it may need for things like eagerly
-		// loading relationships.
-		$collection->setBuilder($this);
-
-		// If we actually found models we will also eager load any relationships that
-		// have been specified as needing to be eager loaded, which will solve the
-		// n+1 query issue for the developers to avoid running a lot of queries.
-		if (count($models) > 0)
-		{
-			$this->eagerLoadRelations($collection);
-		}
+		// We will also eager load any relationships that have been specified as
+		// needing to be eager loaded, which will solve the n+1 query issue for
+		// the developers to avoid running a lot of queries.
+		$collection->with($this->eagerLoad);
 
 		return $collection;
 	}
@@ -194,103 +186,19 @@ class Builder {
 	}
 
 	/**
-	 * Eager load the relationships for the models.
+	 * Set the relationships that should be eager loaded.
 	 *
-	 * @param  Illuminate\Database\Eloquent\Collection  $models
-	 * @return void
-	 */
-	public function eagerLoadRelations(Collection $models)
-	{
-		foreach ($this->eagerLoad as $name => $constraints)
-		{
-			// For nested eager loads we'll skip loading them here and they will be set as an
-			// eager load on the query to retrieve the relation so that they will be eager
-			// loaded on that query, because that is where they get hydrated as models.
-			if (strpos($name, '.') === false)
-			{
-				$models->load($name, $constraints);
-			}
-		}
-	}
-
-	/**
-	 * Get the deeply nested relations for a given top-level relation.
-	 *
-	 * @param  string  $relation
-	 * @return array
-	 */
-	public function nestedRelations($relation)
-	{
-		$nested = array();
-
-		// We are basically looking for any relationships that are nested deeper than
-		// the given top-level relationship. We will just check for any relations
-		// that start with the given top relations and adds them to our arrays.
-		foreach ($this->eagerLoad as $name => $constraints)
-		{
-			if (strpos($name, $relation) === 0 and $name !== $relation)
-			{
-				$nested[substr($name, strlen($relation.'.'))] = $constraints;
-			}
-		}
-
-		return $nested;
-	}
-
-	/**
-	 * Set the relationships that should be eaager loaded.
-	 *
-	 * @param  array  $relations
+	 * @param  mixed  $relation
+	 * @param  mixed  $relation,...
 	 * @return Illuminate\Database\Eloquent\Builder
 	 */
-	public function with(array $relations)
+	public function with($relation)
 	{
-		$this->eagerLoad = $this->parseRelations($relations);
+		if ( ! is_array($relation)) $relation = func_get_args();
+		
+		$this->eagerLoad = $relation;
 
 		return $this;
-	}
-
-	/**
-	 * Parse a list of relations into individuals.
-	 *
-	 * @param  array  $relations
-	 * @return array
-	 */
-	protected function parseRelations(array $relations)
-	{
-		$results = array();
-
-		foreach ($relations as $relation => $constraints)
-		{
-			// If the "relation" value is actually a numeric key, we can assume that no
-			// constraints have been specified for the eager load and we'll just put
-			// an empty Closure with the loader so that we can treat all the same.
-			if (is_numeric($relation))
-			{
-				$f = function() {};
-
-				list($relation, $constraints) = array($constraints, $f);
-			}
-
-			// We need to separate out any nested includes. Which allows the developers
-			// to load deep relatoinships using "dots" without stating each level of
-			// the relationship with its own key in the array of eager load names.
-			$progress = array();
-
-			foreach (explode('.', $relation) as $segment)
-			{
-				$progress[] = $segment;
-
-				$results[$last = implode('.', $progress)] = function() {};
-			}
-
-			// The eager load could have had constrains specified on it. We'll put them
-			// on the last eager load segment, which means that for the nested eager
-			// load includes only the final segments will get constrained queries.
-			$results[$last] = $constraints;
-		}
-
-		return $results;
 	}
 
 	/**
