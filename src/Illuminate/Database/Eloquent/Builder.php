@@ -196,9 +196,52 @@ class Builder {
 	{
 		if ( ! is_array($relation)) $relation = func_get_args();
 		
-		$this->eagerLoad = $relation;
+		$this->eagerLoad = $this->parseRelations($relation);
 
 		return $this;
+	}
+
+	/**
+	 * Parse a list of relations into individuals.
+	 *
+	 * @param  array  $relations
+	 * @return array
+	 */
+	protected function parseRelations(array $relations)
+	{
+		$results = array();
+
+		foreach ($relations as $relation => $constraints)
+		{
+			// If the "relation" value is actually a numeric key, we can assume that no
+			// constraints have been specified for the eager load and we'll just put
+			// an empty Closure with the loader so that we can treat all the same.
+			if (is_numeric($relation))
+			{
+				$f = function() {};
+
+				list($relation, $constraints) = array($constraints, $f);
+			}
+
+			// We need to separate out any nested includes. Which allows the developers
+			// to load deep relatoinships using "dots" without stating each level of
+			// the relationship with its own key in the array of eager load names.
+			$progress = array();
+
+			foreach (explode('.', $relation) as $segment)
+			{
+				$progress[] = $segment;
+
+				$results[$last = implode('.', $progress)] = function() {};
+			}
+
+			// The eager load could have had constrains specified on it. We'll put them
+			// on the last eager load segment, which means that for the nested eager
+			// load includes only the final segments will get constrained queries.
+			$results[$last] = $constraints;
+		}
+
+		return $results;
 	}
 
 	/**

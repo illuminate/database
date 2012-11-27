@@ -55,7 +55,7 @@ class Collection implements ArrayAccess, ArrayableInterface, Countable, Iterator
 	{
 		if (count($this->items) > 0)
 		{
-			$this->eagerLoad = $this->parseRelations($relations);
+			$this->eagerLoad = $relations;
 
 			foreach ($this->eagerLoad as $name => $constraints)
 			{
@@ -71,49 +71,6 @@ class Collection implements ArrayAccess, ArrayableInterface, Countable, Iterator
 		}
 
 		return $this;
-	}
-
-	/**
-	 * Parse a list of relations into individuals.
-	 *
-	 * @param  array  $relations
-	 * @return array
-	 */
-	protected function parseRelations(array $relations)
-	{
-		$results = array();
-
-		foreach ($relations as $relation => $constraints)
-		{
-			// If the "relation" value is actually a numeric key, we can assume that no
-			// constraints have been specified for the eager load and we'll just put
-			// an empty Closure with the loader so that we can treat all the same.
-			if (is_numeric($relation))
-			{
-				$f = function() {};
-
-				list($relation, $constraints) = array($constraints, $f);
-			}
-
-			// We need to separate out any nested includes. Which allows the developers
-			// to load deep relatoinships using "dots" without stating each level of
-			// the relationship with its own key in the array of eager load names.
-			$progress = array();
-
-			foreach (explode('.', $relation) as $segment)
-			{
-				$progress[] = $segment;
-
-				$results[$last = implode('.', $progress)] = function() {};
-			}
-
-			// The eager load could have had constrains specified on it. We'll put them
-			// on the last eager load segment, which means that for the nested eager
-			// load includes only the final segments will get constrained queries.
-			$results[$last] = $constraints;
-		}
-
-		return $results;
 	}
 
 	/**
@@ -151,38 +108,49 @@ class Collection implements ArrayAccess, ArrayableInterface, Countable, Iterator
 	{
 		if (count($this->items) > 0)
 		{
-			$models = $this->items;
-
-			// First we will "back up" the existing where conditions on the query so we can
-			// add our eager constraints. Then we will merge the wheres that were on the
-			// query back to it in order that any where conditions might be specified.
-			$relation = $this->getRelation($name);
-
-			list($wheres, $bindings) = $relation->getAndResetWheres();
-
-			$relation->addEagerConstraints($models);
-
-			// We allow the developers to specify constraints on eager loads and we'll just
-			// call the constraints Closure, passing along the query so they will simply
-			// do all they need to the queries, and even may specify non-where things.
-			$relation->mergeWheres($wheres, $bindings);
-
-			if ( ! is_null($constraints))
-			{
-				call_user_func($constraints, $relation);
-			}
-
-			$models = $relation->initRelation($models, $name);
-
-			// Once we have the results, we just match those back up to their parent models
-			// using the relationship instance. Then we just return the finished arrays
-			// of models which have been eagerly hydrated and are readied for return.
-			$results = $relation->get();
-
-			$this->items = $relation->match($models, $results, $name);
+			$this->items = $this->eagerLoadRelation($name);
 		}
 
 		return $this;
+	}
+
+	/**
+	 * Eagerly load the models for the given relationship.
+	 * 
+	 * @param  string  $name
+	 * @return array
+	 */
+	public function eagerLoadRelation($name)
+	{
+		$models = $this->items;
+
+		// First we will "back up" the existing where conditions on the query so we can
+		// add our eager constraints. Then we will merge the wheres that were on the
+		// query back to it in order that any where conditions might be specified.
+		$relation = $this->getRelation($name);
+
+		list($wheres, $bindings) = $relation->getAndResetWheres();
+
+		$relation->addEagerConstraints($models);
+
+		// We allow the developers to specify constraints on eager loads and we'll just
+		// call the constraints Closure, passing along the query so they will simply
+		// do all they need to the queries, and even may specify non-where things.
+		$relation->mergeWheres($wheres, $bindings);
+
+		if ( ! is_null($constraints))
+		{
+			call_user_func($constraints, $relation);
+		}
+
+		$models = $relation->initRelation($models, $name);
+
+		// Once we have the results, we just match those back up to their parent models
+		// using the relationship instance. Then we just return the finished arrays
+		// of models which have been eagerly hydrated and are readied for return.
+		$results = $relation->get();
+
+		return $relation->match($models, $results, $name);
 	}
 
 	/**
