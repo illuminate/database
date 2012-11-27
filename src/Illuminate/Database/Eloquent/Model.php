@@ -223,21 +223,6 @@ abstract class Model implements ArrayableInterface, JsonableInterface {
 	}
 
 	/**
-	 * Being querying a model with eager loading.
-	 *
-	 * @param  array  $relations
-	 * @return ?
-	 */
-	public static function with($relations)
-	{
-		if (is_string($relations)) $relations = func_get_args();
-
-		$instance = new static;
-
-		return $instance->newQuery()->with($relations);
-	}
-
-	/**
 	 * Define a one-to-one relationship.
 	 *
 	 * @param  string  $related
