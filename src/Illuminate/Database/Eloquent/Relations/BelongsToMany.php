@@ -83,7 +83,7 @@ class BelongsToMany extends Relation {
 		// n + 1 query problem for the developer and also increase performance.
 		if (count($models) > 0)
 		{
-			$models = $this->query->eagerLoadRelations($collection);
+			$this->query->eagerLoadRelations($collection);
 		}
 
 		return $collection;
