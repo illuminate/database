@@ -84,4 +84,18 @@ class EloquentCollectionTest extends PHPUnit_Framework_TestCase {
 		$this->assertEquals(array('foo'), $c->getIterator()->getArrayCopy());
 	}
 
+
+	public function testLoadMethodEagerLoadsGivenRelationships()
+	{
+		$c = $this->getMock('Illuminate\Database\Eloquent\Collection', array('first'), array(array('foo')));
+		$mockItem = m::mock('StdClass');
+		$c->expects($this->once())->method('first')->will($this->returnValue($mockItem));
+		$mockItem->shouldReceive('newQuery')->once()->andReturn($mockItem);
+		$mockItem->shouldReceive('with')->with(array('bar', 'baz'))->andReturn($mockItem);
+		$mockItem->shouldReceive('eagerLoadRelations')->once()->with(array('foo'))->andReturn(array('results'));
+		$c->load('bar', 'baz');
+
+		$this->assertEquals(array('results'), $c->all());
+	}
+
 }
