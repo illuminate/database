@@ -291,6 +291,27 @@ class BelongsToMany extends Relation {
 	}
 
 	/**
+	 * Create a new instance of the related model.
+	 *
+	 * @param  array  $attributes
+	 * @param  array  $joining
+	 * @return Illuminate\Database\Eloquent\Model
+	 */
+	public function create(array $attributes, array $joining = array())
+	{
+		$instance = $this->related->newInstance($attributes);
+
+		// Once we save the related model, we need to attach it to the base model via
+		// through intermediate table so we'll use the existing "attach" method to
+		// accomplish this which will insert the record and any more attributes.
+		$instance->save();
+
+		$this->attach($instance->getKey(), $joining);
+
+		return $instance;
+	}
+
+	/**
 	 * Sync the intermediate tables with a list of IDs.
 	 *
 	 * @param  array  $ids
@@ -323,27 +344,6 @@ class BelongsToMany extends Relation {
 	}
 
 	/**
-	 * Create a new instance of the related model.
-	 *
-	 * @param  array  $attributes
-	 * @param  array  $joining
-	 * @return Illuminate\Database\Eloquent\Model
-	 */
-	public function create(array $attributes, array $joining = array())
-	{
-		$instance = $this->related->newInstance($attributes);
-
-		// Once we save the related model, we need to attach it to the base model via
-		// through intermediate table so we'll use the existing "attach" method to
-		// accomplish this which will insert the record and any more attributes.
-		$instance->save();
-
-		$this->attach($instance->getKey(), $joining);
-
-		return $instance;
-	}
-
-	/**
 	 * Attach a model to the parent.
 	 *
 	 * @param  mixed  $id
@@ -354,7 +354,7 @@ class BelongsToMany extends Relation {
 	{
 		if ($id instanceof Model) $id = $id->getKey();
 
-		$query = $this->query->newQuery()->from($this->table);
+		$query = $this->newPivotStatement();
 
 		return $query->insert($this->createAttachRecords((array) $id, $attributes));
 	}
@@ -460,13 +460,23 @@ class BelongsToMany extends Relation {
 	/**
 	 * Create a new query builder for the pivot table.
 	 *
-	 * @return Illuminate\Database\Eloquent\Builder
+	 * @return Illuminate\Database\Query\Builder
 	 */
 	protected function newPivotQuery()
 	{
-		$query = $this->query->newQuery()->from($this->table);
+		$query = $this->query->getQuery()->newQuery()->from($this->table);
 
 		return $query->where($this->foreignKey, $this->parent->getKey());
+	}
+
+	/**
+	 * Get a new plain query builder for the pivot table.
+	 *
+	 * @return Illuminate\Database\Query\Builder
+	 */
+	protected function newPivotStatement()
+	{
+		return $this->query->getQuery()->newQuery()->from($this->table);
 	}
 
 	/**
