@@ -178,7 +178,7 @@ class Builder {
 		{
 			$models[] = $model = $this->model->newExisting();
 
-			$model->setAttributes((array) $result);
+			$model->setAttributes((array) $result, true);
 
 			$model->setConnection($connection);
 		}

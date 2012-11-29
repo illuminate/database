@@ -139,7 +139,9 @@ class EloquentBuilderTest extends PHPUnit_Framework_TestCase {
 		$models = $builder->getModels(array('foo'));
 
 		$this->assertEquals('taylor', $models[0]->name);
+		$this->assertEquals($models[0]->getAttributes(), $models[0]->getOriginal());
 		$this->assertEquals('dayle', $models[1]->name);
+		$this->assertEquals($models[1]->getAttributes(), $models[1]->getOriginal());
 		$this->assertEquals('foo_connection', $models[0]->getConnectionName());
 		$this->assertEquals('foo_connection', $models[1]->getConnectionName());
 	}

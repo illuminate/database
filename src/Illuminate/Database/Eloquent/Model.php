@@ -65,6 +65,13 @@ abstract class Model implements ArrayableInterface, JsonableInterface {
 	protected $attributes = array();
 
 	/**
+	 * The model attribute's original state.
+	 *
+	 * @var array
+	 */
+	protected $original = array();
+
+	/**
 	 * The loaded relationships for the model.
 	 *
 	 * @var array
@@ -859,11 +866,36 @@ abstract class Model implements ArrayableInterface, JsonableInterface {
 	 * Set the array of model attributes. No checking is done.
 	 *
 	 * @param  array  $attributes
+	 * @param  bool   $sync
 	 * @return void
 	 */
-	public function setAttributes(array $attributes)
+	public function setAttributes(array $attributes, $sync = false)
 	{
 		$this->attributes = $attributes;
+
+		if ($sync) $this->syncOriginal();
+	}
+
+	/**
+	 * Get the model's original attribute values.
+	 *
+	 * @param  string|null  $key
+	 * @param  mixed  $default
+	 * @return array
+	 */
+	public function getOriginal($key = null, $default = null)
+	{
+		return array_get($this->original, $key, $default);
+	}
+
+	/**
+	 * Sync the original attributes with the current.
+	 *
+	 * @return void
+	 */
+	public function syncOriginal()
+	{
+		$this->original = $this->attributes;
 	}
 
 	/**
