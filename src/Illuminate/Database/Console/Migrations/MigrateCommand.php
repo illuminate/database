@@ -5,7 +5,7 @@ use Illuminate\Database\Migrations\Migrator;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Input\InputArgument;
 
-class MigrateCommand extends Command {
+class MigrateCommand extends BaseCommand {
 
 	/**
 	 * The console command name.
@@ -29,13 +29,6 @@ class MigrateCommand extends Command {
 	protected $migrator;
 
 	/**
-	 * The paths to the migrations.
-	 *
-	 * @var array
-	 */
-	protected $paths;
-
-	/**
 	 * The path to the packages directory (vendor).
 	 */
 	protected $packagePath;
@@ -44,15 +37,13 @@ class MigrateCommand extends Command {
 	 * Create a new migration command instance.
 	 *
 	 * @param  Illuminate\Database\Migrations\Migrator  $migrator
-	 * @param  array   $paths
 	 * @param  string  $packagePath
 	 * @return void
 	 */
-	public function __construct(Migrator $migrator, array $paths, $packagePath)
+	public function __construct(Migrator $migrator, $packagePath)
 	{
 		parent::__construct();
 
-		$this->paths = $paths;
 		$this->migrator = $migrator;
 		$this->packagePath = $packagePath;
 	}
@@ -66,29 +57,16 @@ class MigrateCommand extends Command {
 	{
 		$this->migrator->setConnection($this->input->getOption('database'));
 
-		$package = $this->input->getOption('package');
+		$package = $this->input->getOption('package') ?: 'application';
 
 		// The pretend option can be used for "simulating" the migration and grabbing
 		// the SQL queries that would fire if the migration were to be run against
 		// a database for real, which is helpful for double checking migrations.
 		$pretend = $this->input->getOption('pretend');
 
-		$path = $this->getPackageMigrationPath($package);
+		$path = $this->getMigrationPath();
 
 		$this->migrator->run($this->output, $package, $path, $pretend);
-	}
-
-	/**
-	 * Get the path to a package's migrations.
-	 *
-	 * @param  string  $package
-	 * @return string
-	 */
-	protected function getPackageMigrationPath($package)
-	{
-		if (isset($this->paths[$package])) return $this->paths[$package];
-
-		return $this->packagePath.'/'.$package.'/src/migrations';
 	}
 
 	/**
@@ -101,7 +79,7 @@ class MigrateCommand extends Command {
 		return array(
 			array('database', null, InputOption::VALUE_OPTIONAL, 'The database connection to use'),
 
-			array('package', null, InputOption::VALUE_OPTIONAL, 'The package to migrate', 'application'),
+			array('package', null, InputOption::VALUE_OPTIONAL, 'The package to migrate', null),
 
 			array('pretend', null, InputOption::VALUE_NONE, 'Dump the SQL queries that would be run'),
 		);

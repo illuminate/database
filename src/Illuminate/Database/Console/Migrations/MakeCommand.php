@@ -5,7 +5,7 @@ use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Input\InputArgument;
 use Illuminate\Database\Migrations\MigrationCreator;
 
-class MakeCommand extends Command {
+class MakeCommand extends BaseCommand {
 
 	/**
 	 * The console command name.
@@ -29,13 +29,6 @@ class MakeCommand extends Command {
 	protected $creator;
 
 	/**
-	 * The paths to the migration files.
-	 *
-	 * @var array
-	 */
-	protected $paths;
-
-	/**
 	 * The path to the packages directory (vendor).
 	 *
 	 * @var string
@@ -46,14 +39,13 @@ class MakeCommand extends Command {
 	 * Create a new migration install command instance.
 	 *
 	 * @param  Illuminate\Database\Migrations\MigrationCreator  $creator
-	 * @param  array  $paths
+	 * @param  string  $packagePath
 	 * @return void
 	 */
-	public function __construct(MigrationCreator $creator, array $paths, $packagePath)
+	public function __construct(MigrationCreator $creator, $packagePath)
 	{
 		parent::__construct();
 
-		$this->paths = $paths;
 		$this->creator = $creator;
 		$this->packagePath = $packagePath;
 	}
@@ -77,31 +69,11 @@ class MakeCommand extends Command {
 		// Now we're ready to get the path where these migrations should be placed
 		// on disk. This may be specified via the package option on the command
 		// and we will verify that option to determine the appropriate paths.
-		$path = $this->getPath();
+		$path = $this->getMigrationPath();
 
 		$this->creator->create($name, $path, $table, $create);
 
 		$this->info('Migration created successfully!');
-	}
-
-	/**
-	 * Get the path to the migration directory.
-	 *
-	 * @return string
-	 */
-	protected function getPath()
-	{
-		$package = $this->input->getOption('package');
-
-		// If the package is in the list of migration paths we received we will put
-		// the migrations in that path. Otherwise, we will assume the package is
-		// is in the package directories and will place them in that location.
-		if (isset($this->paths[$package]))
-		{
-			return $this->paths[$package];
-		}
-
-		return $this->packagePath.'/'.$package.'/src/migrations';
 	}
 
 	/**
@@ -124,7 +96,7 @@ class MakeCommand extends Command {
 	protected function getOptions()
 	{
 		return array(
-			array('package', null, InputOption::VALUE_OPTIONAL, 'The package the migration belongs to', 'application'),
+			array('package', null, InputOption::VALUE_OPTIONAL, 'The package the migration belongs to', null),
 
 			array('table', null, InputOption::VALUE_OPTIONAL, 'The table to migrate'),
 

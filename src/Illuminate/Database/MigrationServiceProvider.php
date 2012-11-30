@@ -41,7 +41,7 @@ class MigrationServiceProvider extends ServiceProvider {
 	{
 		$this->app['migration.repository'] = $this->app->share(function($app)
 		{
-			$table = $app['config']['database.migration.table'];
+			$table = $app['config']['database.migration'];
 
 			return new DatabaseMigrationRepository($app['db'], $table);
 		});
@@ -92,11 +92,9 @@ class MigrationServiceProvider extends ServiceProvider {
 	{
 		$this->app['command.migrate'] = $this->app->share(function($app)
 		{
-			$paths = $app['config']['database.migration.paths'];
-
 			$packagePath = $app['path.base'].'/vendor';
 
-			return new MigrateCommand($app['migrator'], $paths, $packagePath);
+			return new MigrateCommand($app['migrator'], $packagePath);
 		});
 	}
 
@@ -171,11 +169,9 @@ class MigrationServiceProvider extends ServiceProvider {
 			// creation of the migrations, and may be extended by these developers.
 			$creator = $app['migration.creator'];
 
-			$paths = $app['config']['database.migration.paths'];
-
 			$packagePath = $app['path.base'].'/vendor';
 
-			return new MakeCommand($creator, $paths, $packagePath);
+			return new MakeCommand($creator, $packagePath);
 		});
 	}
 

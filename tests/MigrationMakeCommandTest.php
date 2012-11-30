@@ -13,8 +13,10 @@ class MigrationMakeCommandTest extends PHPUnit_Framework_TestCase {
 
 	public function testBasicCreateGivesCreatorProperArguments()
 	{
-		$command = new MakeCommand($creator = m::mock('Illuminate\Database\Migrations\MigrationCreator'), array('application' => __DIR__), __DIR__.'/vendor');
-		$creator->shouldReceive('create')->once()->with('create_foo', __DIR__, null, false);
+		$command = new MakeCommand($creator = m::mock('Illuminate\Database\Migrations\MigrationCreator'), __DIR__.'/vendor');
+		$app = array('path' => __DIR__);
+		$command->setLaravel($app);
+		$creator->shouldReceive('create')->once()->with('create_foo', __DIR__.'/database/migrations', null, false);
 
 		$this->runCommand($command, array('name' => 'create_foo'));
 	}
@@ -22,17 +24,21 @@ class MigrationMakeCommandTest extends PHPUnit_Framework_TestCase {
 
 	public function testBasicCreateGivesCreatorProperArgumentsWhenTableIsSet()
 	{
-		$command = new MakeCommand($creator = m::mock('Illuminate\Database\Migrations\MigrationCreator'), array('application' => __DIR__), __DIR__.'/vendor');
-		$creator->shouldReceive('create')->once()->with('create_foo', __DIR__, 'users', true);
+		$command = new MakeCommand($creator = m::mock('Illuminate\Database\Migrations\MigrationCreator'), __DIR__.'/vendor');
+		$app = array('path' => __DIR__);
+		$command->setLaravel($app);
+		$creator->shouldReceive('create')->once()->with('create_foo', __DIR__.'/database/migrations', 'users', true);
 
 		$this->runCommand($command, array('name' => 'create_foo', '--table' => 'users', '--create' => true));
-	} 
+	}
 
 
 	public function testPackagePathsMayBeUsed()
 	{
-		$command = new MakeCommand($creator = m::mock('Illuminate\Database\Migrations\MigrationCreator'), array('application' => __DIR__, 'bar' => __DIR__.'/bar'), __DIR__.'/vendor');
-		$creator->shouldReceive('create')->once()->with('create_foo', __DIR__.'/bar', null, false);
+		$command = new MakeCommand($creator = m::mock('Illuminate\Database\Migrations\MigrationCreator'), __DIR__.'/vendor');
+		$app = array('path' => __DIR__);
+		$command->setLaravel($app);
+		$creator->shouldReceive('create')->once()->with('create_foo', __DIR__.'/vendor/bar/src/migrations', null, false);
 
 		$this->runCommand($command, array('name' => 'create_foo', '--package' => 'bar'));
 	}
@@ -40,7 +46,7 @@ class MigrationMakeCommandTest extends PHPUnit_Framework_TestCase {
 
 	public function testPackageFallsBackToVendorDirWhenNotExplicit()
 	{
-		$command = new MakeCommand($creator = m::mock('Illuminate\Database\Migrations\MigrationCreator'), array('application' => __DIR__), __DIR__.'/vendor');
+		$command = new MakeCommand($creator = m::mock('Illuminate\Database\Migrations\MigrationCreator'), __DIR__.'/vendor');
 		$creator->shouldReceive('create')->once()->with('create_foo', __DIR__.'/vendor/foo/bar/src/migrations', null, false);
 
 		$this->runCommand($command, array('name' => 'create_foo', '--package' => 'foo/bar'));
