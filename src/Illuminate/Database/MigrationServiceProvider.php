@@ -41,7 +41,7 @@ class MigrationServiceProvider extends ServiceProvider {
 	{
 		$this->app['migration.repository'] = $this->app->share(function($app)
 		{
-			$table = $app['config']['database.migration'];
+			$table = $app['config']['database.migrations'];
 
 			return new DatabaseMigrationRepository($app['db'], $table);
 		});
