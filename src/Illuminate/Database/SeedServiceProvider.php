@@ -6,6 +6,13 @@ use Illuminate\Database\Console\SeedCommand;
 class SeedServiceProvider extends ServiceProvider {
 
 	/**
+	 * Indicates if loading of the provider is deferred.
+	 *
+	 * @var bool
+	 */
+	protected $defer = true;
+
+	/**
 	 * Register the service provider.
 	 *
 	 * @return void
@@ -33,6 +40,16 @@ class SeedServiceProvider extends ServiceProvider {
 
 			return new SeedCommand($app['db'], $app['seeder'], $app['events'], $path);
 		});
+	}
+
+	/**
+	 * Get the services provided by the provider.
+	 *
+	 * @return array
+	 */
+	public function provides()
+	{
+		return array('seeder', 'command.seed');
 	}
 
 }
