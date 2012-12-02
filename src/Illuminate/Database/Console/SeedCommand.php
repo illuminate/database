@@ -56,7 +56,7 @@ class SeedCommand extends Command {
 	 *
 	 * @param  Illuminate\Database\ConnectionResolverInterface  $resolver
 	 * @param  Illuminate\Database\Seeder  $seeder
-	 * @param  Illumiante\Events\Dispatcher  $events
+	 * @param  Illuminate\Events\Dispatcher  $events
 	 * @param  string  $path
 	 * @return void
 	 */
