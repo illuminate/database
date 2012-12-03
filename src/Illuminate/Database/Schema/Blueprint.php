@@ -173,6 +173,16 @@ class Blueprint {
 	}
 
 	/**
+	 * Indicate that the table should be dropped if it exists.
+	 *
+	 * @return Illuminate\Support\Fluent
+	 */
+	public function dropIfExists()
+	{
+		return $this->addCommand('dropIfExists');
+	}
+
+	/**
 	 * Indicate that the given columns should be dropped.
 	 *
 	 * @param  string|array  $columns

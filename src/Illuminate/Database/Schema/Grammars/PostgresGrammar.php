@@ -106,6 +106,18 @@ class PostgresGrammar extends Grammar {
 	}
 
 	/**
+	 * Compile a drop table (if exists) command.
+	 *
+	 * @param  Illuminate\Database\Schema\Blueprint  $blueprint
+	 * @param  Illuminate\Support\Fluent  $command
+	 * @return string
+	 */
+	public function compileDropIfExists(Blueprint $blueprint, Fluent $command)
+	{
+		return 'drop table if exists '.$this->wrapTable($blueprint);
+	}
+
+	/**
 	 * Compile a drop column command.
 	 *
 	 * @param  Illuminate\Database\Schema\Blueprint  $blueprint

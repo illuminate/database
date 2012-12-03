@@ -43,6 +43,17 @@ class SQLiteSchemaGrammarTest extends PHPUnit_Framework_TestCase {
 	}
 
 
+	public function testDropTableIfExists()
+	{
+		$blueprint = new Blueprint('users');
+		$blueprint->dropIfExists();
+		$statements = $blueprint->toSql($this->getGrammar());
+
+		$this->assertEquals(1, count($statements));
+		$this->assertEquals('drop table if exists "users"', $statements[0]);
+	}
+
+
 	/**
 	 * @expectedException BadMethodCallException
 	 */

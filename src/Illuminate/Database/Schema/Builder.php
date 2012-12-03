@@ -78,6 +78,21 @@ class Builder {
 	}
 
 	/**
+	 * Drop a table from the schema if it exists.
+	 *
+	 * @param  string  $table
+	 * @return Illuminate\Database\Schema\Blueprint
+	 */
+	public function dropIfExists($table)
+	{
+		$blueprint = $this->createBlueprint($table);
+
+		$blueprint->dropIfExists();
+
+		$this->build($blueprint);
+	}
+
+	/**
 	 * Rename a table on the schema.
 	 *
 	 * @param  string  $from
