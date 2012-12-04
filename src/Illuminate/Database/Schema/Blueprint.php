@@ -471,6 +471,18 @@ class Blueprint {
 	}
 
 	/**
+	 * Create a new enum column on the table.
+	 *
+	 * @param  string  $column
+	 * @param  array   $options
+	 * @return Illuminate\Support\Fluent
+	 */
+	public function enum($column, array $options)
+	{
+		return $this->addColumn('enum', $column, compact('options'));
+	}
+
+	/**
 	 * Create a new drop index command on the blueprint.
 	 *
 	 * @param  string        $type
