@@ -258,6 +258,17 @@ class SqlServerSchemaGrammarTest extends PHPUnit_Framework_TestCase {
 	}
 
 
+	public function testAddingEnum()
+	{
+		$blueprint = new Blueprint('users');
+		$blueprint->enum('foo', array('bar', 'baz'));
+		$statements = $blueprint->toSql($this->getGrammar());
+
+		$this->assertEquals(1, count($statements));
+		$this->assertEquals('alter table "users" add "foo" nvarchar(255) not null', $statements[0]);
+	}
+
+
 	public function testAddingDate()
 	{
 		$blueprint = new Blueprint('users');
