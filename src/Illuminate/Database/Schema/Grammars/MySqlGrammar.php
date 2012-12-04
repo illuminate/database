@@ -279,6 +279,17 @@ class MySqlGrammar extends Grammar {
 	}
 
 	/**
+	 * Create the column definition for a enum type.
+	 *
+	 * @param  Illuminate\Support\Fluent  $column
+	 * @return string
+	 */
+	protected function typeEnum(Fluent $column)
+	{
+		return "enum('".implode("', '", $column->allowed)."')";
+	}
+
+	/**
 	 * Create the column definition for a date type.
 	 *
 	 * @param  Illuminate\Support\Fluent  $column

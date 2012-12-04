@@ -392,6 +392,18 @@ class Blueprint {
 	}
 
 	/**
+	 * Create a new enum column on the table.
+	 *
+	 * @param  string  $column
+	 * @param  array   $allowed
+	 * @return Illuminate\Support\Fluent
+	 */
+	public function enum($column, array $allowed)
+	{
+		return $this->addColumn('enum', $column, compact('allowed'));
+	}
+
+	/**
 	 * Create a new date column on the table.
 	 *
 	 * @param  string  $column
