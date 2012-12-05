@@ -536,11 +536,21 @@ abstract class Model implements ArrayableInterface, JsonableInterface {
 		
 		if ( ! ($timestamp instanceof DateTime))
 		{
-			$format = $this->getConnection()->getQueryGrammar()->getDateFormat();
+			$format = $this->getDateFormat();
 			$this->attributes[$key] = DateTime::createFromFormat($format, $timestamp);
 		}
 		
 		return $this->attributes[$key];
+	}
+	
+	/**
+	 * Get the format for databsae stored dates.
+	 * 
+	 * @return string
+	 */
+	protected function getDateFormat()
+	{
+		return $this->getConnection()->getQueryGrammar()->getDateFormat();
 	}
 
 	/**
