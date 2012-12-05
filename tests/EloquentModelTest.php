@@ -108,8 +108,8 @@ class EloquentModelTest extends PHPUnit_Framework_TestCase {
 			'updated_at'	=> '2012-12-05',
 		));
 		
-		$this->assertType('DateTime', $model->created_at);
-		$this->assertType('DateTime', $model->updated_at);
+		$this->assertInstanceOf('DateTime', $model->created_at);
+		$this->assertInstanceOf('DateTime', $model->updated_at);
 	}
 
 
