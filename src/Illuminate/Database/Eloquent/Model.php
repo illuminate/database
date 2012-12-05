@@ -503,6 +503,45 @@ abstract class Model implements ArrayableInterface, JsonableInterface {
 	{
 		return new DateTime;
 	}
+	
+	/**
+	 * Getter for the created_at timestamp.
+	 * 
+	 * @return DateTime
+	 */
+	protected function getCreatedAt()
+	{
+		return $this->asDateTime('created_at');
+	}
+	
+	/**
+	 * Getter for the updated_at timestamp.
+	 * 
+	 * @return DateTime
+	 */
+	protected function getUpdatedAt()
+	{
+		return $this->asDateTime('updated_at');
+	}
+	
+	/**
+	 * Return a timestamp as DateTime object.
+	 * 
+	 * @param  string  $key
+	 * @return DateTime
+	 */
+	protected function asDateTime($key)
+	{
+		$timestamp = $this->attributes[$key];
+		
+		if ( ! ($timestamp instanceof DateTime))
+		{
+			$format = $this->getConnection()->getQueryGrammar()->getDateFormat();
+			$this->attributes[$key] = DateTime::createFromFormat($format, $timestamp);
+		}
+		
+		return $this->attributes[$key];
+	}
 
 	/**
 	 * Get a new query builder for the model's table.
