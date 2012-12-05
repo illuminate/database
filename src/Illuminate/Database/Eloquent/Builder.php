@@ -326,8 +326,6 @@ class Builder {
 				list($name, $constraints) = array($constraints, $f);
 			}
 
-			$progress = array();
-
 			// We need to separate out any nested includes. Which allows the developers
 			// to load deep relatoinships using "dots" without stating each level of
 			// the relationship with its own key in the array of eager load names.
