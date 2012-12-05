@@ -335,7 +335,12 @@ class Builder {
 			{
 				$progress[] = $segment;
 
-				$results[$last = implode('.', $progress)] = function() {};
+				$last = implode('.', $progress);
+
+				// Make sure we don't overwrite an earlier defined constraint
+				if (!isset($results[$last])) {
+					$results[$last] = function() {};
+				}
 			}
 
 			// The eager load could have had constrains specified on it. We'll put them
