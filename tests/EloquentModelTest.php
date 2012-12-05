@@ -101,7 +101,8 @@ class EloquentModelTest extends PHPUnit_Framework_TestCase {
 	
 	public function testTimestampsAreReturnedAsObjects()
 	{
-		$model = new EloquentModelStub;
+		$model = $this->getMock('Illuminate\Database\Eloquent\Model', array('getDateFormat'));
+		$model->expects()->method('getDateFormat')->will($this->returnValue('Y-m-d'));
 		$model->fill(array(
 			'created_at'	=> '2012-12-04',
 			'updated_at'	=> '2012-12-05',
