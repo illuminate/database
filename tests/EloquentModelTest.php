@@ -97,6 +97,19 @@ class EloquentModelTest extends PHPUnit_Framework_TestCase {
 		$model->exists = true;
 		$this->assertTrue($model->save());
 	}
+	
+	
+	public function testTimestampsAreReturnedAsObjects()
+	{
+		$model = new EloquentModelStub;
+		$model->fill(array(
+			'created_at'	=> '2012-12-04',
+			'updated_at'	=> '2012-12-05',
+		));
+		
+		$this->assertType('DateTime', $model->created_at);
+		$this->assertType('DateTime', $model->updated_at);
+	}
 
 
 	public function testInsertProcess()
