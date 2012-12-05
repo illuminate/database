@@ -314,34 +314,53 @@ class Builder {
 	{
 		$results = array();
 
-		foreach ($relations as $relation => $constraints)
+		foreach ($relations as $name => $constraints)
 		{
 			// If the "relation" value is actually a numeric key, we can assume that no
 			// constraints have been specified for the eager load and we'll just put
 			// an empty Closure with the loader so that we can treat all the same.
-			if (is_numeric($relation))
+			if (is_numeric($name))
 			{
 				$f = function() {};
 
-				list($relation, $constraints) = array($constraints, $f);
+				list($name, $constraints) = array($constraints, $f);
 			}
+
+			$progress = array();
 
 			// We need to separate out any nested includes. Which allows the developers
 			// to load deep relatoinships using "dots" without stating each level of
 			// the relationship with its own key in the array of eager load names.
-			$progress = array();
+			$results = $this->parseNestedRelations($name, $results);
 
-			foreach (explode('.', $relation) as $segment)
+			$results[$name] = $constraints;
+		}
+
+		return $results;
+	}
+
+	/**
+	 * Parse the nested relationships in a relation.
+	 *
+	 * @param  string  $name
+	 * @param  array   $results
+	 * @return array
+	 */
+	protected function parseNestedRelations($name, $results)
+	{
+		$progress = array();
+
+		// If the relation has already been set on the result array, we will not set it
+		// again, since that would override any constraints that were already placed
+		// on the relationships. We will only set the ones that are not specified.
+		foreach (explode('.', $name) as $segment)
+		{
+			$progress[] = $segment;
+
+			if ( ! isset($results[$last = implode('.', $progress)]))
 			{
-				$progress[] = $segment;
-
-				$results[$last = implode('.', $progress)] = function() {};
-			}
-
-			// The eager load could have had constrains specified on it. We'll put them
-			// on the last eager load segment, which means that for the nested eager
-			// load includes only the final segments will get constrained queries.
-			$results[$last] = $constraints;
+ 				$results[$last] = function() {};
+ 			}
 		}
 
 		return $results;
