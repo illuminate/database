@@ -428,7 +428,7 @@ abstract class Model implements ArrayableInterface, JsonableInterface {
 	}
 
 	/**
-	 * Called after a model is deleted saved
+	 * Called after a model is deleted
 	 *
 	 * @return bool
 	 */
