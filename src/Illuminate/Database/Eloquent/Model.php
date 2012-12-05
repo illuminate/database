@@ -3,9 +3,9 @@
 use Closure;
 use DateTime;
 use Illuminate\Database\Connection;
-use Illuminate\Support\JsonableInterface;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Support\Contracts\JsonableInterface;
 use Illuminate\Database\Eloquent\Relations\MorphOne;
 use Illuminate\Database\Eloquent\Relations\MorphMany;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;

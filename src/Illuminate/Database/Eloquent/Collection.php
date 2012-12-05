@@ -4,7 +4,7 @@ use Countable;
 use ArrayAccess;
 use ArrayIterator;
 use IteratorAggregate;
-use Illuminate\Support\JsonableInterface;
+use Illuminate\Support\Contracts\JsonableInterface;
 
 class Collection implements ArrayAccess, ArrayableInterface, Countable, IteratorAggregate, JsonableInterface {
 
