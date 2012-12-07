@@ -265,7 +265,7 @@ class PostgresSchemaGrammarTest extends PHPUnit_Framework_TestCase {
 		$statements = $blueprint->toSql($this->getGrammar());
 
 		$this->assertEquals(1, count($statements));
-		$this->assertEquals('alter table "users" add column "foo" tinyint not null', $statements[0]);
+		$this->assertEquals('alter table "users" add column "foo" boolean not null', $statements[0]);
 	}
 
 
