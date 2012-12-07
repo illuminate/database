@@ -264,7 +264,7 @@ class PostgresGrammar extends Grammar {
 	 */
 	protected function typeBoolean(Fluent $column)
 	{
-		return 'tinyint';
+		return 'boolean';
 	}
 
 	/**
