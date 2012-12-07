@@ -329,6 +329,10 @@ class Connection implements ConnectionInterface {
 			{
 				$bindings[$key] = $value->format($grammar->getDateFormat());
 			}
+			elseif ($value === false)
+			{
+				$bindings[$key] = 0;
+			}
 		}
 
 		return $bindings;
