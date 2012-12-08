@@ -38,9 +38,9 @@ class ConnectorTest extends PHPUnit_Framework_TestCase {
 	public function mySqlConnectProvider()
 	{
 		return array(
-			array('mysql:host=foo;dbname=bar', array('host' => 'foo', 'database' => 'bar', 'collation' => 'utf8_unicode_ci')),
-			array('mysql:host=foo;dbname=bar;port=111', array('host' => 'foo', 'database' => 'bar', 'port' => 111, 'collation' => 'utf8_unicode_ci')),
-			array('mysql:host=foo;dbname=bar;port=111;unix_socket=baz', array('host' => 'foo', 'database' => 'bar', 'port' => 111, 'unix_socket' => 'baz', 'collation' => 'utf8_unicode_ci')),
+			array('mysql:host=foo;dbname=bar', array('host' => 'foo', 'database' => 'bar', 'collation' => 'utf8_unicode_ci', 'charset' => 'utf8')),
+			array('mysql:host=foo;dbname=bar;port=111', array('host' => 'foo', 'database' => 'bar', 'port' => 111, 'collation' => 'utf8_unicode_ci', 'charset' => 'utf8')),
+			array('mysql:host=foo;dbname=bar;port=111;unix_socket=baz', array('host' => 'foo', 'database' => 'bar', 'port' => 111, 'unix_socket' => 'baz', 'collation' => 'utf8_unicode_ci', 'charset' => 'utf8')),
 		);
 	}
 
@@ -48,7 +48,7 @@ class ConnectorTest extends PHPUnit_Framework_TestCase {
 	public function testPostgresConnectCallsCreateConnectionWithProperArguments()
 	{
 		$dsn = 'pgsql:host=foo;dbname=bar;port=111';
-		$config = array('host' => 'foo', 'database' => 'bar', 'port' => 111);
+		$config = array('host' => 'foo', 'database' => 'bar', 'port' => 111, 'charset' => 'utf8');
 		$connector = $this->getMock('Illuminate\Database\Connectors\PostgresConnector', array('createConnection', 'getOptions'));
 		$connection = m::mock('stdClass');
 		$connector->expects($this->once())->method('getOptions')->with($this->equalTo($config))->will($this->returnValue(array('options')));
@@ -64,7 +64,7 @@ class ConnectorTest extends PHPUnit_Framework_TestCase {
 	public function testPostgresSearchPathIsSet()
 	{
 		$dsn = 'pgsql:host=foo;dbname=bar';
-		$config = array('host' => 'foo', 'database' => 'bar', 'schema' => 'public');
+		$config = array('host' => 'foo', 'database' => 'bar', 'schema' => 'public', 'charset' => 'utf8');
 		$connector = $this->getMock('Illuminate\Database\Connectors\PostgresConnector', array('createConnection', 'getOptions'));
 		$connection = m::mock('stdClass');
 		$connector->expects($this->once())->method('getOptions')->with($this->equalTo($config))->will($this->returnValue(array('options')));

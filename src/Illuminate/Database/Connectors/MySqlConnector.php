@@ -21,7 +21,14 @@ class MySqlConnector extends Connector implements ConnectorInterface {
 
 		$collation = $config['collation'];
 
-		$connection->prepare("set names 'utf8' collate '$collation'")->execute();
+		$charset = $config['charset'];
+
+		// Next we will set the "names" and "collation" on the clients connections so
+		// a correct character set will be used by this client. The collation also
+		// is set on the server but needs to be set here on this client objects.
+		$names = "set names '$charset' collate '$collation'";
+
+		$connection->prepare($names)->execute();
 
 		return $connection;
 	}

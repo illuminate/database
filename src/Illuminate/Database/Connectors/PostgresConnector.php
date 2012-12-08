@@ -34,7 +34,9 @@ class PostgresConnector extends Connector implements ConnectorInterface {
 
 		$connection = $this->createConnection($dsn, $config, $options);
 
-		$connection->prepare("set names 'utf8'")->execute();
+		$charset = $config['charset'];
+
+		$connection->prepare("set names '$charset'")->execute();
 
 		// Unlike MySQL, Postgres allows the concept of "schema" and a default schema
 		// may have been specified on the connections. If that is the case we will
