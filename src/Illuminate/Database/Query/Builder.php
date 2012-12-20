@@ -973,6 +973,7 @@ class Builder {
 	 */
 	public function insertGetId(array $values, $sequence = null)
 	{
+		if (is_null($sequence)) $sequence = 'id';
 		$sql = $this->grammar->compileInsertGetId($this, $values, $sequence);
 
 		$values = $this->cleanBindings($values);
