@@ -175,7 +175,7 @@ abstract class Relation {
 	 *
 	 * @param  string  $method
 	 * @param  array   $parameters
-	 * @return mixed
+	 * @return Illuminate\Database\Eloquent\Relations\Relation
 	 */
 	public function __call($method, $parameters)
 	{
