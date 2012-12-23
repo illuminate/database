@@ -181,9 +181,9 @@ abstract class Relation {
 	{
 		$result = call_user_func_array(array($this->query, $method), $parameters);
 
-		if ($result instanceof Builder) return $result;
+		if ($result instanceof Builder) return $this;
 
-		return $this;
+		return $result;
 	}
 
 }
