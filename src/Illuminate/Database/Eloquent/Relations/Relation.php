@@ -175,11 +175,13 @@ abstract class Relation {
 	 *
 	 * @param  string  $method
 	 * @param  array   $parameters
-	 * @return Illuminate\Database\Eloquent\Relations\Relation
+	 * @return mixed
 	 */
 	public function __call($method, $parameters)
 	{
-		call_user_func_array(array($this->query, $method), $parameters);
+		$result = call_user_func_array(array($this->query, $method), $parameters);
+
+		if ($result instanceof Builder) return $result;
 
 		return $this;
 	}
