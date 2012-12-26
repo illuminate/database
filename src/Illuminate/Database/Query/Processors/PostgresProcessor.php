@@ -17,6 +17,9 @@ class PostgresProcessor extends Processor {
 	{
 		$results = $query->getConnection()->select($sql, $values);
 
+		if( ! isset($results[0]))
+			throw new Exception("The ID could not be retrieved.");
+
 		return $results[0]->$sequence;
 	}
 
