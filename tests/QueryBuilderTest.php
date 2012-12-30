@@ -531,6 +531,15 @@ class QueryBuilderTest extends PHPUnit_Framework_TestCase {
 	}
 
 
+	public function testMySqlTableExists()
+	{
+		$builder = $this->getMySqlBuilder();
+		$builder->getConnection()->shouldReceive('select')->once()->with('show tables like ?', array('foo'))->andReturn(array(1));
+		$result = $builder->from('foo')->defined();
+		$this->assertTrue($result);
+	}
+
+
 	public function testMergeWheresCanMergeWheresAndBindings()
 	{
 		$builder = $this->getBuilder();

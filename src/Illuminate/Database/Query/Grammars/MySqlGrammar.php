@@ -9,4 +9,14 @@ class MySqlGrammar extends Grammar {
 	 */
 	protected $wrapper = '`%s`';
 
+	/**
+	 * Compile the query to determine if a table exists.
+	 *
+	 * @return string
+	 */
+	public function compileTableExists()
+	{
+		return 'show tables like ?';
+	}
+
 }

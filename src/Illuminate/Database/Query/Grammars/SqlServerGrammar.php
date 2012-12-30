@@ -5,6 +5,16 @@ use Illuminate\Database\Query\Builder;
 class SqlServerGrammar extends Grammar {
 
 	/**
+	 * Compile the query to determine if a table exists.
+	 *
+	 * @return string
+	 */
+	public function compileTableExists()
+	{
+		return "select * from sysobjects where type = 'U' and name = ?";
+	}
+
+	/**
 	 * Compile a select query into SQL.
 	 *
 	 * @param  Illuminate\Database\Query\Builder
