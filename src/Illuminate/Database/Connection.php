@@ -190,7 +190,7 @@ class Connection implements ConnectionInterface {
 	{
 		$sql = $this->queryGrammar->compileTableExists();
 
-		return count($this->connection->select($sql, array($table))) > 0;
+		return count($this->select($sql, array($table))) > 0;
 	}
 
 	/**

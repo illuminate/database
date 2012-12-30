@@ -12,7 +12,7 @@ class MySqlConnection extends Connection {
 	{
 		$sql = $this->queryGrammar->compileTableExists();
 
-		return count($this->connection->select($sql, array($this->database, $table))) > 0;
+		return count($this->select($sql, array($this->database, $table))) > 0;
 	}
 
 	/**
