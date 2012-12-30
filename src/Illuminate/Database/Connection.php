@@ -168,6 +168,17 @@ class Connection implements ConnectionInterface {
 	}
 
 	/**
+	 * Determine if the given table is defined on the database.
+	 *
+	 * @param  string  $table
+	 * @return bool
+	 */
+	public function hasTable($table)
+	{
+		return $this->table($table)->defined();
+	}
+
+	/**
 	 * Begin a fluent query against a database table.
 	 *
 	 * @param  string  $table
