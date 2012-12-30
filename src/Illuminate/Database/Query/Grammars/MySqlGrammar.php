@@ -16,7 +16,7 @@ class MySqlGrammar extends Grammar {
 	 */
 	public function compileTableExists()
 	{
-		return 'show tables like ?';
+		return 'select * from information_schema.tables where table_schema = ? and table_name = ?';
 	}
 
 }

@@ -18,7 +18,7 @@ class ConnectionFactory {
 	{
 		$pdo = $this->createConnector($config)->connect($config);
 
-		return $this->createConnection($config['driver'], $pdo, $config['prefix']);
+		return $this->createConnection($config['driver'], $pdo, $config['database'], $config['prefix']);
 	}
 
 	/**
@@ -57,24 +57,25 @@ class ConnectionFactory {
 	 *
 	 * @param  string  $driver
 	 * @param  PDO     $connection
+	 * @param  string  $database
 	 * @param  string  $tablePrefix
 	 * @return Illuminate\Database\Connection
 	 */
-	protected function createConnection($driver, PDO $connection, $tablePrefix)
+	protected function createConnection($driver, PDO $connection, $database, $tablePrefix)
 	{
 		switch ($driver)
 		{
 			case 'mysql':
-				return new MySqlConnection($connection, $tablePrefix);
+				return new MySqlConnection($connection, $database, $tablePrefix);
 
 			case 'pgsql':
-				return new PostgresConnection($connection, $tablePrefix);
+				return new PostgresConnection($connection, $database, $tablePrefix);
 
 			case 'sqlite':
-				return new SQLiteConnection($connection, $tablePrefix);
+				return new SQLiteConnection($connection, $database, $tablePrefix);
 
 			case 'sqlsrv':
-				return new SqlServerConnection($connection, $tablePrefix);
+				return new SqlServerConnection($connection, $database, $tablePrefix);
 		}
 
 		throw new \InvalidArgumentException("Unsupported driver [$driver]");

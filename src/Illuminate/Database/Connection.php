@@ -71,6 +71,13 @@ class Connection implements ConnectionInterface {
 	protected $pretending = false;
 
 	/**
+	 * The name of the connected database.
+	 *
+	 * @var string
+	 */
+	protected $database;
+
+	/**
 	 * The table prefix for the connection.
 	 *
 	 * @var string
@@ -81,12 +88,18 @@ class Connection implements ConnectionInterface {
 	 * Create a new database connection instance.
 	 *
 	 * @param  PDO     $pdo
+	 * @param  string  $database
 	 * @param  string  $tablePrefix
 	 * @return void
 	 */
-	public function __construct(PDO $pdo, $tablePrefix = '')
+	public function __construct(PDO $pdo, $database = '', $tablePrefix = '')
 	{
+		// First we will setup the default properties. We keep track of the DB
+		// name we are connected to since it is needed when some reflective
+		// type commands are run such as checking whether a table exists.
 		$this->pdo = $pdo;
+
+		$this->database = $database;
 
 		$this->tablePrefix = $tablePrefix;
 
@@ -168,14 +181,16 @@ class Connection implements ConnectionInterface {
 	}
 
 	/**
-	 * Determine if the given table is defined on the database.
+	 * Determine if the given table exists.
 	 *
 	 * @param  string  $table
 	 * @return bool
 	 */
 	public function hasTable($table)
 	{
-		return $this->table($table)->defined();
+		$sql = $this->queryGrammar->compileTableExists();
+
+		return count($this->connection->select($sql, array($table))) > 0;
 	}
 
 	/**
@@ -616,6 +631,27 @@ class Connection implements ConnectionInterface {
 	public function getQueryLog()
 	{
 		return $this->queryLog;
+	}
+
+	/**
+	 * Get the name of the connected database.
+	 *
+	 * @return string
+	 */
+	public function getDatabaseName()
+	{
+		return $this->database;
+	}
+
+	/**
+	 * Set the name of the connected database.
+	 *
+	 * @param  string  $database
+	 * @return string
+	 */
+	public function setDatabaseName($database)
+	{
+		$this->database = $database;
 	}
 
 	/**

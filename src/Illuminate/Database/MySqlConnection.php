@@ -3,6 +3,19 @@
 class MySqlConnection extends Connection {
 
 	/**
+	 * Determine if the given table exists.
+	 *
+	 * @param  string  $table
+	 * @return bool
+	 */
+	public function hasTable($table)
+	{
+		$sql = $this->queryGrammar->compileTableExists();
+
+		return count($this->connection->select($sql, array($this->database, $table))) > 0;
+	}
+
+	/**
 	 * Get the default query grammar instance.
 	 *
 	 * @return Illuminate\Database\Query\Grammars\Grammars\Grammar

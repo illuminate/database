@@ -654,18 +654,6 @@ class Builder {
 	}
 
 	/**
-	 * Determine if the given table exists.
-	 *
-	 * @return bool
-	 */
-	public function defined()
-	{
-		$sql = $this->grammar->compileTableExists();
-
-		return count($this->connection->select($sql, array($this->from))) > 0;
-	}
-
-	/**
 	 * Execute a query for a single record by ID.
 	 *
 	 * @param  int    $id
