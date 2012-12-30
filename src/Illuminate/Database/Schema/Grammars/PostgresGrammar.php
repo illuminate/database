@@ -20,6 +20,16 @@ class PostgresGrammar extends Grammar {
 	protected $modifiers = array('Increment', 'Nullable', 'Default');
 
 	/**
+	 * Compile the query to determine if a table exists.
+	 *
+	 * @return string
+	 */
+	public function compileTableExists()
+	{
+		return 'select * from information_schema.tables where table_name = ?';
+	}
+
+	/**
 	 * Compile a create table command.
 	 *
 	 * @param  Illuminate\Database\Schema\Blueprint  $blueprint

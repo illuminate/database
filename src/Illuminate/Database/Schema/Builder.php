@@ -33,6 +33,19 @@ class Builder {
 	}
 
 	/**
+	 * Determine if the given table exists.
+	 *
+	 * @param  string  $table
+	 * @return bool
+	 */
+	public function hasTable($table)
+	{
+		$sql = $this->grammar->compileTableExists();
+
+		return count($this->connection->select($sql, array($table))) > 0;
+	}
+
+	/**
 	 * Modify a table on the schema.
 	 *
 	 * @param  string   $table

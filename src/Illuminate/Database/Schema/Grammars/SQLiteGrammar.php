@@ -20,6 +20,16 @@ class SQLiteGrammar extends Grammar {
 	protected $modifiers = array('Nullable', 'Default', 'Increment');
 
 	/**
+	 * Compile the query to determine if a table exists.
+	 *
+	 * @return string
+	 */
+	public function compileTableExists()
+	{
+		return "select * from sqlite_master where type = 'table' and name = ?";
+	}
+
+	/**
 	 * Compile a create table command.
 	 *
 	 * @param  Illuminate\Database\Schema\Blueprint  $blueprint

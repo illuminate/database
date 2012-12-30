@@ -3,16 +3,15 @@
 class MySqlConnection extends Connection {
 
 	/**
-	 * Determine if the given table exists.
+	 * Get a schema builder instance for the connection.
 	 *
-	 * @param  string  $table
-	 * @return bool
+	 * @return Illuminate\Database\Schema\Builder
 	 */
-	public function hasTable($table)
+	public function getSchemaBuilder()
 	{
-		$sql = $this->queryGrammar->compileTableExists();
+		if (is_null($this->schemaGrammar)) { $this->useDefaultSchemaGrammar(); }
 
-		return count($this->select($sql, array($this->database, $table))) > 0;
+		return new Schema\MySqlBuilder($this);
 	}
 
 	/**

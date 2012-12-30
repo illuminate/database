@@ -20,6 +20,16 @@ class MySqlGrammar extends Grammar {
 	protected $modifiers = array('Unsigned', 'Nullable', 'Default', 'Increment');
 
 	/**
+	 * Compile the query to determine if a table exists.
+	 *
+	 * @return string
+	 */
+	public function compileTableExists()
+	{
+		return 'select * from information_schema.tables where table_schema = ? and table_name = ?';
+	}
+
+	/**
 	 * Compile a create table command.
 	 *
 	 * @param  Illuminate\Database\Schema\Blueprint  $blueprint

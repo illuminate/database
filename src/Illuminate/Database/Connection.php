@@ -181,19 +181,6 @@ class Connection implements ConnectionInterface {
 	}
 
 	/**
-	 * Determine if the given table exists.
-	 *
-	 * @param  string  $table
-	 * @return bool
-	 */
-	public function hasTable($table)
-	{
-		$sql = $this->queryGrammar->compileTableExists();
-
-		return count($this->select($sql, array($table))) > 0;
-	}
-
-	/**
 	 * Begin a fluent query against a database table.
 	 *
 	 * @param  string  $table
