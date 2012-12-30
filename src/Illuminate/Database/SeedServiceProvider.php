@@ -25,6 +25,8 @@ class SeedServiceProvider extends ServiceProvider {
 		{
 			return new Seeder($app['files'], $app['events']);
 		});
+
+		$this->commands('command.seed');
 	}
 
 	/**
