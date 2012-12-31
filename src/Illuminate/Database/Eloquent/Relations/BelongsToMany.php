@@ -474,7 +474,7 @@ class BelongsToMany extends Relation {
 	 *
 	 * @return Illuminate\Database\Query\Builder
 	 */
-	protected function newPivotStatement()
+	public function newPivotStatement()
 	{
 		return $this->query->getQuery()->newQuery()->from($this->table);
 	}
@@ -486,7 +486,7 @@ class BelongsToMany extends Relation {
 	 * @param  bool   $exists
 	 * @return Illuminate\Database\Eloquent\Relation\Pivot
 	 */
-	protected function newPivot(array $attributes = array(), $exists = false)
+	public function newPivot(array $attributes = array(), $exists = false)
 	{
 		$connection = $this->parent->getConnectionName();
 
@@ -503,7 +503,7 @@ class BelongsToMany extends Relation {
 	 * @param  array  $attributes
 	 * @return Illuminate\Database\Eloquent\Relations\Pivot
 	 */
-	protected function newExistingPivot(array $attributes = array())
+	public function newExistingPivot(array $attributes = array())
 	{
 		return $this->newPivot($attributes, true);
 	}
