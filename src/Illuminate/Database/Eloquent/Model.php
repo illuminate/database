@@ -722,7 +722,22 @@ abstract class Model implements ArrayableInterface, JsonableInterface {
 	{
 		$attributes = array_diff_key($this->attributes, array_flip($this->hidden));
 
-		return array_merge($attributes, $this->relationsToArray());
+		return array_merge($this->attributesToArray($attributes), $this->relationsToArray());
+	}
+
+	/**
+	 * Get the model's attributes in array form (mutators are called).
+	 *
+	 * @return array
+	 */
+	protected function attributesToArray(array $attributes)
+	{
+		foreach (array_keys($attributes) as $key)
+		{
+			$attributes[$key] = $this->getPlainAttribute($key);
+		}
+
+		return $attributes;
 	}
 
 	/**
