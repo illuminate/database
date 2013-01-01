@@ -319,7 +319,10 @@ class Migrator {
 	 */
 	public function setConnection($name)
 	{
-		$this->resolver->setDefaultConnection($name);
+		if ( ! is_null($name))
+		{
+			$this->resolver->setDefaultConnection($name);
+		}
 
 		$this->repository->setSource($name);
 
