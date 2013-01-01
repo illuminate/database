@@ -71,9 +71,21 @@ class Collection implements ArrayAccess, ArrayableInterface, Countable, Iterator
 	 */
 	public function toArray()
 	{
-		return array_map(function($value)
+		return array_map(function($model)
 		{
-			return $value->toArray();
+			$data = $model->toArray();
+			
+			$attributes = $model->getAttributes();
+			
+			foreach($attributes as $key => $value)
+			{
+				if($model->hasGetMutator($key))
+				{
+					$data[$key] = $model->$key;
+				}
+			}
+
+			return $data;
 
 		}, $this->items);
 	}
