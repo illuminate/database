@@ -869,7 +869,7 @@ class Builder {
 	 */
 	public function count($column = '*')
 	{
-		return $this->aggregate(__FUNCTION__, (array) $column);
+		return $this->aggregate(__FUNCTION__, array($column));
 	}
 
 	/**
@@ -880,7 +880,7 @@ class Builder {
 	 */
 	public function min($column)
 	{
-		return $this->aggregate(__FUNCTION__, (array) $column);
+		return $this->aggregate(__FUNCTION__, array($column));
 	}
 
 	/**
@@ -891,7 +891,7 @@ class Builder {
 	 */
 	public function max($column)
 	{
-		return $this->aggregate(__FUNCTION__, (array) $column);
+		return $this->aggregate(__FUNCTION__, array($column));
 	}
 
 	/**
@@ -902,7 +902,7 @@ class Builder {
 	 */
 	public function sum($column)
 	{
-		return $this->aggregate(__FUNCTION__, (array) $column);
+		return $this->aggregate(__FUNCTION__, array($column));
 	}
 
 	/**
