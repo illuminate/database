@@ -319,6 +319,8 @@ class Migrator {
 	 */
 	public function setConnection($name)
 	{
+		$this->resolver->setDefaultConnection($name);
+
 		$this->repository->setSource($name);
 
 		$this->connection = $name;
