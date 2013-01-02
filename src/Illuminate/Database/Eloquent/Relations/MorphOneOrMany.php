@@ -97,7 +97,9 @@ abstract class MorphOneOrMany extends HasOneOrMany {
 
 		$instance = $this->related->newInstance($attributes);
 
-		return $instance->save();
+		$instance->save();
+
+		return $instance;
 	}
 
 	/**
