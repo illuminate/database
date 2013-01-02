@@ -92,10 +92,11 @@ class EloquentMorphTest extends PHPUnit_Framework_TestCase {
 	{
 		// Doesn't matter which relation type we use since they share the code...
 		$relation = $this->getOneRelation();
-		$query = m::mock('stdClass');
-		$relation->getRelated()->shouldReceive('newInstance')->once()->with(array('name' => 'taylor', 'morph_id' => 1, 'morph_type' => get_class($relation->getParent())))->andReturn($query);
-		$query->shouldReceive('save')->once()->andReturn(true);
-		$this->assertTrue($relation->create(array('name' => 'taylor')));
+		$created = m::mock('stdClass');
+		$relation->getRelated()->shouldReceive('newInstance')->once()->with(array('name' => 'taylor', 'morph_id' => 1, 'morph_type' => get_class($relation->getParent())))->andReturn($created);
+		$created->shouldReceive('save')->once()->andReturn(true);
+
+		$this->assertEquals($created, $relation->create(array('name' => 'taylor')));
 	}
 
 
