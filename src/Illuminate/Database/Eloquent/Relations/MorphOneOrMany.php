@@ -82,7 +82,7 @@ abstract class MorphOneOrMany extends HasOneOrMany {
 	 * Create a new instance of the related model.
 	 *
 	 * @param  array  $attributes
-	 * @return mixed
+	 * @return Illuminate\Database\Eloquent\Model
 	 */
 	public function create(array $attributes)
 	{
@@ -97,7 +97,9 @@ abstract class MorphOneOrMany extends HasOneOrMany {
 
 		$instance = $this->related->newInstance($attributes);
 
-		return $instance->save();
+		$instance->save();
+
+		return $instance;
 	}
 
 	/**
