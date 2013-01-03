@@ -504,7 +504,7 @@ abstract class Model implements ArrayableInterface, JsonableInterface {
 	{
 		return new DateTime;
 	}
-	
+
 	/**
 	 * Getter for the created_at timestamp.
 	 * 
@@ -514,7 +514,7 @@ abstract class Model implements ArrayableInterface, JsonableInterface {
 	{
 		return $this->asDateTime('created_at');
 	}
-	
+
 	/**
 	 * Getter for the updated_at timestamp.
 	 * 
@@ -524,7 +524,7 @@ abstract class Model implements ArrayableInterface, JsonableInterface {
 	{
 		return $this->asDateTime('updated_at');
 	}
-	
+
 	/**
 	 * Return a timestamp as DateTime object.
 	 * 
@@ -533,15 +533,14 @@ abstract class Model implements ArrayableInterface, JsonableInterface {
 	 */
 	protected function asDateTime($key)
 	{
-		$timestamp = $this->attributes[$key];
-		
-		if ( ! ($timestamp instanceof DateTime))
+		$value = $this->attributes[$key];
+
+		if ( ! $value instanceof DateTime)
 		{
 			$format = $this->getDateFormat();
-			$this->attributes[$key] = DateTime::createFromFormat($format, $timestamp);
+
+			return DateTime::createFromFormat($format, $value);
 		}
-		
-		return $this->attributes[$key];
 	}
 	
 	/**
