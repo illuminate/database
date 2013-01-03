@@ -971,7 +971,7 @@ class Builder {
 	 * @param  string  $sequence
 	 * @return int
 	 */
-	public function insertGetId(array $values, $sequence = null)
+	public function insertGetId(array $values, $sequence = 'id')
 	{
 		$sql = $this->grammar->compileInsertGetId($this, $values, $sequence);
 
