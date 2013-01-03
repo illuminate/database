@@ -885,7 +885,7 @@ abstract class Model implements ArrayableInterface, JsonableInterface {
 	 * @param  bool   $sync
 	 * @return void
 	 */
-	public function setAttributes(array $attributes, $sync = false)
+	public function setRawAttributes(array $attributes, $sync = false)
 	{
 		$this->attributes = $attributes;
 
