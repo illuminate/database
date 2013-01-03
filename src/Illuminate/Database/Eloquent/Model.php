@@ -234,7 +234,7 @@ abstract class Model implements ArrayableInterface, JsonableInterface {
 	 * Being querying a model with eager loading.
 	 *
 	 * @param  array  $relations
-	 * @return ?
+	 * @return Illuminate\Database\Eloquent\Builder
 	 */
 	public static function with($relations)
 	{

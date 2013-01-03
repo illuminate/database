@@ -294,13 +294,13 @@ class Builder {
 	/**
 	 * Set the relationships that should be eager loaded.
 	 *
-	 * @param  string  $relation      Relation to load
-	 * @param  string  $relation,...  Unlimited number of optional relations
+	 * @param  dynamic  $relation
 	 * @return Illuminate\Database\Eloquent\Builder
 	 */
-	public function with()
+	public function with($relations)
 	{
-		$relations = func_num_args() == 1 ? (array) func_get_arg(0) : func_get_args();
+		if (is_string($relations)) $relations = func_get_args();
+
 		$this->eagerLoad = $this->parseRelations($relations);
 
 		return $this;
