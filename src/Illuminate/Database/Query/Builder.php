@@ -247,7 +247,7 @@ class Builder {
 		// If the given operator is not found in the list of valid operators we will
 		// assume that the developer is just short-cutting the '=' operators and
 		// we will set the operators to '=' and set the values appropriately.
-		if ( ! in_array(strtolower($operator), $this->operators))
+		if ( ! in_array(strtolower($operator), $this->operators, true))
 		{
 			list($value, $operator) = array($operator, '=');
 		}

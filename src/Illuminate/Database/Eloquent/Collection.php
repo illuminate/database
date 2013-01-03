@@ -81,11 +81,12 @@ class Collection implements ArrayAccess, ArrayableInterface, Countable, Iterator
 	/**
 	 * Get the collection of items as JSON.
 	 *
+	 * @param  int  $options
 	 * @return string
 	 */
-	public function toJson()
+	public function toJson($options = 0)
 	{
-		return json_encode($this->toArray());
+		return json_encode($this->toArray(), $options);
 	}
 
 	/**
