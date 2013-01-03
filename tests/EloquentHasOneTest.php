@@ -15,9 +15,10 @@ class EloquentHasOneTest extends PHPUnit_Framework_TestCase {
 	public function testCreateMethodProperlyCreatesNewModel()
 	{
 		$relation = $this->getRelation();
-		$created = $this->getMock('Illuminate\Database\Eloquent\Model', array('save', 'getKey'));
+		$created = $this->getMock('Illuminate\Database\Eloquent\Model', array('save', 'getKey', 'setRawAttributes'));
 		$created->expects($this->once())->method('save')->will($this->returnValue(true));
-		$relation->getRelated()->shouldReceive('newInstance')->once()->with(array('name' => 'taylor', 'foreign_key' => 1))->andReturn($created);
+		$relation->getRelated()->shouldReceive('newInstance')->once()->andReturn($created);
+		$created->expects($this->once())->method('setRawAttributes')->with($this->equalTo(array('name' => 'taylor', 'foreign_key' => 1)));
 
 		$this->assertEquals($created, $relation->create(array('name' => 'taylor')));
 	}
