@@ -17,7 +17,9 @@ class PostgresProcessor extends Processor {
 	{
 		$results = $query->getConnection()->select($sql, $values);
 
-		die(var_dump($results));
+		$sequence = $sequence ?: 'id';
+
+		return $results[0]->$sequence;
 	}
 
 }
