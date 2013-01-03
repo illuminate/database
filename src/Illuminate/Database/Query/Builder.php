@@ -449,7 +449,7 @@ class Builder {
 
 		// If the value of the where in clause is actually a Closure, we will assume that
 		// the developer is using a full sub-select for this "in" statement, and will
-		// execute those Closures and we can re-construct the full sub-selects.
+		// execute those Closures, then we can re-construct the entire sub-selects.
 		if ($values instanceof Closure)
 		{
 			return $this->whereInSub($column, $values, $boolean, $not);

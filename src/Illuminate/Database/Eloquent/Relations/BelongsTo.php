@@ -47,7 +47,7 @@ class BelongsTo extends Relation {
 	{
 		// For belongs to relationships, which are essentially the inverse of has one
 		// or has many relationships, we need to actually query on the primary key
-		// of the related model matching on the foreign key that's on the parent.
+		// of the related models matching on the foreign key that's on a parent.
 		$key = $this->related->getKeyName();
 
 		$this->query->where($key, '=', $this->parent->{$this->foreignKey});

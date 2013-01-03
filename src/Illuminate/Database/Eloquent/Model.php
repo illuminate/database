@@ -128,7 +128,7 @@ abstract class Model implements ArrayableInterface, JsonableInterface {
 	{
 		foreach ($attributes as $key => $value)
 		{
-			// The developer may choose to place some attributes in the "fillable"
+			// The developers may choose to place some attributes in the "fillable"
 			// array, which means only those attributes may be set through mass
 			// assignment to the model, and all others will just be ignored.
 			if ($this->isFillable($key))
@@ -412,7 +412,7 @@ abstract class Model implements ArrayableInterface, JsonableInterface {
 
 		// Now that we have the model names in an array we can just sort them and
 		// use the implode function to join them together with an underscores,
-		// which is typically used by convention within the database systems.
+		// which is typically used by convention within the database system.
 		sort($models);
 
 		return strtolower(implode('_', $models));
@@ -800,7 +800,7 @@ abstract class Model implements ArrayableInterface, JsonableInterface {
 		foreach ($this->relations as $key => $value)
 		{
 			// If the values implements the Arrayable interface we can just call this
-			// toArray method on the instances, which will convert both models and
+			// toArray method on the instances which will convert both models and
 			// collections to their proper array form and we'll set the values.
 			if ($value instanceof ArrayableInterface)
 			{
