@@ -125,7 +125,7 @@ abstract class HasOneOrMany extends Relation {
 	/**
 	 * Build model dictionary keyed by the relation's foreign key.
 	 *
-	 * @param  Illuminate\Database\Eloquent\Collection  $reuslts
+	 * @param  Illuminate\Database\Eloquent\Collection  $results
 	 * @return array
 	 */
 	protected function buildDictionary(Collection $results)
