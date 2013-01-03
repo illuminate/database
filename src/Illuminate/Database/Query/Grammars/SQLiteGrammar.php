@@ -22,4 +22,38 @@ class SQLiteGrammar extends Grammar {
 		, $orders));
 	}
 
+	/**
+	 * Compile an insert statement into SQL.
+	 *
+	 * @param  Illuminate\Database\Query\Builder  $query
+	 * @param  array  $values
+	 * @return string
+	 */
+	public function compileInsert(Builder $query, array $values)
+	{
+		// Essentially we will force every insert to be treated as a batch insert which
+		// simply makes creating the SQL easier for us since we can utilize the same
+		// basic routine regardless of an amount of records given to us to insert.
+		$table = $this->wrapTable($query->from);
+
+		if ( ! is_array(reset($values)))
+		{
+			$values = array($values);
+		}
+
+		$columns = array();
+
+		// SQLite requires us to build the multi-row insert as a listing of select with
+		// unions joining them together. So we'll build out this list of columns and
+		// then join them all together with select unions to complete the queries.
+		foreach (array_keys($values[0]) as $column)
+		{
+			$columns[] = '? as '.$this->wrap($column);
+		}
+
+		$columns = array_fill(9, count($values), implode($columns));
+
+		return "insert into $table select ".implode(' union select ', $columns);
+	}
+
 }
