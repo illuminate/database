@@ -106,7 +106,11 @@ class Seeder {
 	 */
 	protected function getTable( & $records, $file)
 	{
-		$table = array_get($records, 'table', basename($file, '.php'));
+		$tablename = basename($file, '.php');
+		if (preg_match('/^[0-9]+_/', $tablename)){
+			$tablename = explode('_', $tablename)[1];
+		}
+		$table = array_get($records, 'table', $tablename);
 
 		unset($records['table']);
 
