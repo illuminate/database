@@ -35,7 +35,7 @@ abstract class Model implements ArrayableInterface, JsonableInterface {
 	 *
 	 * @var string
 	 */
-	protected $key = 'id';
+	protected $primaryKey = 'id';
 
 	/**
 	 * The number of models to return for pagination.
@@ -585,7 +585,7 @@ abstract class Model implements ArrayableInterface, JsonableInterface {
 	 */
 	public function getKeyName()
 	{
-		return $this->key;
+		return $this->primaryKey;
 	}
 
 	/**
