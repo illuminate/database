@@ -541,6 +541,10 @@ abstract class Model implements ArrayableInterface, JsonableInterface {
 
 			return DateTime::createFromFormat($format, $value);
 		}
+		else
+		{
+			return $value;
+		}
 	}
 	
 	/**
