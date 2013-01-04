@@ -113,6 +113,19 @@ class EloquentModelTest extends PHPUnit_Framework_TestCase {
 	}
 
 
+	public function testTimestampsAreReturnedAsObjectsOnCreate()
+	{
+		$timestamps = array(
+			'created_at' => new DateTime,
+			'updated_at' => new DateTime
+		);
+		$model = new EloquentModelStub;
+		$instance = $model->newInstance($timestamps);
+		$this->assertInstanceOf('DateTime', $instance->updated_at);
+		$this->assertInstanceOf('DateTime', $instance->created_at);
+	}
+
+
 	public function testInsertProcess()
 	{
 		$model = $this->getMock('EloquentModelStub', array('newQuery', 'updateTimestamps'));
