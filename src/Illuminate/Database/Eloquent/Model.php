@@ -473,7 +473,7 @@ abstract class Model implements ArrayableInterface, JsonableInterface {
 			}
 			else
 			{
-				$query->insert($this->attributes);				
+				$query->insert($this->attributes);
 			}
 		}
 
@@ -507,7 +507,7 @@ abstract class Model implements ArrayableInterface, JsonableInterface {
 
 	/**
 	 * Getter for the created_at timestamp.
-	 * 
+	 *
 	 * @return DateTime
 	 */
 	protected function getCreatedAt()
@@ -517,7 +517,7 @@ abstract class Model implements ArrayableInterface, JsonableInterface {
 
 	/**
 	 * Getter for the updated_at timestamp.
-	 * 
+	 *
 	 * @return DateTime
 	 */
 	protected function getUpdatedAt()
@@ -527,7 +527,7 @@ abstract class Model implements ArrayableInterface, JsonableInterface {
 
 	/**
 	 * Return a timestamp as DateTime object.
-	 * 
+	 *
 	 * @param  string  $key
 	 * @return DateTime
 	 */
@@ -546,10 +546,10 @@ abstract class Model implements ArrayableInterface, JsonableInterface {
 			return $value;
 		}
 	}
-	
+
 	/**
 	 * Get the format for databsae stored dates.
-	 * 
+	 *
 	 * @return string
 	 */
 	protected function getDateFormat()
@@ -821,7 +821,7 @@ abstract class Model implements ArrayableInterface, JsonableInterface {
 			}
 		}
 
-		return $attributes;		
+		return $attributes;
 	}
 
 	/**

@@ -97,8 +97,8 @@ class EloquentModelTest extends PHPUnit_Framework_TestCase {
 		$model->exists = true;
 		$this->assertTrue($model->save());
 	}
-	
-	
+
+
 	public function testTimestampsAreReturnedAsObjects()
 	{
 		$model = $this->getMock('Illuminate\Database\Eloquent\Model', array('getDateFormat'));
@@ -107,7 +107,7 @@ class EloquentModelTest extends PHPUnit_Framework_TestCase {
 			'created_at'	=> '2012-12-04',
 			'updated_at'	=> '2012-12-05',
 		));
-		
+
 		$this->assertInstanceOf('DateTime', $model->created_at);
 		$this->assertInstanceOf('DateTime', $model->updated_at);
 	}
