@@ -443,7 +443,7 @@ class Connection implements ConnectionInterface {
 		{
 			$parameters = compact('query', 'bindings', 'time');
 
-			$this->events->fire('illuminate.query', func_get_args());
+			$this->events->fire('illuminate.query', $parameters);
 		}
 
 		$this->queryLog[] = compact('query', 'bindings', 'time');
