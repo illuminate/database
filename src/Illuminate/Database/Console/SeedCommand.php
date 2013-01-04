@@ -95,9 +95,9 @@ class SeedCommand extends Command {
 	{
 		$me = $this;
 
-		$this->events->listen('illuminate.seeding', function($t, $c) use ($me)
+		$this->events->listen('illuminate.seeding', function($e) use ($me)
 		{
-			$message = "<info>Seeded table:</info> {$t} ({$c} records)";
+			$message = "<info>Seeded table:</info> {$e->table} ({$e->count} records)";
 
 			$me->getOutput()->writeln($message);
 		});
