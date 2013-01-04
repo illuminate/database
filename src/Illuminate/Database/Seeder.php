@@ -70,7 +70,9 @@ class Seeder {
 			// information can be presented to the developer about the seeding run.
 			if (isset($this->events))
 			{
-				$this->events->fire('illuminate.seeding', array($table, $count));
+				$payload = compact('table', 'count');
+
+				$this->events->fire('illuminate.seeding', $payload);
 			}
 		}
 

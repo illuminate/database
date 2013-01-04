@@ -24,8 +24,8 @@ class SeederTest extends PHPUnit_Framework_TestCase {
 		$table->shouldReceive('insert')->once()->with(array(array('name' => 'Taylor')));
 		$connection->shouldReceive('table')->with('b')->andReturn($table);
 		$table->shouldReceive('insert')->once()->with(array(array('name' => 'Dayle')));
-		$events->shouldReceive('fire')->once()->with('illuminate.seeding', array('a_table', 1));
-		$events->shouldReceive('fire')->once()->with('illuminate.seeding', array('b', 1));
+		$events->shouldReceive('fire')->once()->with('illuminate.seeding', array('table' => 'a_table', 'count' => 1));
+		$events->shouldReceive('fire')->once()->with('illuminate.seeding', array('table' => 'b', 'count' => 1));
 
 		$this->assertEquals(2, $seeder->seed($connection, 'path'));
 	}
