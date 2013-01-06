@@ -54,8 +54,8 @@ class Grammar extends BaseGrammar {
 		foreach ($this->selectComponents as $component)
 		{
 			// To compile the query, we'll spin through each component of the query and
-			// see if that component exists. If it does, we'll just call the compiler
-			// function for that component which is responsible for making the SQL.
+			// see if that component exists. If it does we'll just call the compiler
+			// function for the component which is responsible for making the SQL.
 			if ( ! is_null($query->$component))
 			{
 				$method = 'compile'.ucfirst($component);
@@ -148,9 +148,7 @@ class Grammar extends BaseGrammar {
 			// Once we have constructed the clauses, we'll need to take the boolean connector
 			// off of the first clause as it obviously will not be required on that clause
 			// because it leads the rest of the clauses, thus not requiring any boolean.
-			$search = array('and ', 'or ');
-
-			$clauses[0] = str_replace($search, '', $clauses[0]);
+			$clauses[0] = preg_replace('/and |or /', '', $clauses[0], 1);
 
 			$clauses = implode(' ', $clauses);
 
