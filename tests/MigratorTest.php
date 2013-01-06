@@ -25,6 +25,8 @@ class MigratorTest extends PHPUnit_Framework_TestCase {
 		$migrator->getRepository()->shouldReceive('getRan')->once()->with('application')->andReturn(array(
 			'1_foo',
 		));
+		$migrator->getFilesystem()->shouldReceive('requireOnce')->once()->with(__DIR__.'/2_bar.php');
+		$migrator->getFilesystem()->shouldReceive('requireOnce')->once()->with(__DIR__.'/3_baz.php');
 		$migrator->getRepository()->shouldReceive('getNextBatchNumber')->once()->andReturn(1);
 		$migrator->getRepository()->shouldReceive('log')->once()->with('application', '2_bar', 1);
 		$migrator->getRepository()->shouldReceive('log')->once()->with('application', '3_baz', 1);
@@ -58,6 +60,8 @@ class MigratorTest extends PHPUnit_Framework_TestCase {
 		$migrator->getRepository()->shouldReceive('getRan')->once()->with('application')->andReturn(array(
 			'1_foo',
 		));
+		$migrator->getFilesystem()->shouldReceive('requireOnce')->once()->with(__DIR__.'/2_bar.php');
+		$migrator->getFilesystem()->shouldReceive('requireOnce')->once()->with(__DIR__.'/3_baz.php');
 		$migrator->getRepository()->shouldReceive('getNextBatchNumber')->once()->andReturn(1);
 
 		$barMock = m::mock('stdClass');

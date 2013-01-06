@@ -72,6 +72,9 @@ class Migrator {
 
 		$migrations = array_diff($files, $ran);
 
+		// Includes the files so we can call each of the migration classes
+		$this->requireFiles($migrations, $path);
+
 		$this->runMigrationList($output, $migrations, $package, $pretend);
 	}
 
@@ -238,11 +241,11 @@ class Migrator {
 	 * @param  array  $files
 	 * @return void
 	 */
-	protected function requireFiles(array $files)
+	protected function requireFiles(array $files, $path)
 	{
 		foreach ($files as $file)
 		{
-			$this->files->requireOnce($file);
+			$this->files->requireOnce($path . DIRECTORY_SEPARATOR . $file . '.php');
 		}
 	}
 
