@@ -93,6 +93,12 @@ abstract class Model implements ArrayableInterface, JsonableInterface {
 	 */
 	protected $fillable = array();
 
+    /**
+     * The attributes that are not mass assignable.
+     * @var array
+     */
+    protected $unfillable = array();
+
 	/**
 	 * Indicates if the model exists.
 	 *
@@ -726,6 +732,17 @@ abstract class Model implements ArrayableInterface, JsonableInterface {
 		$this->fillable = $fillable;
 	}
 
+    /**
+     * Set the unfillable attributes for the model
+     *
+     * @param  array  $unfillable
+     * @return void
+     */
+    public function setUnfillable(array $unfillable)
+    {
+        $this->unfillable = $unfillable;
+    }
+
 	/**
 	 * Determine if the given attribute may be mass assigned.
 	 *
@@ -734,7 +751,11 @@ abstract class Model implements ArrayableInterface, JsonableInterface {
 	 */
 	public function isFillable($key)
 	{
-		return empty($this->fillable) or in_array($key, $this->fillable);
+        if (in_array($key, $this->fillable)) return true;
+        if (in_array($key, $this->unfillable)) return false;
+        if (empty($this->fillable)) return true;
+
+        return false;
 	}
 
 	/**
