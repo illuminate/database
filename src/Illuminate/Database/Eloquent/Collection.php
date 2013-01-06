@@ -17,6 +17,13 @@ class Collection implements ArrayAccess, ArrayableInterface, Countable, Iterator
 	protected $items;
 
 	/**
+	 * A dictionary of available primary keys.
+	 *
+	 * @var array
+	 */
+	protected $dictionary = array();
+
+	/**
 	 * Create a new Eloquent result collection.
 	 *
 	 * @param  array  $items
@@ -25,6 +32,8 @@ class Collection implements ArrayAccess, ArrayableInterface, Countable, Iterator
 	public function __construct(array $items = array())
 	{
 		$this->items = $items;
+
+		$this->buildDictionary();
 	}
 
 	/**
@@ -53,6 +62,11 @@ class Collection implements ArrayAccess, ArrayableInterface, Countable, Iterator
 	{
 		$this->items[] = $item;
 
+		if ($item instanceof Model)
+		{
+			$this->dictionary[$item->getKey()] = true;
+		}
+
 		return $this;
 	}
 
@@ -64,6 +78,17 @@ class Collection implements ArrayAccess, ArrayableInterface, Countable, Iterator
 	public function first()
 	{
 		return count($this->items) > 0 ? reset($this->items) : null;
+	}
+
+	/**
+	 * Determine if a key exists in the collection.
+	 *
+	 * @param  mixed  $key
+	 * @return bool
+	 */
+	public function contains($key)
+	{
+		return isset($this->dictionary[$key]);
 	}
 
 	/**
@@ -111,6 +136,23 @@ class Collection implements ArrayAccess, ArrayableInterface, Countable, Iterator
 		return empty($this->items);
 	}
 
+	/**
+	 * Build the dictionary of primary keys.
+	 *
+	 * @return void
+	 */
+	protected function buildDictionary()
+	{
+		$this->dictionary = array();
+
+		foreach ($this->items as $item)
+		{
+			if ($item instanceof Model)
+			{
+				$this->dictionary[$item->getKey()] = true;
+			}
+		}
+	}
 
 	/**
 	 * Get an iterator for the items.
