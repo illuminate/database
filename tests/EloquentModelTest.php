@@ -39,6 +39,23 @@ class EloquentModelTest extends PHPUnit_Framework_TestCase {
 		$this->assertEquals('5ebe2294ecd0e0f08eab7690d2a6ee69', $model->password_hash);
 	}
 
+	public function testAttributeArrayManipulation()
+	{
+		$model = new EloquentModelStub;
+		$model['name'] = 'foo';
+		$this->assertEquals('foo', $model['name']);
+		$this->assertTrue(isset($model['name']));
+		unset($model['name']);
+		$this->assertFalse(isset($model['name']));
+
+		// test mutation
+		$model['list_items'] = array('name' => 'taylor');
+		$this->assertEquals(array('name' => 'taylor'), $model['list_items']);
+		$attributes = $model->getAttributes();
+		$this->assertEquals(json_encode(array('name' => 'taylor')), $attributes['list_items']);
+	}
+
+
 	public function testNewInstanceReturnsNewInstanceWithAttributesSet()
 	{
 		$model = new EloquentModelStub;
