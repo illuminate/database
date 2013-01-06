@@ -233,20 +233,6 @@ class Migrator {
 	}
 
 	/**
-	 * Require the given migration files.
-	 *
-	 * @param  array  $files
-	 * @return void
-	 */
-	protected function requireFiles(array $files)
-	{
-		foreach ($files as $file)
-		{
-			$this->files->requireOnce($file);
-		}
-	}
-
-	/**
 	 * Pretend to run the migrations.
 	 *
 	 * @param  Symfony\Component\Console\Output\OutputInterface  $output
