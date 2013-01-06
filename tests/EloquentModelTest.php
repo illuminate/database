@@ -26,6 +26,18 @@ class EloquentModelTest extends PHPUnit_Framework_TestCase {
 		$this->assertEquals(json_encode(array('name' => 'taylor')), $attributes['list_items']);
 	}
 
+	public function testCalculatedAttributes()
+	{
+		$model = new EloquentModelStub;
+		$model->password = 'secret';
+		$attributes = $model->getAttributes();
+
+		// ensure password attribute was not set to null
+		$this->assertFalse(array_key_exists('password', $attributes));
+		$this->assertEquals('******', $model->password);
+		$this->assertEquals('5ebe2294ecd0e0f08eab7690d2a6ee69', $attributes['password_hash']);
+		$this->assertEquals('5ebe2294ecd0e0f08eab7690d2a6ee69', $model->password_hash);
+	}
 
 	public function testNewInstanceReturnsNewInstanceWithAttributesSet()
 	{
@@ -368,6 +380,14 @@ class EloquentModelStub extends Illuminate\Database\Eloquent\Model {
 	public function setListItems($value)
 	{
 		return json_encode($value);
+	}
+	public function getPassword()
+	{
+		return '******';
+	}
+	public function setPassword($value)
+	{
+		$this->attributes['password_hash'] = md5($value);
 	}
 	public function belongsToStub()
 	{
