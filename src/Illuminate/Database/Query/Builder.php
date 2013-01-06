@@ -629,7 +629,7 @@ class Builder {
 	}
 
 	/**
-	 * Add an "order by" clause to the query.
+	 * Add a "having" clause to the query.
 	 *
 	 * @param  string  $column
 	 * @param  string  $operator

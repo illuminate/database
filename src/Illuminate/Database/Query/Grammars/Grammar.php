@@ -406,7 +406,10 @@ class Grammar extends BaseGrammar {
 
 		$sql = implode(' ', array_map(function($having) use ($me)
 		{
-			return 'and '.$me->wrap($having['column']).' '.$having['operator'].' '.$this->parameter($having['value']);
+			extract($having);
+
+			return 'and '.$me->wrap($column).' '.$operator.' '.$me->parameter($value);
+
 		}, $havings));
 
 		return 'having '.preg_replace('/and /', '', $sql, 1);

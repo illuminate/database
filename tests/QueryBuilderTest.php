@@ -189,6 +189,14 @@ class QueryBuilderTest extends PHPUnit_Framework_TestCase {
 	}
 
 
+	public function testHavings()
+	{
+		$builder = $this->getBuilder();
+		$builder->select('*')->from('users')->groupBy('email')->having('email', '>', 1);
+		$this->assertEquals('select * from "users" group by "email" having "email" > ?', $builder->toSql());
+	}
+
+
 	public function testLimitsAndOffsets()
 	{
 		$builder = $this->getBuilder();
