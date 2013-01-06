@@ -417,6 +417,46 @@ abstract class Model implements ArrayableInterface, JsonableInterface {
 
 		return strtolower(implode('_', $models));
 	}
+	
+	/**
+	 * Called before a model is deleted
+	 *
+	 * @return bool
+	 */
+	public function beforeDelete()
+	{
+		return true;
+	}
+
+	/**
+	 * Called after a model is deleted
+	 *
+	 * @return bool
+	 */
+	public function afterDelete()
+	{
+		return true;
+	}
+
+	/**
+	 * Called before a model is saved
+	 *
+	 * @return bool
+	 */
+	public function beforeSave()
+	{
+		return true;
+	}
+
+	/**
+	 * Called after a model is succesfully saved
+	 *
+	 * @return bool
+	 */
+	public function afterSave()
+	{
+		return true;
+	}	
 
 	/**
 	 * Delete the model from the database.
@@ -427,9 +467,23 @@ abstract class Model implements ArrayableInterface, JsonableInterface {
 	{
 		if ($this->exists)
 		{
+			// run beforeDelete
+			if ( ! $this->beforeDelete())
+			{
+				return false;
+			}
+			
 			$key = $this->getKeyName();
 
-			return $this->newQuery()->where($key, $this->getKey())->delete();
+			$delete = $this->newQuery()->where($key, $this->getKey())->delete();
+
+			// run after delete
+			if ($delete)
+			{
+				$this->afterDelete();
+			}
+
+			return $delete;
 		}
 	}
 
@@ -450,6 +504,12 @@ abstract class Model implements ArrayableInterface, JsonableInterface {
 		if ($this->timestamps)
 		{
 			$this->updateTimestamps();
+		}
+		
+		// run beforeSave
+		if ( ! $this->beforeSave())
+		{
+			return false;
 		}
 
 		// If the model already exists in the database we can just update our record
@@ -476,6 +536,9 @@ abstract class Model implements ArrayableInterface, JsonableInterface {
 				$query->insert($this->attributes);
 			}
 		}
+		
+		// run afterSave
+		$this->afterSave();
 
 		return $this->exists = true;
 	}
