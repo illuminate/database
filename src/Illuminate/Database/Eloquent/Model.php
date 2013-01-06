@@ -545,16 +545,18 @@ abstract class Model implements ArrayableInterface, JsonableInterface {
 	 */
 	protected function asDateTime($key)
 	{
-		$value = $this->attributes[$key];
-
-		if ( ! $value instanceof DateTime)
+		if (isset($this->attributes[$key]) and $value = $this->attributes[$key])
 		{
-			$format = $this->getDateFormat();
 
-			return DateTime::createFromFormat($format, $value);
+			if ( ! $value instanceof DateTime)
+			{
+				$format = $this->getDateFormat();
+
+				return DateTime::createFromFormat($format, $value);
+			}
+
+			return $value;
 		}
-
-		return $value;
 	}
 
 	/**
