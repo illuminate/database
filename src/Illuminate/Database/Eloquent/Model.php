@@ -830,10 +830,12 @@ abstract class Model implements ArrayableInterface, JsonableInterface {
 	 */
 	public function getAttribute($key)
 	{
+		$inAttributes = array_key_exists($key, $this->attributes);
+
 		// If the key references an attribute, we can just go ahead and return the
 		// plain attribute value from the model. This allows every attribute to
 		// be dynamically accessed through the _get method without accessors.
-		if (array_key_exists($key, $this->attributes) or $this->hasGetMutator($key))
+		if ($inAttributes or $this->hasGetMutator($key))
 		{
 			return $this->getPlainAttribute($key);
 		}
@@ -895,14 +897,15 @@ abstract class Model implements ArrayableInterface, JsonableInterface {
 	 */
 	public function setAttribute($key, $value)
 	{
-		// First we will check for the presence of a mutator for the set operation
-		// which simply lets the developers tweak the attribute as it is set on
-		// the model, such as "json_encoding" an listing of data for storage.
 		if ($this->hasSetMutator($key))
 		{
+			// First we will check for the presence of a mutator for the set operation
+			// which simply lets the developers tweak the attribute as it is set on
+			// the model, such as "json_encoding" an listing of data for storage.
 			$method = 'set'.camel_case($key);
 
 			$value = $this->$method($value);
+
 			return is_null($value) ? null : $this->attributes[$key] = $value;
 		}
 
