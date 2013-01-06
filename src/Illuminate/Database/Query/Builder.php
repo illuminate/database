@@ -270,7 +270,10 @@ class Builder {
 
 		$this->wheres[] = compact('type', 'column', 'operator', 'value', 'boolean');
 
-		$this->bindings[] = $value;
+		if ( ! $value instanceof Expression)
+		{
+			$this->bindings[] = $value;
+		}
 
 		return $this;
 	}
