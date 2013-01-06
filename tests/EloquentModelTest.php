@@ -64,6 +64,13 @@ class EloquentModelTest extends PHPUnit_Framework_TestCase {
 	}
 
 
+	public function testFindMethodWithArrayCallsQueryBuilderCorrectly()
+	{
+		$result = EloquentModelFindManyStub::find(array(1, 2));
+		$this->assertEquals('foo', $result);
+	}
+
+
 	public function testWithMethodCallsQueryBuilderCorrectly()
 	{
 		$result = EloquentModelWithStub::with('foo', 'bar');
@@ -417,6 +424,16 @@ class EloquentModelFindStub extends Illuminate\Database\Eloquent\Model {
 	{
 		$mock = m::mock('Illuminate\Database\Eloquent\Builder');
 		$mock->shouldReceive('find')->once()->with(1, array('*'))->andReturn('foo');
+		return $mock;
+	}
+}
+
+class EloquentModelFindManyStub extends Illuminate\Database\Eloquent\Model {
+	public function newQuery()
+	{
+		$mock = m::mock('Illuminate\Database\Eloquent\Builder');
+		$mock->shouldReceive('whereIn')->once()->with(array(1, 2))->andReturn($mock);
+		$mock->shouldReceive('get')->once()->with(array('*'))->andReturn('foo');
 		return $mock;
 	}
 }

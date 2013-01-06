@@ -221,11 +221,16 @@ abstract class Model implements ArrayableInterface, JsonableInterface {
 	 *
 	 * @param  mixed  $id
 	 * @param  array  $columns
-	 * @return Illuminate\Database\Eloquent\Model
+	 * @return Illuminate\Database\Eloquent\Model|Collection
 	 */
 	public static function find($id, $columns = array('*'))
 	{
 		$instance = new static;
+
+		if (is_array($id))
+		{
+			return $instance->newQuery()->whereIn($id)->get($columns);
+		}
 
 		return $instance->newQuery()->find($id, $columns);
 	}
