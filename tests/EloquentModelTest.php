@@ -256,11 +256,29 @@ class EloquentModelTest extends PHPUnit_Framework_TestCase {
 	public function testFillable()
 	{
 		$model = new EloquentModelStub;
-		$model->setFillable(array('name', 'age'));
+		$model->fillable(array('name', 'age'));
 		$model->fill(array('name' => 'foo', 'age' => 'bar', 'password' => 'baz'));
 		$this->assertFalse(isset($model->password));
 		$this->assertEquals('foo', $model->name);
 		$this->assertEquals('bar', $model->age);
+	}
+
+
+	public function testGuarded()
+	{
+		$model = new EloquentModelStub;
+		$model->guard(array('name', 'age'));
+		$model->fill(array('name' => 'foo', 'age' => 'bar', 'votes' => 'baz'));
+		$this->assertFalse(isset($model->name));
+		$this->assertFalse(isset($model->age));
+		$this->assertEquals('baz', $model->votes);
+
+		$model = new EloquentModelStub;
+		$model->guard(array('*'));
+		$model->fill(array('name' => 'foo', 'age' => 'bar', 'votes' => 'baz'));
+		$this->assertFalse(isset($model->name));
+		$this->assertFalse(isset($model->age));
+		$this->assertFalse(isset($model->votes));
 	}
 
 

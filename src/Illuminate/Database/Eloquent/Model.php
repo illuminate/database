@@ -94,6 +94,13 @@ abstract class Model implements ArrayableInterface, JsonableInterface {
 	protected $fillable = array();
 
 	/**
+	 * The attribute that aren't mass assignable.
+	 *
+	 * @var array
+	 */
+	protected $guarded = array();
+
+	/**
 	 * Indicates if the model exists.
 	 *
 	 * @var bool
@@ -719,11 +726,26 @@ abstract class Model implements ArrayableInterface, JsonableInterface {
 	 * Set the fillable attributes for the model.
 	 *
 	 * @param  array  $fillable
-	 * @return void
+	 * @return Illuminate\Database\Eloquent\Model
 	 */
-	public function setFillable(array $fillable)
+	public function fillable(array $fillable)
 	{
 		$this->fillable = $fillable;
+
+		return $this;
+	}
+
+	/**
+	 * Set the guarded attributes for the model.
+	 *
+	 * @param  array  $guarded
+	 * @return Illuminate\Database\Eloquent\Model
+	 */
+	public function guard(array $guarded)
+	{
+		$this->guarded = $guarded;
+
+		return $this;
 	}
 
 	/**
@@ -734,7 +756,14 @@ abstract class Model implements ArrayableInterface, JsonableInterface {
 	 */
 	public function isFillable($key)
 	{
-		return empty($this->fillable) or in_array($key, $this->fillable);
+		if (in_array($key, $this->fillable)) return true;
+
+		if (in_array($key, $this->guarded) or $this->guarded == array('*'))
+		{
+			return false;
+		}
+
+		return empty($this->fillable);
 	}
 
 	/**
