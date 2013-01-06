@@ -117,7 +117,10 @@ class Builder {
 	 *
 	 * @var array
 	 */
-	protected $operators = array('=', '<', '>', '<=', '>=', '<>', '!=', 'like', 'not like');
+	protected $operators = array(
+		'=', '<', '>', '<=', '>=', '<>', '!=',
+		'like', 'not like', 'between',
+	);
 
 	/**
 	 * Create a new query builder instance.
@@ -314,6 +317,37 @@ class Builder {
 	public function orWhereRaw($sql, array $bindings = array())
 	{
 		return $this->whereRaw($sql, $bindings, 'or');
+	}
+
+	/**
+	 * Add a where between statement to the query.
+	 *
+	 * @param  string  $column
+	 * @param  array   $values
+	 * @param  string  $boolean
+	 * @return Illuminate\Database\Query\Builder
+	 */
+	public function whereBetween($column, array $values, $boolean = 'and')
+	{
+		$type = 'between';
+
+		$this->wheres[] = compact('column', 'type', 'boolean');
+
+		$this->bindings = array_merge($this->bindings, $values);
+
+		return $this;
+	}
+
+	/**
+	 * Add an or where between statement to the query.
+	 *
+	 * @param  string  $column
+	 * @param  array   $values
+	 * @return Illuminate\Database\Query\Builder
+	 */
+	public function orWhereBetween($column, array $values)
+	{
+		return $this->whereBetween($column, $values, 'or');
 	}
 
 	/**

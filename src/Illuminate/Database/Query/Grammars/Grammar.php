@@ -256,6 +256,18 @@ class Grammar extends BaseGrammar {
 	}
 
 	/**
+	 * Compile a "between" where clause.
+	 *
+	 * @param  Illuminate\Database\Query\Builder  $query
+	 * @param  array  $where
+	 * @return string
+	 */
+	protected function whereBetween(Builder $query, $where)
+	{
+		return $this->wrap($where['column']).' between ? and ?';
+	}
+
+	/**
 	 * Compile a where exists clause.
 	 *
 	 * @param  Illuminate\Database\Query\Builder  $query
