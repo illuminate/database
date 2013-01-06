@@ -32,8 +32,6 @@ class Collection implements ArrayAccess, ArrayableInterface, Countable, Iterator
 	public function __construct(array $items = array())
 	{
 		$this->items = $items;
-
-		$this->buildDictionary();
 	}
 
 	/**
@@ -62,7 +60,11 @@ class Collection implements ArrayAccess, ArrayableInterface, Countable, Iterator
 	{
 		$this->items[] = $item;
 
-		if ($item instanceof Model)
+		if (count($this->dictionary) == 0)
+		{
+			$this->buildDictionary();
+		}
+		elseif ($item instanceof Model)
 		{
 			$this->dictionary[$item->getKey()] = true;
 		}
@@ -88,6 +90,11 @@ class Collection implements ArrayAccess, ArrayableInterface, Countable, Iterator
 	 */
 	public function contains($key)
 	{
+		if (count($this->dictionary) == 0)
+		{
+			$this->buildDictionary();
+		}
+
 		return isset($this->dictionary[$key]);
 	}
 
