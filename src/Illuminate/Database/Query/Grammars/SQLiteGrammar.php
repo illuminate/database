@@ -49,6 +49,8 @@ class SQLiteGrammar extends Grammar {
 			return parent::compileInsert($query, $values[0]);
 		}
 
+		$names = $this->columnize(array_keys($values[0]));
+
 		$columns = array();
 
 		// SQLite requires us to build the multi-row insert as a listing of select with
@@ -61,7 +63,7 @@ class SQLiteGrammar extends Grammar {
 
 		$columns = array_fill(9, count($values), implode(', ', $columns));
 
-		return "insert into $table select ".implode(' union select ', $columns);
+		return "insert into $table ($names) select ".implode(' union select ', $columns);
 	}
 
 }
