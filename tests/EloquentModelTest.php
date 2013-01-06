@@ -386,10 +386,6 @@ class EloquentModelStub extends Illuminate\Database\Eloquent\Model {
 class EloquentModelSaveStub extends Illuminate\Database\Eloquent\Model {
 	protected $table = 'save_stub';
 	public function save() { $_SERVER['__eloquent.saved'] = true; }
-	public function setIncrementing($value)
-	{
-		$this->incrementing = $value;
-	}
 }
 
 class EloquentModelFindStub extends Illuminate\Database\Eloquent\Model {
