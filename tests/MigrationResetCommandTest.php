@@ -15,7 +15,8 @@ class MigrationResetCommandTest extends PHPUnit_Framework_TestCase {
 	{
 		$command = new ResetCommand($migrator = m::mock('Illuminate\Database\Migrations\Migrator'));
 		$migrator->shouldReceive('setConnection')->once()->with(null);
-		$migrator->shouldReceive('rollback')->twice()->with(m::type('Symfony\Component\Console\Output\OutputInterface'), false)->andReturn(true, false);
+		$migrator->shouldReceive('rollback')->twice()->with(false)->andReturn(true, false);
+		$migrator->shouldReceive('getNotes')->andReturn(array());
 
 		$this->runCommand($command);
 	}
@@ -25,7 +26,8 @@ class MigrationResetCommandTest extends PHPUnit_Framework_TestCase {
 	{
 		$command = new ResetCommand($migrator = m::mock('Illuminate\Database\Migrations\Migrator'));
 		$migrator->shouldReceive('setConnection')->once()->with('foo');
-		$migrator->shouldReceive('rollback')->twice()->with(m::type('Symfony\Component\Console\Output\OutputInterface'), true)->andReturn(true, false);
+		$migrator->shouldReceive('rollback')->twice()->with(true)->andReturn(true, false);
+		$migrator->shouldReceive('getNotes')->andReturn(array());
 
 		$this->runCommand($command, array('--pretend' => true, '--database' => 'foo'));
 	}

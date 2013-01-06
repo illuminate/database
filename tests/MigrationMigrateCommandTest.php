@@ -17,7 +17,8 @@ class MigrationMigrateCommandTest extends PHPUnit_Framework_TestCase {
 		$app = array('path' => __DIR__);
 		$command->setLaravel($app);
 		$migrator->shouldReceive('setConnection')->once()->with(null);
-		$migrator->shouldReceive('run')->once()->with(m::type('Symfony\Component\Console\Output\OutputInterface'), 'application', __DIR__.'/database/migrations', false);
+		$migrator->shouldReceive('run')->once()->with('application', __DIR__.'/database/migrations', false);
+		$migrator->shouldReceive('getNotes')->andReturn(array());
 
 		$this->runCommand($command);
 	}
@@ -27,7 +28,8 @@ class MigrationMigrateCommandTest extends PHPUnit_Framework_TestCase {
 	{
 		$command = new MigrateCommand($migrator = m::mock('Illuminate\Database\Migrations\Migrator'), __DIR__.'/vendor');
 		$migrator->shouldReceive('setConnection')->once()->with(null);
-		$migrator->shouldReceive('run')->once()->with(m::type('Symfony\Component\Console\Output\OutputInterface'), 'bar', __DIR__.'/vendor/bar/src/migrations', false);
+		$migrator->shouldReceive('run')->once()->with('bar', __DIR__.'/vendor/bar/src/migrations', false);
+		$migrator->shouldReceive('getNotes')->andReturn(array());
 
 		$this->runCommand($command, array('--package' => 'bar'));
 	}
@@ -37,7 +39,8 @@ class MigrationMigrateCommandTest extends PHPUnit_Framework_TestCase {
 	{
 		$command = new MigrateCommand($migrator = m::mock('Illuminate\Database\Migrations\Migrator'), __DIR__.'/vendor');
 		$migrator->shouldReceive('setConnection')->once()->with(null);
-		$migrator->shouldReceive('run')->once()->with(m::type('Symfony\Component\Console\Output\OutputInterface'), 'foo/bar', __DIR__.'/vendor/foo/bar/src/migrations', false);
+		$migrator->shouldReceive('run')->once()->with('foo/bar', __DIR__.'/vendor/foo/bar/src/migrations', false);
+		$migrator->shouldReceive('getNotes')->andReturn(array());
 
 		$this->runCommand($command, array('--package' => 'foo/bar'));
 	}
@@ -49,7 +52,8 @@ class MigrationMigrateCommandTest extends PHPUnit_Framework_TestCase {
 		$app = array('path' => __DIR__);
 		$command->setLaravel($app);
 		$migrator->shouldReceive('setConnection')->once()->with(null);
-		$migrator->shouldReceive('run')->once()->with(m::type('Symfony\Component\Console\Output\OutputInterface'), 'application', __DIR__.'/database/migrations', true);
+		$migrator->shouldReceive('run')->once()->with('application', __DIR__.'/database/migrations', true);
+		$migrator->shouldReceive('getNotes')->andReturn(array());
 
 		$this->runCommand($command, array('--pretend' => true));
 	}
@@ -61,7 +65,8 @@ class MigrationMigrateCommandTest extends PHPUnit_Framework_TestCase {
 		$app = array('path' => __DIR__);
 		$command->setLaravel($app);
 		$migrator->shouldReceive('setConnection')->once()->with('foo');
-		$migrator->shouldReceive('run')->once()->with(m::type('Symfony\Component\Console\Output\OutputInterface'), 'application', __DIR__.'/database/migrations', false);
+		$migrator->shouldReceive('run')->once()->with('application', __DIR__.'/database/migrations', false);
+		$migrator->shouldReceive('getNotes')->andReturn(array());
 
 		$this->runCommand($command, array('--database' => 'foo'));
 	}

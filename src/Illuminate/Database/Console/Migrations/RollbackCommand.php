@@ -51,7 +51,15 @@ class RollbackCommand extends Command {
 
 		$pretend = $this->input->getOption('pretend');
 
-		$this->migrator->rollback($this->output, $pretend);
+		$this->migrator->rollback($pretend);
+
+		// Once the migrator has run we will grab the note output and send it out to
+		// the console screen, since the migrator itself functions without having
+		// any instances of the OutputInterface contract passed into the class.
+		foreach ($this->migrator->getNotes() as $note)
+		{
+			$this->output->writeln($note);
+		}
 	}
 
 	/**

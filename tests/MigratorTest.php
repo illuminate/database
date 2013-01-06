@@ -35,11 +35,7 @@ class MigratorTest extends PHPUnit_Framework_TestCase {
 		$migrator->expects($this->at(0))->method('resolve')->with($this->equalTo('2_bar'))->will($this->returnValue($barMock));
 		$migrator->expects($this->at(1))->method('resolve')->with($this->equalTo('3_baz'))->will($this->returnValue($bazMock));
 
-		$output = m::mock('Symfony\Component\Console\Output\OutputInterface');
-		$output->shouldReceive('writeln')->once()->with('<info>Migrated:</info> 2_bar');
-		$output->shouldReceive('writeln')->once()->with('<info>Migrated:</info> 3_baz');
-
-		$migrator->run($output, 'application', __DIR__);
+		$migrator->run('application', __DIR__);
 	}
 
 
@@ -84,11 +80,7 @@ class MigratorTest extends PHPUnit_Framework_TestCase {
 		});
 		$resolver->shouldReceive('connection')->with(null)->andReturn($connection);
 
-		$output = m::mock('Symfony\Component\Console\Output\OutputInterface');
-		$output->shouldReceive('writeln')->once()->with('<info>'.get_class($barMock).':</info> foo');
-		$output->shouldReceive('writeln')->once()->with('<info>'.get_class($bazMock).':</info> bar');
-
-		$migrator->run($output, 'application', __DIR__, true);	
+		$migrator->run('application', __DIR__, true);	
 	}
 
 
@@ -106,10 +98,7 @@ class MigratorTest extends PHPUnit_Framework_TestCase {
 			'1_foo',
 		));
 
-		$output = m::mock('Symfony\Component\Console\Output\OutputInterface');
-		$output->shouldReceive('writeln')->once()->with('<info>Nothing to migrate.</info>');
-
-		$migrator->run($output, 'application', __DIR__);
+		$migrator->run('application', __DIR__);
 	}
 
 
@@ -137,11 +126,7 @@ class MigratorTest extends PHPUnit_Framework_TestCase {
 		$migrator->getRepository()->shouldReceive('delete')->once()->with($barMigration);
 		$migrator->getRepository()->shouldReceive('delete')->once()->with($fooMigration);
 
-		$output = m::mock('Symfony\Component\Console\Output\OutputInterface');
-		$output->shouldReceive('writeln')->once()->with('<info>Rolled back:</info> bar');
-		$output->shouldReceive('writeln')->once()->with('<info>Rolled back:</info> foo');
-
-		$migrator->rollback($output);
+		$migrator->rollback();
 	}
 
 
@@ -181,11 +166,7 @@ class MigratorTest extends PHPUnit_Framework_TestCase {
 		});
 		$resolver->shouldReceive('connection')->with(null)->andReturn($connection);
 
-		$output = m::mock('Symfony\Component\Console\Output\OutputInterface');
-		$output->shouldReceive('writeln')->once()->with('<info>'.get_class($barMock).':</info> bar');
-		$output->shouldReceive('writeln')->once()->with('<info>'.get_class($fooMock).':</info> foo');
-
-		$migrator->rollback($output, true);
+		$migrator->rollback(true);
 	}
 
 
@@ -198,10 +179,7 @@ class MigratorTest extends PHPUnit_Framework_TestCase {
 		));
 		$migrator->getRepository()->shouldReceive('getLast')->once()->andReturn(array());
 
-		$output = m::mock('Symfony\Component\Console\Output\OutputInterface');
-		$output->shouldReceive('writeln')->once()->with('<info>Nothing to rollback.</info>');
-
-		$migrator->rollback($output);
+		$migrator->rollback();
 	}
 
 }

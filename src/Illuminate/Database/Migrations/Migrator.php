@@ -2,6 +2,7 @@
 
 use Closure;
 use Illuminate\Filesystem;
+use Illuminate\Events\Dispatcher;
 use Illuminate\Database\Connection;
 use Symfony\Component\Console\Output\OutputInterface;
 use Illuminate\Database\ConnectionResolverInterface as Resolver;
@@ -37,11 +38,19 @@ class Migrator {
 	protected $connection;
 
 	/**
+	 * The notes for the current operation.
+	 *
+	 * @var array
+	 */
+	protected $notes = array();
+
+	/**
 	 * Create a new migrator instance.
 	 *
 	 * @param  Illuminate\Database\Migrations\MigrationRepositoryInterface  $repository
 	 * @param  Illuminate\Database\ConnectionResolverInterface  $resolver
 	 * @param  Illuminate\Filesystem  $files
+	 * @return void
 	 */
 	public function __construct(MigrationRepositoryInterface $repository,
 								Resolver $resolver,
@@ -61,37 +70,38 @@ class Migrator {
 	 * @param  bool    $pretend
 	 * @return void
 	 */
-	public function run(OutputInterface $output, $package, $path, $pretend = false)
+	public function run($package, $path, $pretend = false)
 	{
+		$this->notes = array();
+
+		$files = $this->getMigrationFiles($path);
+
 		// Once we grab all of the migration files for the path, we will compare them
 		// against the migrations that have already been run for this package then
 		// run all of the oustanding migrations against the database connection.
-		$files = $this->getMigrationFiles($path);
-
 		$ran = $this->repository->getRan($package);
 
 		$migrations = array_diff($files, $ran);
 
-		$this->runMigrationList($output, $migrations, $package, $pretend);
+		$this->runMigrationList($migrations, $package, $pretend);
 	}
 
 	/**
 	 * Run an array of migrations.
 	 *
-	 * @param  Symfony\Component\Console\Output\OutputInterface  $output
 	 * @param  array   $migrations
 	 * @param  string  $package
 	 * @param  bool    $pretend
 	 * @return void
 	 */
-	public function runMigrationList(OutputInterface $output, $migrations, $package, $pretend = false)
+	public function runMigrationList($migrations, $package, $pretend = false)
 	{
 		// First we will just make sure that there are any migrations to run. If there
 		// aren't, we will just make a note of it to the developer so they're aware
 		// that all of the migrations have been run against this database system.
 		if (count($migrations) == 0)
 		{
-			$output->writeln('<info>Nothing to migrate.</info>');
+			$this->note('<info>Nothing to migrate.</info>');
 
 			return;
 		}
@@ -103,21 +113,20 @@ class Migrator {
 		// that the migration was run so we don't repeat it next time we execute.
 		foreach ($migrations as $file)
 		{
-			$this->runUp($output, $package, $file, $batch, $pretend);
+			$this->runUp($package, $file, $batch, $pretend);
 		}
 	}
 
 	/**
 	 * Run "up" a migration instance.
 	 *
-	 * @param  Symfony\Component\Console\Output\OutputInterface  $output
 	 * @param  string  $package
 	 * @param  string  $file
 	 * @param  int     $batch
 	 * @param  bool    $pretend
 	 * @return void
 	 */
-	protected function runUp($output, $package, $file, $batch, $pretend)
+	protected function runUp($package, $file, $batch, $pretend)
 	{
 		// First we will resolve a "real" instance of the migration class from this
 		// migration file name. Once we have the instances we can run the actual
@@ -126,7 +135,7 @@ class Migrator {
 
 		if ($pretend)
 		{
-			return $this->pretendToRun($output, $migration, 'up');
+			return $this->pretendToRun($migration, 'up');
 		}
 
 		$migration->up();
@@ -136,18 +145,19 @@ class Migrator {
 		// in the application. A migration repository keeps the migrate order.
 		$this->repository->log($package, $file, $batch);
 
-		$output->writeln("<info>Migrated:</info> $file");
+		$this->note("<info>Migrated:</info> $file");
 	}
 
 	/**
 	 * Rollback the last migration operation.
 	 *
-	 * @param  Symfony\Component\Console\Output\OutputInterface  $output
-	 * @param  bool  $pretend
+	 * @param  bool   $pretend
 	 * @return int
 	 */
-	public function rollback(OutputInterface $output, $pretend = false)
+	public function rollback($pretend = false)
 	{
+		$this->notes = array();
+
 		// We want to pull in the last batch of migrations that ran on the previous
 		// migration operation. We'll then reverse those migrations and run each
 		// of them "down" to reverse the last migration "operation" which ran.
@@ -155,7 +165,7 @@ class Migrator {
 
 		if (count($migrations) == 0)
 		{
-			$output->writeln('<info>Nothing to rollback.</info>');
+			$this->note('<info>Nothing to rollback.</info>');
 
 			return count($migrations);
 		}
@@ -165,7 +175,7 @@ class Migrator {
 		// and properly reverse the entire database schema operation that ran.
 		foreach ($migrations as $migration)
 		{
-			$this->runDown($output, $migration, $pretend);
+			$this->runDown($migration, $pretend);
 		}
 
 		return count($migrations);
@@ -174,12 +184,11 @@ class Migrator {
 	/**
 	 * Run "down" a migration instance.
 	 *
-	 * @param  Symfony\Component\Console\Output\OutputInterface  $output
 	 * @param  StdClass  $migration
 	 * @param  bool  $pretend
 	 * @return void
 	 */
-	protected function runDown($output, $migration, $pretend)
+	protected function runDown($migration, $pretend)
 	{
 		$file = $migration->migration;
 
@@ -190,7 +199,7 @@ class Migrator {
 
 		if ($pretend)
 		{
-			return $this->pretendToRun($output, $instance, 'down');
+			return $this->pretendToRun($instance, 'down');
 		}
 
 		$instance->down();
@@ -200,7 +209,7 @@ class Migrator {
 		// by the application then will be able to fire by any later operation.
 		$this->repository->delete($migration);
 
-		$output->writeln("<info>Rolled back:</info> $file");
+		$this->note("<info>Rolled back:</info> $file");
 	}
 
 	/**
@@ -235,29 +244,27 @@ class Migrator {
 	/**
 	 * Pretend to run the migrations.
 	 *
-	 * @param  Symfony\Component\Console\Output\OutputInterface  $output
 	 * @param  object  $migration
 	 * @return void
 	 */
-	protected function pretendToRun($output, $migration, $method)
+	protected function pretendToRun($migration, $method)
 	{
-		foreach ($this->getQueries($output, $migration, $method) as $query)
+		foreach ($this->getQueries($migration, $method) as $query)
 		{
 			$name = get_class($migration);
 
-			$output->writeln("<info>{$name}:</info> {$query['query']}");
+			$this->note("<info>{$name}:</info> {$query['query']}");
 		}
 	}
 
 	/**
 	 * Get all of the queries that would be run for a migration.
 	 *
-	 * @param  Symfony\Component\Console\Output\OutputInterface  $output
 	 * @param  object  $migration
 	 * @param  string  $method
 	 * @return array
 	 */
-	protected function getQueries($output, $migration, $method)
+	protected function getQueries($migration, $method)
 	{
 		$connection = $migration->getConnection();
 
@@ -285,6 +292,27 @@ class Migrator {
 		$class = camel_case($file);
 
 		return new $class;
+	}
+
+	/**
+	 * Raise a note event for the migrator.
+	 *
+	 * @param  string  $message
+	 * @return void
+	 */
+	protected function note($message)
+	{
+		$this->notes[] = $message;
+	}
+
+	/**
+	 * Get the notes for the last operation.
+	 *
+	 * @return array
+	 */
+	public function getNotes()
+	{
+		return $this->notes;
 	}
 
 	/**
