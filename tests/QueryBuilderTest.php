@@ -85,7 +85,7 @@ class QueryBuilderTest extends PHPUnit_Framework_TestCase {
 		$builder = $this->getBuilder();
 		$builder->select('*')->from('users')->whereRaw('id = ? or email = ?', array(1, 'foo'));
 		$this->assertEquals('select * from "users" where id = ? or email = ?', $builder->toSql());
-		$this->assertEquals(array(0 => 1, 1 => 'foo'), $builder->getBindings());	
+		$this->assertEquals(array(0 => 1, 1 => 'foo'), $builder->getBindings());
 	}
 
 	public function testRawOrWheres()
@@ -93,7 +93,7 @@ class QueryBuilderTest extends PHPUnit_Framework_TestCase {
 		$builder = $this->getBuilder();
 		$builder->select('*')->from('users')->where('id', '=', 1)->orWhereRaw('email = ?', array('foo'));
 		$this->assertEquals('select * from "users" where "id" = ? or email = ?', $builder->toSql());
-		$this->assertEquals(array(0 => 1, 1 => 'foo'), $builder->getBindings());	
+		$this->assertEquals(array(0 => 1, 1 => 'foo'), $builder->getBindings());
 	}
 
 
@@ -318,7 +318,7 @@ class QueryBuilderTest extends PHPUnit_Framework_TestCase {
 		$builder->getConnection()->shouldReceive('select')->once()->with('select * from "users" where "id" = ? limit 1', array(1))->andReturn(array(array('foo' => 'bar')));
 		$builder->getProcessor()->shouldReceive('processSelect')->once()->with($builder, array(array('foo' => 'bar')));
 		$results = $builder->from('users')->where('id', '=', 1)->first();
-		$this->assertEquals(array('foo' => 'bar'), $results);	
+		$this->assertEquals(array('foo' => 'bar'), $results);
 	}
 
 
@@ -334,7 +334,7 @@ class QueryBuilderTest extends PHPUnit_Framework_TestCase {
 		$builder->getConnection()->shouldReceive('select')->once()->andReturn(array(array('id' => 1, 'foo' => 'bar'), array('id' => 10, 'foo' => 'baz')));
 		$builder->getProcessor()->shouldReceive('processSelect')->once()->with($builder, array(array('id' => 1, 'foo' => 'bar'), array('id' => 10, 'foo' => 'baz')));
 		$results = $builder->from('users')->where('id', '=', 1)->lists('foo', 'id');
-		$this->assertEquals(array(1 => 'bar', 10 => 'baz'), $results);	
+		$this->assertEquals(array(1 => 'bar', 10 => 'baz'), $results);
 	}
 
 
@@ -397,7 +397,7 @@ class QueryBuilderTest extends PHPUnit_Framework_TestCase {
 		$builder->getConnection()->shouldReceive('select')->once()->with('select "foo" from "users" where "id" = ? limit 1', array(1))->andReturn(array(array('foo' => 'bar')));
 		$builder->getProcessor()->shouldReceive('processSelect')->once()->with($builder, array(array('foo' => 'bar')));
 		$results = $builder->from('users')->where('id', '=', 1)->pluck('foo');
-		$this->assertEquals('bar', $results);	
+		$this->assertEquals('bar', $results);
 	}
 
 
@@ -447,7 +447,7 @@ class QueryBuilderTest extends PHPUnit_Framework_TestCase {
 	public function testSQLiteMultipleInserts()
 	{
 		$builder = $this->getSQLiteBuilder();
-		$builder->getConnection()->shouldReceive('insert')->once()->with('insert into "users" select ? as "email" union select ? as "email"', array('foo', 'bar'))->andReturn(true);
+		$builder->getConnection()->shouldReceive('insert')->once()->with('insert into "users"(email) select ? as "email" union select ? as "email"', array('foo', 'bar'))->andReturn(true);
 		$result = $builder->from('users')->insert(array(array('email' => 'foo'), array('email' => 'bar')));
 		$this->assertTrue($result);
 	}

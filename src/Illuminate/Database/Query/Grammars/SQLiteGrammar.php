@@ -50,18 +50,23 @@ class SQLiteGrammar extends Grammar {
 		}
 
 		$columns = array();
+		$columnsNames = array_keys($values[0]);
 
 		// SQLite requires us to build the multi-row insert as a listing of select with
 		// unions joining them together. So we'll build out this list of columns and
 		// then join them all together with select unions to complete the queries.
-		foreach (array_keys($values[0]) as $column)
+		foreach ($columnsNames as $column)
 		{
-			$columns[] = '? as '.$this->wrap($column);
+			$column = '? as '.$this->wrap($column);
+			if (!empty($columns)) $column = ', ' .$column;
+
+			$columns[] = $column;
 		}
 
 		$columns = array_fill(9, count($values), implode($columns));
+		$columnsNames = implode(', ', $columnsNames);
 
-		return "insert into $table select ".implode(' union select ', $columns);
+		return "insert into $table($columnsNames) select ".implode(' union select ', $columns);
 	}
 
 }
