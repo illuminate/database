@@ -51,7 +51,7 @@ class InstallCommand extends Command {
 
 		$this->repository->createRepository();
 
-		$this->info("Nice! Now we're ready to do some migrating!");
+		$this->info("Migration table created successfully.");
 	}
 
 	/**
@@ -62,7 +62,7 @@ class InstallCommand extends Command {
 	protected function getOptions()
 	{
 		return array(
-			array('database', null, InputOption::VALUE_OPTIONAL, 'The database connection to use'),
+			array('database', null, InputOption::VALUE_OPTIONAL, 'The database connection to use.'),
 		);
 	}
 

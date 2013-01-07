@@ -49,9 +49,9 @@ class RefreshCommand extends Command {
 	protected function getOptions()
 	{
 		return array(
-			array('database', null, InputOption::VALUE_OPTIONAL, 'The database connection to use'),
+			array('database', null, InputOption::VALUE_OPTIONAL, 'The database connection to use.'),
 
-			array('seed', null, InputOption::VALUE_NONE, 'Indicates if the seed task should be re-run'),
+			array('seed', null, InputOption::VALUE_NONE, 'Indicates if the seed task should be re-run.'),
 		);
 	}
 

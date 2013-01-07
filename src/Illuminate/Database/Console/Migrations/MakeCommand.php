@@ -96,13 +96,13 @@ class MakeCommand extends BaseCommand {
 	protected function getOptions()
 	{
 		return array(
-			array('path', null, InputOption::VALUE_OPTIONAL, 'Where to store the migration', null),
+			array('path', null, InputOption::VALUE_OPTIONAL, 'Where to store the migration.', null),
 
-			array('package', null, InputOption::VALUE_OPTIONAL, 'The package the migration belongs to', null),
+			array('package', null, InputOption::VALUE_OPTIONAL, 'The package the migration belongs to.', null),
 
-			array('table', null, InputOption::VALUE_OPTIONAL, 'The table to migrate'),
+			array('table', null, InputOption::VALUE_OPTIONAL, 'The table to migrate.'),
 
-			array('create', null, InputOption::VALUE_NONE, 'The table needs to be created'),
+			array('create', null, InputOption::VALUE_NONE, 'The table needs to be created.'),
 		);
 	}
 
