@@ -16,6 +16,11 @@ class ConnectionFactory {
 	 */
 	public function make(array $config)
 	{
+		if ( ! isset($config['prefix']))
+		{
+			$config['prefix'] = '';
+		}
+
 		$pdo = $this->createConnector($config)->connect($config);
 
 		return $this->createConnection($config['driver'], $pdo, $config['database'], $config['prefix']);
@@ -61,7 +66,7 @@ class ConnectionFactory {
 	 * @param  string  $tablePrefix
 	 * @return Illuminate\Database\Connection
 	 */
-	protected function createConnection($driver, PDO $connection, $database, $tablePrefix)
+	protected function createConnection($driver, PDO $connection, $database, $tablePrefix = '')
 	{
 		switch ($driver)
 		{
