@@ -87,6 +87,8 @@ class MigrateCommand extends BaseCommand {
 		return array(
 			array('database', null, InputOption::VALUE_OPTIONAL, 'The database connection to use'),
 
+			array('path', null, InputOption::VALUE_OPTIONAL, 'The path to migrate', null),
+
 			array('package', null, InputOption::VALUE_OPTIONAL, 'The package to migrate', null),
 
 			array('pretend', null, InputOption::VALUE_NONE, 'Dump the SQL queries that would be run'),

@@ -11,6 +11,16 @@ class BaseCommand extends Command {
 	 */
 	protected function getMigrationPath()
 	{
+		$path = $this->input->getOption('path');
+
+		// First, we will check to see if a path option has been defined. If it has
+		// we will use the path relative to the root of this installation folder
+		// so that migrations may be run for any path within the applications.
+		if ( ! is_null($path))
+		{
+			return $this->laravel['path.base'].'/'.$path;
+		}
+
 		$package = $this->input->getOption('package');
 
 		// If the package is in the list of migration paths we received we will put
