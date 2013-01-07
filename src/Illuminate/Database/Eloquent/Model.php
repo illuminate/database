@@ -545,8 +545,9 @@ abstract class Model implements ArrayableInterface, JsonableInterface {
 	 */
 	protected function asDateTime($key)
 	{
-		if (isset($this->attributes[$key]) and $value = $this->attributes[$key])
+		if (isset($this->attributes[$key]))
 		{
+			$value = $this->attributes[$key];
 
 			if ( ! $value instanceof DateTime)
 			{
