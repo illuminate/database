@@ -291,6 +291,22 @@ class BelongsToMany extends Relation {
 	}
 
 	/**
+	 * Save a new model and attach it to the parent model.
+	 *
+	 * @param  Illuminate\Database\Eloquent\Model  $model
+	 * @param  array  $joining
+	 * @return Illuminate\Database\Eloquent\Model
+	 */
+	public function save(Model $model, array $joining = array())
+	{
+		$model->save();
+
+		$this->attach($model->getKey(), $joining);
+
+		return $model;
+	}
+
+	/**
 	 * Create a new instance of the related model.
 	 *
 	 * @param  array  $attributes
@@ -455,6 +471,16 @@ class BelongsToMany extends Relation {
 		}
 
 		return $query->delete();
+	}
+
+	/**
+	 * Delete all record on the pivot table for this model.
+	 *
+	 * @return int
+	 */
+	public function delete()
+	{
+		return $this->newPivotQuery()->delete();
 	}
 
 	/**
