@@ -12,6 +12,18 @@ class EloquentHasOneTest extends PHPUnit_Framework_TestCase {
 	}
 
 
+	public function testSaveMethodSetsForeignKeyOnModel()
+	{
+		$relation = $this->getRelation();
+		$mockModel = $this->getMock('Illuminate\Database\Eloquent\Model', array('save'));
+		$mockModel->expects($this->once())->method('save');
+		$result = $relation->save($mockModel);
+
+		$attributes = $result->getAttributes();
+		$this->assertEquals(1, $attributes['foreign_key']);
+	}
+
+
 	public function testCreateMethodProperlyCreatesNewModel()
 	{
 		$relation = $this->getRelation();
