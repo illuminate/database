@@ -18,10 +18,9 @@ class DatabaseMigrationRepositoryTest extends PHPUnit_Framework_TestCase {
 		$connectionMock = m::mock('Illuminate\Database\Connection');
 		$repo->getConnectionResolver()->shouldReceive('connection')->with(null)->andReturn($connectionMock);
 		$repo->getConnection()->shouldReceive('table')->once()->with('migrations')->andReturn($query);
-		$query->shouldReceive('where')->once()->with('package', 'foo')->andReturn($query);
 		$query->shouldReceive('lists')->once()->with('migration')->andReturn('bar');
 
-		$this->assertEquals('bar', $repo->getRan('foo'));
+		$this->assertEquals('bar', $repo->getRan());
 	}
 
 
@@ -50,9 +49,9 @@ class DatabaseMigrationRepositoryTest extends PHPUnit_Framework_TestCase {
 		$connectionMock = m::mock('Illuminate\Database\Connection');
 		$repo->getConnectionResolver()->shouldReceive('connection')->with(null)->andReturn($connectionMock);
 		$repo->getConnection()->shouldReceive('table')->once()->with('migrations')->andReturn($query);
-		$query->shouldReceive('insert')->once()->with(array('package' => 'foo', 'migration' => 'bar', 'batch' => 1));
+		$query->shouldReceive('insert')->once()->with(array('migration' => 'bar', 'batch' => 1));
 
-		$repo->log('foo', 'bar', 1);
+		$repo->log('bar', 1);
 	}
 
 
@@ -64,9 +63,8 @@ class DatabaseMigrationRepositoryTest extends PHPUnit_Framework_TestCase {
 		$repo->getConnectionResolver()->shouldReceive('connection')->with(null)->andReturn($connectionMock);
 		$repo->getConnection()->shouldReceive('table')->once()->with('migrations')->andReturn($query);
 		$query->shouldReceive('where')->once()->with('migration', 'foo')->andReturn($query);
-		$query->shouldReceive('where')->once()->with('package', 'bar')->andReturn($query);
 		$query->shouldReceive('delete')->once();
-		$migration = (object) array('migration' => 'foo', 'package' => 'bar');
+		$migration = (object) array('migration' => 'foo');
 
 		$repo->delete($migration);
 	}

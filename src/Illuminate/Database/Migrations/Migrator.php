@@ -64,13 +64,11 @@ class Migrator {
 	/**
 	 * Run the outstanding migrations at a given path.
 	 *
-	 * @param  Symfony\Component\Console\Output\OutputInterface  $output
-	 * @param  string  $package
 	 * @param  string  $path
 	 * @param  bool    $pretend
 	 * @return void
 	 */
-	public function run($package, $path, $pretend = false)
+	public function run($path, $pretend = false)
 	{
 		$this->notes = array();
 
@@ -79,22 +77,21 @@ class Migrator {
 		// Once we grab all of the migration files for the path, we will compare them
 		// against the migrations that have already been run for this package then
 		// run all of the oustanding migrations against the database connection.
-		$ran = $this->repository->getRan($package);
+		$ran = $this->repository->getRan();
 
 		$migrations = array_diff($files, $ran);
 
-		$this->runMigrationList($migrations, $package, $pretend);
+		$this->runMigrationList($migrations, $pretend);
 	}
 
 	/**
 	 * Run an array of migrations.
 	 *
 	 * @param  array   $migrations
-	 * @param  string  $package
 	 * @param  bool    $pretend
 	 * @return void
 	 */
-	public function runMigrationList($migrations, $package, $pretend = false)
+	public function runMigrationList($migrations, $pretend = false)
 	{
 		// First we will just make sure that there are any migrations to run. If there
 		// aren't, we will just make a note of it to the developer so they're aware
@@ -113,20 +110,19 @@ class Migrator {
 		// that the migration was run so we don't repeat it next time we execute.
 		foreach ($migrations as $file)
 		{
-			$this->runUp($package, $file, $batch, $pretend);
+			$this->runUp($file, $batch, $pretend);
 		}
 	}
 
 	/**
 	 * Run "up" a migration instance.
 	 *
-	 * @param  string  $package
 	 * @param  string  $file
 	 * @param  int     $batch
 	 * @param  bool    $pretend
 	 * @return void
 	 */
-	protected function runUp($package, $file, $batch, $pretend)
+	protected function runUp($file, $batch, $pretend)
 	{
 		// First we will resolve a "real" instance of the migration class from this
 		// migration file name. Once we have the instances we can run the actual
@@ -143,7 +139,7 @@ class Migrator {
 		// Once we have run a migrations class, we will log that it was run in this
 		// repository so that we don't try to run it next time we do a migration
 		// in the application. A migration repository keeps the migrate order.
-		$this->repository->log($package, $file, $batch);
+		$this->repository->log($file, $batch);
 
 		$this->note("<info>Migrated:</info> $file");
 	}
@@ -351,6 +347,16 @@ class Migrator {
 	public function getRepository()
 	{
 		return $this->repository;
+	}
+
+	/**
+	 * Determine if the migration repository exists.
+	 *
+	 * @return bool
+	 */
+	public function repositoryExists()
+	{
+		return $this->repository->repositoryExists();
 	}
 
 	/**

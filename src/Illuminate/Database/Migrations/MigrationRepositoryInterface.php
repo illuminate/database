@@ -5,10 +5,9 @@ interface MigrationRepositoryInterface {
 	/**
 	 * Get the ran migrations for a given package.
 	 *
-	 * @param  string  $package
 	 * @return array
 	 */
-	public function getRan($package);
+	public function getRan();
 
 	/**
 	 * Get the last migration batch.
@@ -20,12 +19,11 @@ interface MigrationRepositoryInterface {
 	/**
 	 * Log that a migration was run.
 	 *
-	 * @param  string  $package
 	 * @param  string  $file
 	 * @param  int     $batch
 	 * @return void
 	 */
-	public function log($package, $file, $batch);
+	public function log($file, $batch);
 
 	/**
 	 * Remove that a migration from the log.
@@ -48,6 +46,13 @@ interface MigrationRepositoryInterface {
 	 * @return void
 	 */
 	public function createRepository();
+
+	/**
+	 * Determine if the migration repository exists.
+	 *
+	 * @return bool
+	 */
+	public function repositoryExists();
 
 	/**
 	 * Set the information source to gather data.

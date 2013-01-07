@@ -22,12 +22,12 @@ class MigratorTest extends PHPUnit_Framework_TestCase {
 			__DIR__.'/1_foo.php',
 			__DIR__.'/3_baz.php',
 		));
-		$migrator->getRepository()->shouldReceive('getRan')->once()->with('application')->andReturn(array(
+		$migrator->getRepository()->shouldReceive('getRan')->once()->andReturn(array(
 			'1_foo',
 		));
 		$migrator->getRepository()->shouldReceive('getNextBatchNumber')->once()->andReturn(1);
-		$migrator->getRepository()->shouldReceive('log')->once()->with('application', '2_bar', 1);
-		$migrator->getRepository()->shouldReceive('log')->once()->with('application', '3_baz', 1);
+		$migrator->getRepository()->shouldReceive('log')->once()->with('2_bar', 1);
+		$migrator->getRepository()->shouldReceive('log')->once()->with('3_baz', 1);
 		$barMock = m::mock('stdClass');
 		$barMock->shouldReceive('up')->once();
 		$bazMock = m::mock('stdClass');
@@ -35,7 +35,7 @@ class MigratorTest extends PHPUnit_Framework_TestCase {
 		$migrator->expects($this->at(0))->method('resolve')->with($this->equalTo('2_bar'))->will($this->returnValue($barMock));
 		$migrator->expects($this->at(1))->method('resolve')->with($this->equalTo('3_baz'))->will($this->returnValue($bazMock));
 
-		$migrator->run('application', __DIR__);
+		$migrator->run(__DIR__);
 	}
 
 
@@ -51,7 +51,7 @@ class MigratorTest extends PHPUnit_Framework_TestCase {
 			__DIR__.'/1_foo.php',
 			__DIR__.'/3_baz.php',
 		));
-		$migrator->getRepository()->shouldReceive('getRan')->once()->with('application')->andReturn(array(
+		$migrator->getRepository()->shouldReceive('getRan')->once()->andReturn(array(
 			'1_foo',
 		));
 		$migrator->getRepository()->shouldReceive('getNextBatchNumber')->once()->andReturn(1);
@@ -80,7 +80,7 @@ class MigratorTest extends PHPUnit_Framework_TestCase {
 		});
 		$resolver->shouldReceive('connection')->with(null)->andReturn($connection);
 
-		$migrator->run('application', __DIR__, true);	
+		$migrator->run(__DIR__, true);	
 	}
 
 
@@ -94,11 +94,11 @@ class MigratorTest extends PHPUnit_Framework_TestCase {
 		$migrator->getFilesystem()->shouldReceive('glob')->once()->with(__DIR__.'/*_*.php')->andReturn(array(
 			__DIR__.'/1_foo.php',
 		));
-		$migrator->getRepository()->shouldReceive('getRan')->once()->with('application')->andReturn(array(
+		$migrator->getRepository()->shouldReceive('getRan')->once()->andReturn(array(
 			'1_foo',
 		));
 
-		$migrator->run('application', __DIR__);
+		$migrator->run(__DIR__);
 	}
 
 

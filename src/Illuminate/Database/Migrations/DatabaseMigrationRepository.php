@@ -40,14 +40,13 @@ class DatabaseMigrationRepository implements MigrationRepositoryInterface {
 	}
 
 	/**
-	 * Get the ran migrations for a given package.
+	 * Get the ran migrations.
 	 *
-	 * @param  string  $package
 	 * @return array
 	 */
-	public function getRan($package)
+	public function getRan()
 	{
-		return $this->table()->where('package', $package)->lists('migration');
+		return $this->table()->lists('migration');
 	}
 
 	/**
@@ -65,29 +64,26 @@ class DatabaseMigrationRepository implements MigrationRepositoryInterface {
 	/**
 	 * Log that a migration was run.
 	 *
-	 * @param  string  $package
 	 * @param  string  $file
 	 * @param  int     $batch
 	 * @return void
 	 */
-	public function log($package, $file, $batch)
+	public function log($file, $batch)
 	{
-		$record = array('package' => $package, 'migration' => $file, 'batch' => $batch);
+		$record = array('migration' => $file, 'batch' => $batch);
 
 		$this->table()->insert($record);
 	}
 
 	/**
-	 * Remove that a migration from the log.
+	 * Remove a migration from the log.
 	 *
 	 * @param  StdClass  $migration
 	 * @return void
 	 */
 	public function delete($migration)
 	{
-		$query = $this->table()->where('migration', $migration->migration);
-
-		$query->where('package', $migration->package)->delete();
+		$query = $this->table()->where('migration', $migration->migration)->delete();
 	}
 
 	/**
@@ -123,13 +119,23 @@ class DatabaseMigrationRepository implements MigrationRepositoryInterface {
 		{
 			// The migrations table is responsible for keeping track of which of the
 			// migrations have actually run for the application. We'll create the
-			// table to hold the migration and package as well as the batch ID.
+			// table to hold the migration file's path as well as the batch ID.
 			$table->string('migration');
-
-			$table->string('package');
 
 			$table->integer('batch');
 		});
+	}
+
+	/**
+	 * Determine if the migration repository exists.
+	 *
+	 * @return bool
+	 */
+	public function repositoryExists()
+	{
+		$schema = $this->getConnection()->getSchemaBuilder();
+
+		return $schema->hasTable($this->table);
 	}
 
 	/**

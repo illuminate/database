@@ -55,9 +55,7 @@ class MigrateCommand extends BaseCommand {
 	 */
 	public function fire()
 	{
-		$this->migrator->setConnection($this->input->getOption('database'));
-
-		$package = $this->input->getOption('package') ?: 'application';
+		$this->prepareDatabase();
 
 		// The pretend option can be used for "simulating" the migration and grabbing
 		// the SQL queries that would fire if the migration were to be run against
@@ -66,7 +64,7 @@ class MigrateCommand extends BaseCommand {
 
 		$path = $this->getMigrationPath();
 
-		$this->migrator->run($package, $path, $pretend);
+		$this->migrator->run($path, $pretend);
 
 		// Once the migrator has run we will grab the note output and send it out to
 		// the console screen, since the migrator itself functions without having
@@ -78,6 +76,23 @@ class MigrateCommand extends BaseCommand {
 	}
 
 	/**
+	 * Prepare the migration database for running.
+	 *
+	 * @return void
+	 */
+	protected function prepareDatabase()
+	{
+		$this->migrator->setConnection($this->input->getOption('database'));
+
+		if ( ! $this->migrator->repositoryExists())
+		{
+			$options = array('--database' => $this->input->getOption('database'));
+
+			$this->call('migrate:install', $options);
+		}
+	}
+
+	/**
 	 * Get the console command options.
 	 *
 	 * @return array
@@ -85,13 +100,13 @@ class MigrateCommand extends BaseCommand {
 	protected function getOptions()
 	{
 		return array(
-			array('database', null, InputOption::VALUE_OPTIONAL, 'The database connection to use'),
+			array('database', null, InputOption::VALUE_OPTIONAL, 'The database connection to use.'),
 
-			array('path', null, InputOption::VALUE_OPTIONAL, 'The path to migrate', null),
+			array('path', null, InputOption::VALUE_OPTIONAL, 'The path to migration files.', null),
 
-			array('package', null, InputOption::VALUE_OPTIONAL, 'The package to migrate', null),
+			array('package', null, InputOption::VALUE_OPTIONAL, 'The package to migrate.', null),
 
-			array('pretend', null, InputOption::VALUE_NONE, 'Dump the SQL queries that would be run'),
+			array('pretend', null, InputOption::VALUE_NONE, 'Dump the SQL queries that would be run.'),
 		);
 	}
 
