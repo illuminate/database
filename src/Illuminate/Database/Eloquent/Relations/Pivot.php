@@ -44,6 +44,19 @@ class Pivot extends Model {
 	}
 
 	/**
+	 * Set the keys for a save update query.
+	 *
+	 * @param  Illuminate\Database\Eloquent\Builder
+	 * @return void
+	 */
+	protected function setKeysForSaveQuery($query)
+	{
+		$query->where($this->foreignKey, $this->getAttribute($this->foreignKey));
+
+		$query->where($this->otherKey, $this->getAttribute($this->otherKey));
+	}
+
+	/**
 	 * Delete the pivot model record from the database.
 	 *
 	 * @return int

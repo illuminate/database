@@ -476,7 +476,7 @@ abstract class Model implements ArrayableInterface, JsonableInterface {
 		// clause to only update this model. Otherwise, we'll just insert them.
 		if ($this->exists)
 		{
-			$query->where($keyName, '=', $this->getKey());
+			$this->setKeysForSaveQuery($query);
 
 			$query->update($this->attributes);
 		}
@@ -497,6 +497,17 @@ abstract class Model implements ArrayableInterface, JsonableInterface {
 		}
 
 		return $this->exists = true;
+	}
+
+	/**
+	 * Set the keys for a save update query.
+	 *
+	 * @param  Illuminate\Database\Eloquent\Builder
+	 * @return void
+	 */
+	protected function setKeysForSaveQuery($query)
+	{
+		$query->where($this->getKeyName(), '=', $this->getKey());
 	}
 
 	/**
