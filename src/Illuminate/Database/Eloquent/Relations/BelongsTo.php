@@ -79,8 +79,6 @@ class BelongsTo extends Relation {
 	{
 		$keys = array();
 
-		if (count($models) == 0) return array(0);
-
 		// First we need to gather all of the keys from the parent models so we know what
 		// to query for via the eager loading query. We will add them to an array then
 		// execute a "where in" statement to gather up all of those related records.
@@ -90,6 +88,14 @@ class BelongsTo extends Relation {
 			{
 				$keys[] = $value;
 			}
+		}
+
+		// If there are no keys that were not null we will just return an array with 0 in
+		// it so the query doesn't fail, but will not return any results, which should
+		// be what this developer is expecting in a case where this happens to them.
+		if (count($keys) == 0)
+		{
+			return array(0);
 		}
 
 		return array_values(array_unique($keys));
