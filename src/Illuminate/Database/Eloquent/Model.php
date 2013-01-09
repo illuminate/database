@@ -101,6 +101,13 @@ abstract class Model implements ArrayableInterface, JsonableInterface {
 	protected $guarded = array();
 
 	/**
+	 * The date fields for the model.
+	 *
+	 * @var array
+	 */
+	protected $dates = array();
+
+	/**
 	 * Indicates if the model exists.
 	 *
 	 * @var bool
@@ -518,59 +525,6 @@ abstract class Model implements ArrayableInterface, JsonableInterface {
 	}
 
 	/**
-	 * Getter for the created_at timestamp.
-	 *
-	 * @return DateTime
-	 */
-	protected function getCreatedAt()
-	{
-		return $this->asDateTime('created_at');
-	}
-
-	/**
-	 * Getter for the updated_at timestamp.
-	 *
-	 * @return DateTime
-	 */
-	protected function getUpdatedAt()
-	{
-		return $this->asDateTime('updated_at');
-	}
-
-	/**
-	 * Return a timestamp as DateTime object.
-	 *
-	 * @param  string  $key
-	 * @return DateTime
-	 */
-	protected function asDateTime($key)
-	{
-		if (isset($this->attributes[$key]))
-		{
-			$value = $this->attributes[$key];
-
-			if ( ! $value instanceof DateTime)
-			{
-				$format = $this->getDateFormat();
-
-				return DateTime::createFromFormat($format, $value);
-			}
-
-			return $value;
-		}
-	}
-
-	/**
-	 * Get the format for databsae stored dates.
-	 *
-	 * @return string
-	 */
-	protected function getDateFormat()
-	{
-		return $this->getConnection()->getQueryGrammar()->getDateFormat();
-	}
-
-	/**
 	 * Get a new query builder for the model's table.
 	 *
 	 * @return Illuminate\Database\Eloquent\Builder
@@ -810,22 +764,7 @@ abstract class Model implements ArrayableInterface, JsonableInterface {
 	{
 		$attributes = array_diff_key($this->attributes, array_flip($this->hidden));
 
-		return array_merge($this->attributesToArray($attributes), $this->relationsToArray());
-	}
-
-	/**
-	 * Get the model's attributes in array form (mutators are called).
-	 *
-	 * @return array
-	 */
-	protected function attributesToArray(array $attributes)
-	{
-		foreach (array_keys($attributes) as $key)
-		{
-			$attributes[$key] = $this->getPlainAttribute($key);
-		}
-
-		return $attributes;
+		return array_merge($attributes, $this->relationsToArray());
 	}
 
 	/**
@@ -904,14 +843,39 @@ abstract class Model implements ArrayableInterface, JsonableInterface {
 	 */
 	protected function getPlainAttribute($key)
 	{
-		$value = isset($this->attributes[$key]) ? $this->attributes[$key] : null;
+		$value = $this->getAttributeFromArray($key);
 
-		if ($this->hasGetMutator($key))
+		// If the attribute is listed as a date, we will convert it to a DateTime
+		// instance on retrieval, which makes it quite convenient to work with
+		// date fields without having to create a mutator for each property.
+		if (in_array($key, $this->dates))
+		{
+			return $this->asDateTime($value);
+		}
+
+		// If the attribute has a get mutator, we will call that then return what
+		// it returns as the value, which is useful for transforming values on
+		// retrieval from the model to a form that is more useful for usage.
+		elseif ($this->hasGetMutator($key))
 		{
 			return $this->{'get'.camel_case($key)}($value);
 		}
 
 		return $value;
+	}
+
+	/**
+	 * Get an attribute from the $attributes array.
+	 *
+	 * @param  string  $key
+	 * @return mixed
+	 */
+	protected function getAttributeFromArray($key)
+	{
+		if (array_key_exists($key, $this->attributes))
+		{
+			return $this->attributes[$key];
+		}
 	}
 
 	/**
@@ -934,16 +898,22 @@ abstract class Model implements ArrayableInterface, JsonableInterface {
 	 */
 	public function setAttribute($key, $value)
 	{
-		if ($this->hasSetMutator($key))
+		// If an attribute is listed as a "date", we'll convert it from a DateTime
+		// instance into a form proper for storage on the database tables using
+		// the connection grammar's date format. We will auto set the values.
+		if (in_array($key, $this->dates))
 		{
-			// First we will check for the presence of a mutator for the set operation
-			// which simply lets the developers tweak the attribute as it is set on
-			// the model, such as "json_encoding" an listing of data for storage.
+			$this->attributes[$key] = $this->fromDateTime($value);
+		}
+
+		// First we will check for the presence of a mutator for the set operation
+		// which simply lets the developers tweak the attribute as it is set on
+		// the model, such as "json_encoding" an listing of data for storage.
+		elseif ($this->hasSetMutator($key))
+		{
 			$method = 'set'.camel_case($key);
 
-			$value = $this->$method($value);
-
-			return is_null($value) ? null : $this->attributes[$key] = $value;
+			return $this->{$method}($value);
 		}
 
 		$this->attributes[$key] = $value;
@@ -958,6 +928,45 @@ abstract class Model implements ArrayableInterface, JsonableInterface {
 	public function hasSetMutator($key)
 	{
 		return method_exists($this, 'set'.camel_case($key));
+	}
+
+	/**
+	 * Convert a DateTime to a storable string.
+	 *
+	 * @param  DateTime  $value
+	 * @return string
+	 */
+	protected function fromDateTime(DateTime $value)
+	{
+		return $value->format($this->getDateFormat());
+	}
+
+	/**
+	 * Return a timestamp as DateTime object.
+	 *
+	 * @param  mixed  $value
+	 * @return DateTime
+	 */
+	protected function asDateTime($value)
+	{
+		if ( ! $value instanceof DateTime)
+		{
+			$format = $this->getDateFormat();
+
+			return DateTime::createFromFormat($format, $value);
+		}
+
+		return $value;
+	}
+
+	/**
+	 * Get the format for databsae stored dates.
+	 *
+	 * @return string
+	 */
+	protected function getDateFormat()
+	{
+		return $this->getConnection()->getQueryGrammar()->getDateFormat();
 	}
 
 	/**

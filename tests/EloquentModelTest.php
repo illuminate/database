@@ -26,6 +26,7 @@ class EloquentModelTest extends PHPUnit_Framework_TestCase {
 		$this->assertEquals(json_encode(array('name' => 'taylor')), $attributes['list_items']);
 	}
 
+
 	public function testCalculatedAttributes()
 	{
 		$model = new EloquentModelStub;
@@ -38,6 +39,7 @@ class EloquentModelTest extends PHPUnit_Framework_TestCase {
 		$this->assertEquals('5ebe2294ecd0e0f08eab7690d2a6ee69', $attributes['password_hash']);
 		$this->assertEquals('5ebe2294ecd0e0f08eab7690d2a6ee69', $model->password_hash);
 	}
+
 
 	public function testNewInstanceReturnsNewInstanceWithAttributesSet()
 	{
@@ -120,9 +122,9 @@ class EloquentModelTest extends PHPUnit_Framework_TestCase {
 
 	public function testTimestampsAreReturnedAsObjects()
 	{
-		$model = $this->getMock('Illuminate\Database\Eloquent\Model', array('getDateFormat'));
+		$model = $this->getMock('EloquentDateModelStub', array('getDateFormat'));
 		$model->expects($this->any())->method('getDateFormat')->will($this->returnValue('Y-m-d'));
-		$model->fill(array(
+		$model->setRawAttributes(array(
 			'created_at'	=> '2012-12-04',
 			'updated_at'	=> '2012-12-05',
 		));
@@ -138,7 +140,11 @@ class EloquentModelTest extends PHPUnit_Framework_TestCase {
 			'created_at' => new DateTime,
 			'updated_at' => new DateTime
 		);
-		$model = new EloquentModelStub;
+		$model = new EloquentDateModelStub;
+		Illuminate\Database\Eloquent\Model::setConnectionResolver($resolver = m::mock('Illuminate\Database\ConnectionResolverInterface'));
+		$resolver->shouldReceive('connection')->andReturn($mockConnection = m::mock('StdClass'));
+		$mockConnection->shouldReceive('getQueryGrammar')->andReturn($mockConnection);
+		$mockConnection->shouldReceive('getDateFormat')->andReturn('Y-m-d H:i:s');
 		$instance = $model->newInstance($timestamps);
 		$this->assertInstanceOf('DateTime', $instance->updated_at);
 		$this->assertInstanceOf('DateTime', $instance->created_at);
@@ -404,7 +410,7 @@ class EloquentModelStub extends Illuminate\Database\Eloquent\Model {
 	}
 	public function setListItems($value)
 	{
-		return json_encode($value);
+		$this->attributes['list_items'] = json_encode($value);
 	}
 	public function getPassword()
 	{
@@ -426,6 +432,10 @@ class EloquentModelStub extends Illuminate\Database\Eloquent\Model {
 	{
 		return $this->belongsTo('EloquentModelSaveStub', 'foo');
 	}
+}
+
+class EloquentDateModelStub extends EloquentModelStub {
+	protected $dates = array('created_at', 'updated_at');
 }
 
 class EloquentModelSaveStub extends Illuminate\Database\Eloquent\Model {
