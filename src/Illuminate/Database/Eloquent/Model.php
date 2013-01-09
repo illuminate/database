@@ -903,17 +903,22 @@ abstract class Model implements ArrayableInterface, JsonableInterface {
 		// the connection grammar's date format. We will auto set the values.
 		if (in_array($key, $this->dates))
 		{
-			$this->attributes[$key] = $this->fromDateTime($value);
+			if ($value)
+			{
+				$this->attributes[$key] = $this->fromDateTime($value);
+				return;
+			}
 		}
 
-		// First we will check for the presence of a mutator for the set operation
+		// Now we will check for the presence of a mutator for the set operation
 		// which simply lets the developers tweak the attribute as it is set on
 		// the model, such as "json_encoding" an listing of data for storage.
 		elseif ($this->hasSetMutator($key))
 		{
 			$method = 'set'.camel_case($key);
 
-			return $this->{$method}($value);
+			$this->attributes[$key] = $this->{$method}($value);
+			return;
 		}
 
 		$this->attributes[$key] = $value;
