@@ -845,20 +845,20 @@ abstract class Model implements ArrayableInterface, JsonableInterface {
 	{
 		$value = $this->getAttributeFromArray($key);
 
-		// If the attribute is listed as a date, we will convert it to a DateTime
-		// instance on retrieval, which makes it quite convenient to work with
-		// date fields without having to create a mutator for each property.
-		if (in_array($key, $this->dates))
-		{
-			return $this->asDateTime($value);
-		}
-
 		// If the attribute has a get mutator, we will call that then return what
 		// it returns as the value, which is useful for transforming values on
 		// retrieval from the model to a form that is more useful for usage.
-		elseif ($this->hasGetMutator($key))
+		if ($this->hasGetMutator($key))
 		{
 			return $this->{'get'.camel_case($key)}($value);
+		}
+
+		// If the attribute is listed as a date, we will convert it to a DateTime
+		// instance on retrieval, which makes it quite convenient to work with
+		// date fields without having to create a mutator for each property.
+		elseif (in_array($key, $this->dates))
+		{
+			if ($value) return $this->asDateTime($value);
 		}
 
 		return $value;
@@ -898,22 +898,25 @@ abstract class Model implements ArrayableInterface, JsonableInterface {
 	 */
 	public function setAttribute($key, $value)
 	{
-		// If an attribute is listed as a "date", we'll convert it from a DateTime
-		// instance into a form proper for storage on the database tables using
-		// the connection grammar's date format. We will auto set the values.
-		if (in_array($key, $this->dates))
-		{
-			$this->attributes[$key] = $this->fromDateTime($value);
-		}
-
 		// First we will check for the presence of a mutator for the set operation
 		// which simply lets the developers tweak the attribute as it is set on
 		// the model, such as "json_encoding" an listing of data for storage.
-		elseif ($this->hasSetMutator($key))
+		if ($this->hasSetMutator($key))
 		{
 			$method = 'set'.camel_case($key);
 
 			return $this->{$method}($value);
+		}
+
+		// If an attribute is listed as a "date", we'll convert it from a DateTime
+		// instance into a form proper for storage on the database tables using
+		// the connection grammar's date format. We will auto set the values.
+		elseif (in_array($key, $this->dates))
+		{
+			if ($value)
+			{
+				$this->attributes[$key] = $this->fromDateTime($value);
+			}
 		}
 
 		$this->attributes[$key] = $value;
