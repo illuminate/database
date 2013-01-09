@@ -151,6 +151,24 @@ class EloquentModelTest extends PHPUnit_Framework_TestCase {
 	}
 
 
+	public function testDateTimeAttributesReturnNullIfSetToNull()
+	{
+		$timestamps = array(
+			'created_at' => new DateTime,
+			'updated_at' => new DateTime
+		);
+		$model = new EloquentDateModelStub;
+		Illuminate\Database\Eloquent\Model::setConnectionResolver($resolver = m::mock('Illuminate\Database\ConnectionResolverInterface'));
+		$resolver->shouldReceive('connection')->andReturn($mockConnection = m::mock('StdClass'));
+		$mockConnection->shouldReceive('getQueryGrammar')->andReturn($mockConnection);
+		$mockConnection->shouldReceive('getDateFormat')->andReturn('Y-m-d H:i:s');
+		$instance = $model->newInstance($timestamps);
+
+		$instance->created_at = null;
+		$this->assertNull($instance->created_at);
+	}
+
+
 	public function testInsertProcess()
 	{
 		$model = $this->getMock('EloquentModelStub', array('newQuery', 'updateTimestamps'));

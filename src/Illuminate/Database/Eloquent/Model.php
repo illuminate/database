@@ -850,7 +850,14 @@ abstract class Model implements ArrayableInterface, JsonableInterface {
 		// date fields without having to create a mutator for each property.
 		if (in_array($key, $this->dates))
 		{
-			return $this->asDateTime($value);
+			// DateTime does not always throw an Exception for failed
+			// dates. If you pass "null" you can just receive "false" back,
+			// which may break some people's apps if they're explicitly
+			// expecting null back.
+			if ($value)
+			{
+				return $this->asDateTime($value);
+			}
 		}
 
 		// If the attribute has a get mutator, we will call that then return what
@@ -903,10 +910,13 @@ abstract class Model implements ArrayableInterface, JsonableInterface {
 		// the connection grammar's date format. We will auto set the values.
 		if (in_array($key, $this->dates))
 		{
-			$this->attributes[$key] = $this->fromDateTime($value);
+			if ($value)
+			{
+				$this->attributes[$key] = $this->fromDateTime($value);
+			}
 		}
 
-		// First we will check for the presence of a mutator for the set operation
+		// Now we will check for the presence of a mutator for the set operation
 		// which simply lets the developers tweak the attribute as it is set on
 		// the model, such as "json_encoding" an listing of data for storage.
 		elseif ($this->hasSetMutator($key))
@@ -916,6 +926,7 @@ abstract class Model implements ArrayableInterface, JsonableInterface {
 			return $this->{$method}($value);
 		}
 
+		// Finally, we'll just set the attribute as it was passed to us.
 		$this->attributes[$key] = $value;
 	}
 
