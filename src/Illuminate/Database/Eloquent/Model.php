@@ -926,7 +926,7 @@ abstract class Model implements ArrayableInterface, JsonableInterface {
 		{
 			if ($value)
 			{
-				$this->attributes[$key] = $this->fromDateTime($value);
+				return $this->attributes[$key] = $this->fromDateTime($value);
 			}
 		}
 
