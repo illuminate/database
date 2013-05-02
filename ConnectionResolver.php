@@ -54,6 +54,17 @@ class ConnectionResolver implements ConnectionResolverInterface {
 	{
 		$this->connections[$name] = $connection;
 	}
+	
+	/**
+	 * Check if a connection has been registered by its $name
+	 *
+	 * @param  string  $name The name of the connection
+	 * @return boolean
+	 */
+	public function hasConnection($name)
+	{
+		return isset($this->connections[$name]);
+	}
 
 	/**
 	 * Get the default connection name.
