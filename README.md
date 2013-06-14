@@ -62,4 +62,15 @@ class User extends Illuminate\Database\Eloquent\Model {}
 $users = User::where('votes', '>', 1)->get();
 ```
 
+**Running Queries**
+
+Unlike the Laravel framework version, you must use the connection instance to run general queries:
+
+
+```
+Capsule()->connection()->insert('insert into users (id, name) values (?, ?)', array(1, 'Dayle')); 
+// insert() and update() return rows affected
+Capsule()->connection()->statement('replace into login_log (id, timestamp) value (?, now())', array(23));
+```
+
 For further documentation on using the various database facilities this library provides, consult the [Laravel framework documentation](http://laravel.com/docs).
