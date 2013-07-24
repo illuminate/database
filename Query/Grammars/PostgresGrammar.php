@@ -145,7 +145,7 @@ class PostgresGrammar extends Grammar {
 	 */
 	public function compileTruncate(Builder $query)
 	{
-		return array('truncate '.$this->wrapTable($query->from).' restart identity' => array());
+		return array('truncate '.$this->wrapTable($query->from).' restart identity cascade' => array());
 	}
 
 }
