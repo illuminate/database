@@ -1508,7 +1508,7 @@ abstract class Model implements ArrayAccess, ArrayableInterface, JsonableInterfa
 	}
 
 	/**
-	 * Set the number of models ot return per page.
+	 * Set the number of models to return per page.
 	 *
 	 * @param  int   $perPage
 	 * @return void

@@ -1509,6 +1509,8 @@ class Builder {
 	public function setBindings(array $bindings)
 	{
 		$this->bindings = $bindings;
+
+		return $this;
 	}
 
 	/**
