@@ -214,8 +214,6 @@ class Migrator {
 		if (count($migrations) == 0)
 		{
 			$this->note('<info>Nothing to rollback.</info>');
-
-			return count($migrations);
 		}
 
 		return count($migrations);
