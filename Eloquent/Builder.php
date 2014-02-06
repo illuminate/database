@@ -621,6 +621,19 @@ class Builder {
 	}
 
 	/**
+	 * Add an "xor where" clause to the query.
+	 *
+	 * @param  string  $column
+	 * @param  string  $operator
+	 * @param  mixed   $value
+	 * @return \Illuminate\Database\Eloquent\Builder|static
+	 */
+	public function xorWhere($column, $operator = null, $value = null)
+	{
+		return $this->where($column, $operator, $value, 'xor');
+	}
+
+	/**
 	 * Add a relationship count condition to the query.
 	 *
 	 * @param  string  $relation
