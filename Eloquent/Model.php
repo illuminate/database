@@ -1450,6 +1450,8 @@ abstract class Model implements ArrayAccess, ArrayableInterface, JsonableInterfa
 
 				$this->fireModelEvent('updated', false);
 			}
+
+			return true;
 		}
 
 		return true;
