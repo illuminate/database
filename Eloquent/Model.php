@@ -1340,7 +1340,7 @@ abstract class Model implements ArrayAccess, Arrayable, Jsonable, JsonSerializab
 	 * @param  int     $amount
 	 * @return int
 	 */
-	protected function increment($column, $amount = 1)
+	public function increment($column, $amount = 1)
 	{
 		return $this->incrementOrDecrement($column, $amount, 'increment');
 	}
@@ -1352,7 +1352,7 @@ abstract class Model implements ArrayAccess, Arrayable, Jsonable, JsonSerializab
 	 * @param  int     $amount
 	 * @return int
 	 */
-	protected function decrement($column, $amount = 1)
+	public function decrement($column, $amount = 1)
 	{
 		return $this->incrementOrDecrement($column, $amount, 'decrement');
 	}
@@ -3127,11 +3127,6 @@ abstract class Model implements ArrayAccess, Arrayable, Jsonable, JsonSerializab
 	 */
 	public function __call($method, $parameters)
 	{
-		if (in_array($method, array('increment', 'decrement')))
-		{
-			return call_user_func_array(array($this, $method), $parameters);
-		}
-
 		$query = $this->newQuery();
 
 		return call_user_func_array(array($query, $method), $parameters);
