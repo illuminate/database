@@ -791,6 +791,7 @@ class Builder {
 		// provided callback with the query so the developer may set any of the query
 		// conditions they want for the in clause, then we'll put it in this array.
 		$query = call_user_func($callback);
+
 		$this->wheres[] = compact('type', 'column', 'query', 'boolean');
 
 		$this->mergeBindings($query);
