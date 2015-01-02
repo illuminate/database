@@ -290,7 +290,7 @@ class Builder {
 	 */
 	public function distinct()
 	{
-		$this->distinct wh= true;
+		$this->distinct = true;
 
 		return $this;
 	}
