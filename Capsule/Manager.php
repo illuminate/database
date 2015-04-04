@@ -1,7 +1,6 @@
 <?php namespace Illuminate\Database\Capsule;
 
 use PDO;
-use Illuminate\Support\Fluent;
 use Illuminate\Container\Container;
 use Illuminate\Database\DatabaseManager;
 use Illuminate\Contracts\Events\Dispatcher;
@@ -45,7 +44,7 @@ class Manager {
 	 */
 	protected function setupDefaultConfiguration()
 	{
-		$this->container['config']['database.fetch'] = PDO::FETCH_ASSOC;
+		$this->container['config']['database.fetch'] = PDO::FETCH_OBJ;
 
 		$this->container['config']['database.default'] = 'default';
 	}

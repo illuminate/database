@@ -51,7 +51,7 @@ class BelongsToMany extends Relation {
 	protected $pivotWheres = [];
 
 	/**
-	 * Create a new has many relationship instance.
+	 * Create a new belongs to many relationship instance.
 	 *
 	 * @param  \Illuminate\Database\Eloquent\Builder  $query
 	 * @param  \Illuminate\Database\Eloquent\Model  $parent
@@ -166,6 +166,24 @@ class BelongsToMany extends Relation {
 		}
 
 		return $this->related->newCollection($models);
+	}
+
+	/**
+	 * Get a paginator for the "select" statement.
+	 *
+	 * @param  int    $perPage
+	 * @param  array  $columns
+	 * @return \Illuminate\Pagination\Paginator
+	 */
+	public function paginate($perPage = null, $columns = array('*'))
+	{
+		$this->query->addSelect($this->getSelectColumns($columns));
+
+		$paginator = $this->query->paginate($perPage, $columns);
+
+		$this->hydratePivotRelation($paginator->items());
+
+		return $paginator;
 	}
 
 	/**
@@ -513,6 +531,111 @@ class BelongsToMany extends Relation {
 	}
 
 	/**
+	 * Find a related model by its primary key.
+	 *
+	 * @param  mixed  $id
+	 * @param  array  $columns
+	 * @return \Illuminate\Database\Eloquent\Model|\Illuminate\Database\Eloquent\Collection|null
+	 */
+	public function find($id, $columns = ['*'])
+	{
+		if (is_array($id))
+		{
+			return $this->findMany($id, $columns);
+		}
+
+		$this->where($this->getRelated()->getQualifiedKeyName(), '=', $id);
+
+		return $this->first($columns);
+	}
+
+	/**
+	 * Find multiple related models by their primary keys.
+	 *
+	 * @param  mixed  $id
+	 * @param  array  $columns
+	 * @return \Illuminate\Database\Eloquent\Collection
+	 */
+	public function findMany($ids, $columns = ['*'])
+	{
+		if (empty($ids)) return $this->getRelated()->newCollection();
+
+		$this->whereIn($this->getRelated()->getQualifiedKeyName(), $ids);
+
+		return $this->get($columns);
+	}
+
+	/**
+	 * Find a related model by its primary key or return new instance of the related model.
+	 *
+	 * @param  mixed  $id
+	 * @param  array  $columns
+	 * @return \Illuminate\Support\Collection|\Illuminate\Database\Eloquent\Model
+	 */
+	public function findOrNew($id, $columns = ['*'])
+	{
+		if (is_null($instance = $this->find($id, $columns)))
+		{
+			$instance = $this->getRelated()->newInstance();
+		}
+
+		return $instance;
+	}
+
+	/**
+	 * Get the first related model record matching the attributes or instantiate it.
+	 *
+	 * @param  array  $attributes
+	 * @return \Illuminate\Database\Eloquent\Model
+	 */
+	public function firstOrNew(array $attributes)
+	{
+		if (is_null($instance = $this->where($attributes)->first()))
+		{
+			$instance = $this->related->newInstance();
+		}
+
+		return $instance;
+	}
+
+	/**
+	 * Get the first related record matching the attributes or create it.
+	 *
+	 * @param  array  $attributes
+	 * @return \Illuminate\Database\Eloquent\Model
+	 */
+	public function firstOrCreate(array $attributes, array $joining = [], $touch = true)
+	{
+		if (is_null($instance = $this->where($attributes)->first()))
+		{
+			$instance = $this->create($attributes, $joining, $touch);
+		}
+
+		return $instance;
+	}
+
+	/**
+	 * Create or update a related record matching the attributes, and fill it with values.
+	 *
+	 * @param  array  $attributes
+	 * @param  array  $values
+	 * @return \Illuminate\Database\Eloquent\Model
+	 */
+	public function updateOrCreate(array $attributes, array $values = [], array $joining = [], $touch = true)
+	{
+		if (is_null($instance = $this->where($attributes)->first()))
+		{
+			return $this->create($values, $joining, $touch);
+		}
+
+		$instance->fill($values);
+
+		$instance->save(['touch' => false]);
+
+		return $instance;
+	}
+
+	/**
 	 * Create a new instance of the related model.
 	 *
 	 * @param  array  $attributes
@@ -565,7 +688,7 @@ class BelongsToMany extends Relation {
 	public function sync($ids, $detaching = true)
 	{
 		$changes = array(
-			'attached' => array(), 'detached' => array(), 'updated' => array()
+			'attached' => array(), 'detached' => array(), 'updated' => array(),
 		);
 
 		if ($ids instanceof Collection) $ids = $ids->modelKeys();
@@ -1010,16 +1133,6 @@ class BelongsToMany extends Relation {
 	public function getOtherKey()
 	{
 		return $this->table.'.'.$this->otherKey;
-	}
-
-	/**
-	 * Get the fully qualified parent key name.
-	 *
-	 * @return string
-	 */
-	protected function getQualifiedParentKeyName()
-	{
-		return $this->parent->getQualifiedKeyName();
 	}
 
 	/**

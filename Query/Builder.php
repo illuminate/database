@@ -1,6 +1,8 @@
 <?php namespace Illuminate\Database\Query;
 
 use Closure;
+use BadMethodCallException;
+use InvalidArgumentException;
 use Illuminate\Support\Collection;
 use Illuminate\Pagination\Paginator;
 use Illuminate\Database\ConnectionInterface;
@@ -170,10 +172,11 @@ class Builder {
 	 */
 	protected $operators = array(
 		'=', '<', '>', '<=', '>=', '<>', '!=',
-		'like', 'not like', 'between', 'ilike',
+		'like', 'like binary', 'not like', 'between', 'ilike',
 		'&', '|', '^', '<<', '>>',
 		'rlike', 'regexp', 'not regexp',
-		'~', '~*', '!~', '!~*',
+		'~', '~*', '!~', '!~*', 'similar to',
+                'not similar to',
 	);
 
 	/**
@@ -260,7 +263,7 @@ class Builder {
 		}
 		else
 		{
-			throw new \InvalidArgumentException;
+			throw new InvalidArgumentException;
 		}
 
 		return $this->selectRaw('('.$query.') as '.$this->grammar->wrap($as), $bindings);
@@ -451,7 +454,7 @@ class Builder {
 		}
 		elseif ($this->invalidOperatorAndValue($operator, $value))
 		{
-			throw new \InvalidArgumentException("Value must be provided.");
+			throw new InvalidArgumentException("Illegal operator and value combination.");
 		}
 
 		// If the columns is actually a Closure instance, we will assume the developer
@@ -525,7 +528,7 @@ class Builder {
 	{
 		$isOperator = in_array($operator, $this->operators);
 
-		return ($isOperator && $operator != '=' && is_null($value));
+		return $isOperator && $operator != '=' && is_null($value);
 	}
 
 	/**
@@ -888,6 +891,20 @@ class Builder {
 	}
 
 	/**
+	 * Add a "where date" statement to the query.
+	 *
+	 * @param  string  $column
+	 * @param  string   $operator
+	 * @param  int   $value
+	 * @param  string   $boolean
+	 * @return \Illuminate\Database\Query\Builder|static
+	 */
+	public function whereDate($column, $operator, $value, $boolean = 'and')
+	{
+		return $this->addDateBasedWhere('Date', $column, $operator, $value, $boolean);
+	}
+
+	/**
 	 * Add a "where day" statement to the query.
 	 *
 	 * @param  string  $column
@@ -1014,6 +1031,7 @@ class Builder {
 	/**
 	 * Add a "group by" clause to the query.
 	 *
+	 * @param  array|string  $column,...
 	 * @return $this
 	 */
 	public function groupBy()
@@ -1041,7 +1059,10 @@ class Builder {
 
 		$this->havings[] = compact('type', 'column', 'operator', 'value', 'boolean');
 
-		$this->addBinding($value, 'having');
+		if ( ! $value instanceof Expression)
+		{
+			$this->addBinding($value, 'having');
+		}
 
 		return $this;
 	}
@@ -1353,12 +1374,7 @@ class Builder {
 	 */
 	protected function runSelect()
 	{
-		if ($this->useWritePdo)
-		{
-			return $this->connection->select($this->toSql(), $this->getBindings(), false);
-		}
-
-		return $this->connection->select($this->toSql(), $this->getBindings());
+		return $this->connection->select($this->toSql(), $this->getBindings(), ! $this->useWritePdo);
 	}
 
 	/**
@@ -1377,7 +1393,7 @@ class Builder {
 		$results = $this->forPage($page, $perPage)->get($columns);
 
 		return new LengthAwarePaginator($results, $total, $perPage, $page, [
-			'path' => Paginator::resolveCurrentPath()
+			'path' => Paginator::resolveCurrentPath(),
 		]);
 	}
 
@@ -1396,8 +1412,8 @@ class Builder {
 
 		$this->skip(($page - 1) * $perPage)->take($perPage + 1);
 
-		return new Paginator($this->get($columns), $page, $perPage, [
-			'path' => Paginator::resolveCurrentPath()
+		return new Paginator($this->get($columns), $perPage, $page, [
+			'path' => Paginator::resolveCurrentPath(),
 		]);
 	}
 
@@ -1485,24 +1501,9 @@ class Builder {
 	{
 		$columns = $this->getListSelect($column, $key);
 
-		// First we will just get all of the column values for the record result set
-		// then we can associate those values with the column if it was specified
-		// otherwise we can just give these values back without a specific key.
 		$results = new Collection($this->get($columns));
 
-		$values = $results->fetch($columns[0])->all();
-
-		// If a key was specified and we have results, we will go ahead and combine
-		// the values with the keys of all of the records so that the values can
-		// be accessed by the key of the rows instead of simply being numeric.
-		if ( ! is_null($key) && count($results) > 0)
-		{
-			$keys = $results->fetch($key)->all();
-
-			return array_combine($keys, $values);
-		}
-
-		return $values;
+		return $results->lists($columns[0], array_get($columns, 1));
 	}
 
 	/**
@@ -1519,12 +1520,12 @@ class Builder {
 		// If the selected column contains a "dot", we will remove it so that the list
 		// operation can run normally. Specifying the table is not needed, since we
 		// really want the names of the columns as it is in this resulting array.
-		if (($dot = strpos($select[0], '.')) !== false)
+		return array_map(function($column)
 		{
-			$select[0] = substr($select[0], $dot + 1);
-		}
+			$dot = strpos($column, '.');
 
-		return $select;
+			return $dot === false ? $column : substr($column, $dot + 1);
+		}, $select);
 	}
 
 	/**
@@ -1657,6 +1658,8 @@ class Builder {
 	 */
 	public function insert(array $values)
 	{
+		if (empty($values)) return true;
+
 		// Since every insert gets treated like a batch insert, we will make sure the
 		// bindings are structured in a way that is convenient for building these
 		// inserts statements by verifying the elements are actually an array.
@@ -1877,7 +1880,7 @@ class Builder {
 	{
 		if ( ! array_key_exists($type, $this->bindings))
 		{
-			throw new \InvalidArgumentException("Invalid binding type: {$type}.");
+			throw new InvalidArgumentException("Invalid binding type: {$type}.");
 		}
 
 		$this->bindings[$type] = $bindings;
@@ -1898,7 +1901,7 @@ class Builder {
 	{
 		if ( ! array_key_exists($type, $this->bindings))
 		{
-			throw new \InvalidArgumentException("Invalid binding type: {$type}.");
+			throw new InvalidArgumentException("Invalid binding type: {$type}.");
 		}
 
 		if (is_array($value))
@@ -1986,7 +1989,7 @@ class Builder {
 
 		$className = get_class($this);
 
-		throw new \BadMethodCallException("Call to undefined method {$className}::{$method}()");
+		throw new BadMethodCallException("Call to undefined method {$className}::{$method}()");
 	}
 
 }

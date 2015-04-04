@@ -128,6 +128,8 @@ class Grammar extends BaseGrammar {
 	{
 		$sql = array();
 
+		$query->setBindings(array(), 'join');
+
 		foreach ($joins as $join)
 		{
 			$table = $this->wrapTable($join->table);
@@ -142,10 +144,8 @@ class Grammar extends BaseGrammar {
 				$clauses[] = $this->compileJoinConstraint($clause);
 			}
 
-			foreach ($join->bindings as $index => $binding)
+			foreach ($join->bindings as $binding)
 			{
-				unset($join->bindings[$index]);
-
 				$query->addBinding($binding, 'join');
 			}
 
@@ -306,6 +306,8 @@ class Grammar extends BaseGrammar {
 	 */
 	protected function whereIn(Builder $query, $where)
 	{
+		if (empty($where['values'])) return '0 = 1';
+
 		$values = $this->parameterize($where['values']);
 
 		return $this->wrap($where['column']).' in ('.$values.')';
@@ -320,6 +322,8 @@ class Grammar extends BaseGrammar {
 	 */
 	protected function whereNotIn(Builder $query, $where)
 	{
+		if (empty($where['values'])) return '1 = 1';
+
 		$values = $this->parameterize($where['values']);
 
 		return $this->wrap($where['column']).' not in ('.$values.')';
@@ -375,6 +379,18 @@ class Grammar extends BaseGrammar {
 	protected function whereNotNull(Builder $query, $where)
 	{
 		return $this->wrap($where['column']).' is not null';
+	}
+
+	/**
+	 * Compile a "where date" clause.
+	 *
+	 * @param  \Illuminate\Database\Query\Builder  $query
+	 * @param  array  $where
+	 * @return string
+	 */
+	protected function whereDate(Builder $query, $where)
+	{
+		return $this->dateBasedWhere('date', $query, $where);
 	}
 
 	/**
@@ -514,8 +530,7 @@ class Grammar extends BaseGrammar {
 			if (isset($order['sql'])) return $order['sql'];
 
 			return $this->wrap($order['column']).' '.$order['direction'];
-		}
-		, $orders));
+		}, $orders));
 	}
 
 	/**

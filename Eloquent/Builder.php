@@ -70,7 +70,7 @@ class Builder {
 	 *
 	 * @param  mixed  $id
 	 * @param  array  $columns
-	 * @return \Illuminate\Database\Eloquent\Model|static|null
+	 * @return \Illuminate\Database\Eloquent\Model|\Illuminate\Database\Eloquent\Collection|null
 	 */
 	public function find($id, $columns = array('*'))
 	{
@@ -87,15 +87,15 @@ class Builder {
 	/**
 	 * Find a model by its primary key.
 	 *
-	 * @param  array  $id
+	 * @param  array  $ids
 	 * @param  array  $columns
-	 * @return \Illuminate\Database\Eloquent\Model|Collection|static
+	 * @return \Illuminate\Database\Eloquent\Collection
 	 */
-	public function findMany($id, $columns = array('*'))
+	public function findMany($ids, $columns = array('*'))
 	{
-		if (empty($id)) return $this->model->newCollection();
+		if (empty($ids)) return $this->model->newCollection();
 
-		$this->query->whereIn($this->model->getQualifiedKeyName(), $id);
+		$this->query->whereIn($this->model->getQualifiedKeyName(), $ids);
 
 		return $this->get($columns);
 	}
@@ -105,13 +105,22 @@ class Builder {
 	 *
 	 * @param  mixed  $id
 	 * @param  array  $columns
-	 * @return \Illuminate\Database\Eloquent\Model|static
+	 * @return \Illuminate\Database\Eloquent\Model|\Illuminate\Database\Eloquent\Collection
 	 *
 	 * @throws \Illuminate\Database\Eloquent\ModelNotFoundException
 	 */
 	public function findOrFail($id, $columns = array('*'))
 	{
-		if ( ! is_null($model = $this->find($id, $columns))) return $model;
+		$result = $this->find($id, $columns);
+
+		if (is_array($id))
+		{
+			if (count($result) == count(array_unique($id))) return $result;
+		}
+		elseif ( ! is_null($result))
+		{
+			return $result;
+		}
 
 		throw (new ModelNotFoundException)->setModel(get_class($this->model));
 	}
@@ -234,7 +243,7 @@ class Builder {
 	 * @param  array  $columns
 	 * @return \Illuminate\Contracts\Pagination\LengthAwarePaginator
 	 */
-	public function paginate($perPage = 15, $columns = ['*'])
+	public function paginate($perPage = null, $columns = ['*'])
 	{
 		$total = $this->query->getCountForPagination();
 
@@ -243,8 +252,8 @@ class Builder {
 			$perPage = $perPage ?: $this->model->getPerPage()
 		);
 
-		return new LengthAwarePaginator($this->get($columns)->all(), $total, $perPage, $page, [
-			'path' => Paginator::resolveCurrentPath()
+		return new LengthAwarePaginator($this->get($columns), $total, $perPage, $page, [
+			'path' => Paginator::resolveCurrentPath(),
 		]);
 	}
 
@@ -263,8 +272,8 @@ class Builder {
 
 		$this->skip(($page - 1) * $perPage)->take($perPage + 1);
 
-		return new Paginator($this->get($columns)->all(), $perPage, $page, [
-			'path' => Paginator::resolveCurrentPath()
+		return new Paginator($this->get($columns), $perPage, $page, [
+			'path' => Paginator::resolveCurrentPath(),
 		]);
 	}
 
@@ -368,26 +377,11 @@ class Builder {
 	 */
 	public function getModels($columns = array('*'))
 	{
-		// First, we will simply get the raw results from the query builders which we
-		// can use to populate an array with Eloquent models. We will pass columns
-		// that should be selected as well, which are typically just everything.
 		$results = $this->query->get($columns);
 
 		$connection = $this->model->getConnectionName();
 
-		$models = array();
-
-		// Once we have the results, we can spin through them and instantiate a fresh
-		// model instance for each records we retrieved from the database. We will
-		// also set the proper connection name for the model after we create it.
-		foreach ($results as $result)
-		{
-			$models[] = $model = $this->model->newFromBuilder($result);
-
-			$model->setConnection($connection);
-		}
-
-		return $models;
+		return $this->model->hydrate($results, $connection)->all();
 	}
 
 	/**
@@ -555,11 +549,16 @@ class Builder {
 	 * @param  string  $operator
 	 * @param  int     $count
 	 * @param  string  $boolean
-	 * @param  \Closure  $callback
+	 * @param  \Closure|null  $callback
 	 * @return \Illuminate\Database\Eloquent\Builder|static
 	 */
 	public function has($relation, $operator = '>=', $count = 1, $boolean = 'and', Closure $callback = null)
 	{
+		if (strpos($relation, '.') !== false)
+		{
+			return $this->hasNested($relation, $operator, $count, $boolean, $callback);
+		}
+
 		$relation = $this->getHasRelationQuery($relation);
 
 		$query = $relation->getRelationCountQuery($relation->getRelated()->newQuery(), $this);
@@ -570,11 +569,43 @@ class Builder {
 	}
 
 	/**
+	 * Add nested relationship count conditions to the query.
+	 *
+	 * @param  string  $relations
+	 * @param  string  $operator
+	 * @param  int     $count
+	 * @param  string  $boolean
+	 * @param  \Closure  $callback
+	 * @return \Illuminate\Database\Eloquent\Builder|static
+	 */
+	protected function hasNested($relations, $operator = '>=', $count = 1, $boolean = 'and', $callback = null)
+	{
+		$relations = explode('.', $relations);
+
+		// In order to nest "has", we need to add count relation constraints on the
+		// callback Closure. We'll do this by simply passing the Closure its own
+		// reference to itself so it calls itself recursively on each segment.
+		$closure = function ($q) use (&$closure, &$relations, $operator, $count, $boolean, $callback)
+		{
+			if (count($relations) > 1)
+			{
+				$q->whereHas(array_shift($relations), $closure);
+			}
+			else
+			{
+				$q->has(array_shift($relations), $operator, $count, 'and', $callback);
+			}
+		};
+
+		return $this->has(array_shift($relations), '>=', 1, $boolean, $closure);
+	}
+
+	/**
 	 * Add a relationship count condition to the query.
 	 *
 	 * @param  string  $relation
 	 * @param  string  $boolean
-	 * @param  \Closure  $callback
+	 * @param  \Closure|null  $callback
 	 * @return \Illuminate\Database\Eloquent\Builder|static
 	 */
 	public function doesntHave($relation, $boolean = 'and', Closure $callback = null)
@@ -585,10 +616,10 @@ class Builder {
 	/**
 	 * Add a relationship count condition to the query with where clauses.
 	 *
-	 * @param  string  $relation
+	 * @param  string    $relation
 	 * @param  \Closure  $callback
-	 * @param  string  $operator
-	 * @param  int     $count
+	 * @param  string    $operator
+	 * @param  int       $count
 	 * @return \Illuminate\Database\Eloquent\Builder|static
 	 */
 	public function whereHas($relation, Closure $callback, $operator = '>=', $count = 1)
@@ -600,10 +631,10 @@ class Builder {
 	 * Add a relationship count condition to the query with where clauses.
 	 *
 	 * @param  string  $relation
-	 * @param  \Closure  $callback
+	 * @param  \Closure|null  $callback
 	 * @return \Illuminate\Database\Eloquent\Builder|static
 	 */
-	public function whereDoesntHave($relation, Closure $callback)
+	public function whereDoesntHave($relation, Closure $callback = null)
 	{
 		return $this->doesntHave($relation, 'and', $callback);
 	}
@@ -624,10 +655,10 @@ class Builder {
 	/**
 	 * Add a relationship count condition to the query with where clauses and an "or".
 	 *
-	 * @param  string  $relation
+	 * @param  string    $relation
 	 * @param  \Closure  $callback
-	 * @param  string  $operator
-	 * @param  int     $count
+	 * @param  string    $operator
+	 * @param  int       $count
 	 * @return \Illuminate\Database\Eloquent\Builder|static
 	 */
 	public function orWhereHas($relation, Closure $callback, $operator = '>=', $count = 1)
@@ -660,8 +691,8 @@ class Builder {
 	/**
 	 * Merge the "wheres" from a relation query to a has query.
 	 *
-	 * @param  \Illuminate\Database\Eloquent\Builder $hasQuery
-	 * @param  \Illuminate\Database\Eloquent\Relations\Relation $relation
+	 * @param  \Illuminate\Database\Eloquent\Builder  $hasQuery
+	 * @param  \Illuminate\Database\Eloquent\Relations\Relation  $relation
 	 * @return void
 	 */
 	protected function mergeWheresToHas(Builder $hasQuery, Relation $relation)
@@ -775,7 +806,7 @@ class Builder {
 	 * Call the given model scope on the underlying model.
 	 *
 	 * @param  string  $scope
-	 * @param  array  $parameters
+	 * @param  array   $parameters
 	 * @return \Illuminate\Database\Query\Builder
 	 */
 	protected function callScope($scope, $parameters)
@@ -799,11 +830,13 @@ class Builder {
 	 * Set the underlying query builder instance.
 	 *
 	 * @param  \Illuminate\Database\Query\Builder  $query
-	 * @return void
+	 * @return $this
 	 */
 	public function setQuery($query)
 	{
 		$this->query = $query;
+
+		return $this;
 	}
 
 	/**
@@ -820,11 +853,13 @@ class Builder {
 	 * Set the relationships being eagerly loaded.
 	 *
 	 * @param  array  $eagerLoad
-	 * @return void
+	 * @return $this
 	 */
 	public function setEagerLoads(array $eagerLoad)
 	{
 		$this->eagerLoad = $eagerLoad;
+
+		return $this;
 	}
 
 	/**
@@ -855,7 +890,7 @@ class Builder {
 	/**
 	 * Extend the builder with a given callback.
 	 *
-	 * @param  string  $name
+	 * @param  string    $name
 	 * @param  \Closure  $callback
 	 * @return void
 	 */

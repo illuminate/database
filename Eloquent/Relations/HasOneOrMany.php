@@ -21,7 +21,7 @@ abstract class HasOneOrMany extends Relation {
 	protected $localKey;
 
 	/**
-	 * Create a new has many relationship instance.
+	 * Create a new has one or many relationship instance.
 	 *
 	 * @param  \Illuminate\Database\Eloquent\Builder  $query
 	 * @param  \Illuminate\Database\Eloquent\Model  $parent
@@ -47,6 +47,8 @@ abstract class HasOneOrMany extends Relation {
 		if (static::$constraints)
 		{
 			$this->query->where($this->foreignKey, '=', $this->getParentKey());
+
+			$this->query->whereNotNull($this->foreignKey);
 		}
 	}
 
@@ -180,6 +182,77 @@ abstract class HasOneOrMany extends Relation {
 		array_walk($models, array($this, 'save'));
 
 		return $models;
+	}
+
+	/**
+	 * Find a model by its primary key or return new instance of the related model.
+	 *
+	 * @param  mixed  $id
+	 * @param  array  $columns
+	 * @return \Illuminate\Support\Collection|\Illuminate\Database\Eloquent\Model
+	 */
+	public function findOrNew($id, $columns = ['*'])
+	{
+		if (is_null($instance = $this->find($id, $columns)))
+		{
+			$instance = $this->related->newInstance();
+
+			$instance->setAttribute($this->getPlainForeignKey(), $this->getParentKey());
+		}
+
+		return $instance;
+	}
+
+	/**
+	 * Get the first related model record matching the attributes or instantiate it.
+	 *
+	 * @param  array  $attributes
+	 * @return \Illuminate\Database\Eloquent\Model
+	 */
+	public function firstOrNew(array $attributes)
+	{
+		if (is_null($instance = $this->where($attributes)->first()))
+		{
+			$instance = $this->related->newInstance($attributes);
+
+			$instance->setAttribute($this->getPlainForeignKey(), $this->getParentKey());
+		}
+
+		return $instance;
+	}
+
+	/**
+	 * Get the first related record matching the attributes or create it.
+	 *
+	 * @param  array  $attributes
+	 * @return \Illuminate\Database\Eloquent\Model
+	 */
+	public function firstOrCreate(array $attributes)
+	{
+		if (is_null($instance = $this->where($attributes)->first()))
+		{
+			$instance = $this->create($attributes);
+		}
+
+		return $instance;
+	}
+
+	/**
+	 * Create or update a related record matching the attributes, and fill it with values.
+	 *
+	 * @param  array  $attributes
+	 * @param  array  $values
+	 * @return \Illuminate\Database\Eloquent\Model
+	 */
+	public function updateOrCreate(array $attributes, array $values = [])
+	{
+		$instance = $this->firstOrNew($attributes);
+
+		$instance->fill($values);
+
+		$instance->save();
+
+		return $instance;
 	}
 
 	/**

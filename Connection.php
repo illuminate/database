@@ -3,6 +3,9 @@
 use PDO;
 use Closure;
 use DateTime;
+use Exception;
+use LogicException;
+use RuntimeException;
 use Illuminate\Contracts\Events\Dispatcher;
 use Illuminate\Database\Query\Processors\Processor;
 use Doctrine\DBAL\Connection as DoctrineConnection;
@@ -63,7 +66,7 @@ class Connection implements ConnectionInterface {
 	 *
 	 * @var int
 	 */
-	protected $fetchMode = PDO::FETCH_ASSOC;
+	protected $fetchMode = PDO::FETCH_OBJ;
 
 	/**
 	 * The number of active transactions.
@@ -99,6 +102,13 @@ class Connection implements ConnectionInterface {
 	 * @var string
 	 */
 	protected $database;
+
+	/**
+	 * The instance of Doctrine connection.
+	 *
+	 * @var \Doctrine\DBAL\Connection
+	 */
+	protected $doctrineConnection;
 
 	/**
 	 * The table prefix for the connection.
@@ -449,7 +459,7 @@ class Connection implements ConnectionInterface {
 		// If we catch an exception, we will roll back so nothing gets messed
 		// up in the database. Then we'll re-throw the exception so it can
 		// be handled how the developer sees fit for their applications.
-		catch (\Exception $e)
+		catch (Exception $e)
 		{
 			$this->rollBack();
 
@@ -529,9 +539,13 @@ class Connection implements ConnectionInterface {
 	 */
 	public function pretend(Closure $callback)
 	{
+		$loggingQueries = $this->loggingQueries;
+
+		$this->enableQueryLog();
+
 		$this->pretending = true;
 
-		$this->queryLog = array();
+		$this->queryLog = [];
 
 		// Basically to make the database connection "pretend", we will just return
 		// the default values for all the query methods, then we will return an
@@ -539,6 +553,8 @@ class Connection implements ConnectionInterface {
 		$callback($this);
 
 		$this->pretending = false;
+
+		$this->loggingQueries = $loggingQueries;
 
 		return $this->queryLog;
 	}
@@ -606,7 +622,7 @@ class Connection implements ConnectionInterface {
 		// If an exception occurs when attempting to run a query, we'll format the error
 		// message to include the bindings with SQL, which will make this exception a
 		// lot more helpful to the developer instead of just the database's errors.
-		catch (\Exception $e)
+		catch (Exception $e)
 		{
 			throw new QueryException(
 				$query, $this->prepareBindings($bindings), $e
@@ -642,12 +658,18 @@ class Connection implements ConnectionInterface {
 	/**
 	 * Determine if the given exception was caused by a lost connection.
 	 *
-	 * @param  \Illuminate\Database\QueryException
+	 * @param  \Illuminate\Database\QueryException  $e
 	 * @return bool
 	 */
 	protected function causedByLostConnection(QueryException $e)
 	{
-		return str_contains($e->getPrevious()->getMessage(), 'server has gone away');
+		$message = $e->getPrevious()->getMessage();
+
+		return str_contains($message, [
+			'server has gone away',
+			'no connection to the server',
+			'Lost connection',
+		]);
 	}
 
 	/**
@@ -674,7 +696,7 @@ class Connection implements ConnectionInterface {
 			return call_user_func($this->reconnector, $this);
 		}
 
-		throw new \LogicException("Lost connection and no reconnector available.");
+		throw new LogicException("Lost connection and no reconnector available.");
 	}
 
 	/**
@@ -780,11 +802,16 @@ class Connection implements ConnectionInterface {
 	 */
 	public function getDoctrineConnection()
 	{
-		$driver = $this->getDoctrineDriver();
+		if (is_null($this->doctrineConnection))
+		{
+			$driver = $this->getDoctrineDriver();
 
-		$data = array('pdo' => $this->pdo, 'dbname' => $this->getConfig('database'));
+			$data = ['pdo' => $this->pdo, 'dbname' => $this->getConfig('database')];
 
-		return new DoctrineConnection($data, $driver);
+			$this->doctrineConnection = new DoctrineConnection($data, $driver);
+		}
+
+		return $this->doctrineConnection;
 	}
 
 	/**
@@ -818,7 +845,7 @@ class Connection implements ConnectionInterface {
 	public function setPdo($pdo)
 	{
 		if ($this->transactions >= 1)
-			throw new \RuntimeException("Can't swap PDO instance while within transaction.");
+			throw new RuntimeException("Can't swap PDO instance while within transaction.");
 
 		$this->pdo = $pdo;
 
@@ -906,7 +933,7 @@ class Connection implements ConnectionInterface {
 	/**
 	 * Get the schema grammar used by the connection.
 	 *
-	 * @return \Illuminate\Database\Query\Grammars\Grammar
+	 * @return \Illuminate\Database\Schema\Grammars\Grammar
 	 */
 	public function getSchemaGrammar()
 	{
