@@ -1,9 +1,13 @@
 <?php namespace Illuminate\Database\Query;
 
 use Closure;
+use BadMethodCallException;
+use InvalidArgumentException;
 use Illuminate\Support\Collection;
+use Illuminate\Pagination\Paginator;
 use Illuminate\Database\ConnectionInterface;
 use Illuminate\Database\Query\Grammars\Grammar;
+use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Database\Query\Processors\Processor;
 
 class Builder {
@@ -155,39 +159,11 @@ class Builder {
 	public $lock;
 
 	/**
-	 * The backups of fields while doing a pagination count.
+	 * The field backups currently in use.
 	 *
 	 * @var array
 	 */
-	protected $backups = array();
-
-	/**
-	 * The key that should be used when caching the query.
-	 *
-	 * @var string
-	 */
-	protected $cacheKey;
-
-	/**
-	 * The number of minutes to cache the query.
-	 *
-	 * @var int
-	 */
-	protected $cacheMinutes;
-
-	/**
-	 * The tags for the query cache.
-	 *
-	 * @var array
-	 */
-	protected $cacheTags;
-
-	/**
-	 * The cache driver to be used.
-	 *
-	 * @var string
-	 */
-	protected $cacheDriver;
+	protected $backups = [];
 
 	/**
 	 * All of the available clause operators.
@@ -196,9 +172,11 @@ class Builder {
 	 */
 	protected $operators = array(
 		'=', '<', '>', '<=', '>=', '<>', '!=',
-		'like', 'not like', 'between', 'ilike',
+		'like', 'like binary', 'not like', 'between', 'ilike',
 		'&', '|', '^', '<<', '>>',
 		'rlike', 'regexp', 'not regexp',
+		'~', '~*', '!~', '!~*', 'similar to',
+                'not similar to',
 	);
 
 	/**
@@ -242,11 +220,53 @@ class Builder {
 	 * Add a new "raw" select expression to the query.
 	 *
 	 * @param  string  $expression
+	 * @param  array   $bindings
 	 * @return \Illuminate\Database\Query\Builder|static
 	 */
-	public function selectRaw($expression)
+	public function selectRaw($expression, array $bindings = array())
 	{
-		return $this->select(new Expression($expression));
+		$this->addSelect(new Expression($expression));
+
+		if ($bindings)
+		{
+			$this->addBinding($bindings, 'select');
+		}
+
+		return $this;
+	}
+
+	/**
+	 * Add a subselect expression to the query.
+	 *
+	 * @param  \Closure|\Illuminate\Database\Query\Builder|string $query
+	 * @param  string  $as
+	 * @return \Illuminate\Database\Query\Builder|static
+	 */
+	public function selectSub($query, $as)
+	{
+		if ($query instanceof Closure)
+		{
+			$callback = $query;
+
+			$callback($query = $this->newQuery());
+		}
+
+		if ($query instanceof Builder)
+		{
+			$bindings = $query->getBindings();
+
+			$query = $query->toSql();
+		}
+		elseif (is_string($query))
+		{
+			$bindings = [];
+		}
+		else
+		{
+			throw new InvalidArgumentException;
+		}
+
+		return $this->selectRaw('('.$query.') as '.$this->grammar->wrap($as), $bindings);
 	}
 
 	/**
@@ -401,7 +421,7 @@ class Builder {
 	/**
 	 * Add a basic where clause to the query.
 	 *
-	 * @param  string  $column
+	 * @param  string|array|\Closure  $column
 	 * @param  string  $operator
 	 * @param  mixed   $value
 	 * @param  string  $boolean
@@ -434,7 +454,7 @@ class Builder {
 		}
 		elseif ($this->invalidOperatorAndValue($operator, $value))
 		{
-			throw new \InvalidArgumentException("Value must be provided.");
+			throw new InvalidArgumentException("Illegal operator and value combination.");
 		}
 
 		// If the columns is actually a Closure instance, we will assume the developer
@@ -508,7 +528,7 @@ class Builder {
 	{
 		$isOperator = in_array($operator, $this->operators);
 
-		return ($isOperator && $operator != '=' && is_null($value));
+		return $isOperator && $operator != '=' && is_null($value);
 	}
 
 	/**
@@ -1039,7 +1059,10 @@ class Builder {
 
 		$this->havings[] = compact('type', 'column', 'operator', 'value', 'boolean');
 
-		$this->addBinding($value, 'having');
+		if ( ! $value instanceof Expression)
+		{
+			$this->addBinding($value, 'having');
+		}
 
 		return $this;
 	}
@@ -1283,57 +1306,6 @@ class Builder {
 	}
 
 	/**
-	 * Indicate that the query results should be cached.
-	 *
-	 * @param  \DateTime|int  $minutes
-	 * @param  string  $key
-	 * @return $this
-	 */
-	public function remember($minutes, $key = null)
-	{
-		list($this->cacheMinutes, $this->cacheKey) = array($minutes, $key);
-
-		return $this;
-	}
-
-	/**
-	 * Indicate that the query results should be cached forever.
-	 *
-	 * @param  string  $key
-	 * @return \Illuminate\Database\Query\Builder|static
-	 */
-	public function rememberForever($key = null)
-	{
-		return $this->remember(-1, $key);
-	}
-
-	/**
-	 * Indicate that the results, if cached, should use the given cache tags.
-	 *
-	 * @param  array|mixed  $cacheTags
-	 * @return $this
-	 */
-	public function cacheTags($cacheTags)
-	{
-		$this->cacheTags = $cacheTags;
-
-		return $this;
-	}
-
-	/**
-	 * Indicate that the results, if cached, should use the given cache driver.
-	 *
-	 * @param  string  $cacheDriver
-	 * @return $this
-	 */
-	public function cacheDriver($cacheDriver)
-	{
-		$this->cacheDriver = $cacheDriver;
-
-		return $this;
-	}
-
-	/**
 	 * Execute a query for a single record by ID.
 	 *
 	 * @param  int    $id
@@ -1379,8 +1351,6 @@ class Builder {
 	 */
 	public function get($columns = array('*'))
 	{
-		if ( ! is_null($this->cacheMinutes)) return $this->getCached($columns);
-
 		return $this->getFresh($columns);
 	}
 
@@ -1404,97 +1374,93 @@ class Builder {
 	 */
 	protected function runSelect()
 	{
-		if ($this->useWritePdo)
+		return $this->connection->select($this->toSql(), $this->getBindings(), ! $this->useWritePdo);
+	}
+
+	/**
+	 * Paginate the given query into a simple paginator.
+	 *
+	 * @param  int  $perPage
+	 * @param  array  $columns
+	 * @return \Illuminate\Contracts\Pagination\LengthAwarePaginator
+	 */
+	public function paginate($perPage = 15, $columns = ['*'])
+	{
+		$page = Paginator::resolveCurrentPage();
+
+		$total = $this->getCountForPagination();
+
+		$results = $this->forPage($page, $perPage)->get($columns);
+
+		return new LengthAwarePaginator($results, $total, $perPage, $page, [
+			'path' => Paginator::resolveCurrentPath(),
+		]);
+	}
+
+	/**
+	 * Get a paginator only supporting simple next and previous links.
+	 *
+	 * This is more efficient on larger data-sets, etc.
+	 *
+	 * @param  int  $perPage
+	 * @param  array  $columns
+	 * @return \Illuminate\Contracts\Pagination\Paginator
+	 */
+	public function simplePaginate($perPage = 15, $columns = ['*'])
+	{
+		$page = Paginator::resolveCurrentPage();
+
+		$this->skip(($page - 1) * $perPage)->take($perPage + 1);
+
+		return new Paginator($this->get($columns), $perPage, $page, [
+			'path' => Paginator::resolveCurrentPath(),
+		]);
+	}
+
+	/**
+	 * Get the count of the total records for the paginator.
+	 *
+	 * @return int
+	 */
+	public function getCountForPagination()
+	{
+		$this->backupFieldsForCount();
+
+		$total = $this->count();
+
+		$this->restoreFieldsForCount();
+
+		return $total;
+	}
+
+	/**
+	 * Backup some fields for the pagination count.
+	 *
+	 * @return void
+	 */
+	protected function backupFieldsForCount()
+	{
+		foreach (['orders', 'limit', 'offset'] as $field)
 		{
-			return $this->connection->select($this->toSql(), $this->getBindings(), false);
+			$this->backups[$field] = $this->{$field};
+
+			$this->{$field} = null;
+		}
+	}
+
+	/**
+	 * Restore some fields after the pagination count.
+	 *
+	 * @return void
+	 */
+	protected function restoreFieldsForCount()
+	{
+		foreach (['orders', 'limit', 'offset'] as $field)
+		{
+			$this->{$field} = $this->backups[$field];
 		}
 
-		return $this->connection->select($this->toSql(), $this->getBindings());
-	}
-
-	/**
-	 * Execute the query as a cached "select" statement.
-	 *
-	 * @param  array  $columns
-	 * @return array
-	 */
-	public function getCached($columns = array('*'))
-	{
-		if (is_null($this->columns)) $this->columns = $columns;
-
-		// If the query is requested to be cached, we will cache it using a unique key
-		// for this database connection and query statement, including the bindings
-		// that are used on this query, providing great convenience when caching.
-		list($key, $minutes) = $this->getCacheInfo();
-
-		$cache = $this->getCache();
-
-		$callback = $this->getCacheCallback($columns);
-
-		// If the "minutes" value is less than zero, we will use that as the indicator
-		// that the value should be remembered values should be stored indefinitely
-		// and if we have minutes we will use the typical remember function here.
-		if ($minutes < 0)
-		{
-			return $cache->rememberForever($key, $callback);
-		}
-
-		return $cache->remember($key, $minutes, $callback);
-	}
-
-	/**
-	 * Get the cache object with tags assigned, if applicable.
-	 *
-	 * @return \Illuminate\Cache\CacheManager
-	 */
-	protected function getCache()
-	{
-		$cache = $this->connection->getCacheManager()->driver($this->cacheDriver);
-
-		return $this->cacheTags ? $cache->tags($this->cacheTags) : $cache;
-	}
-
-	/**
-	 * Get the cache key and cache minutes as an array.
-	 *
-	 * @return array
-	 */
-	protected function getCacheInfo()
-	{
-		return array($this->getCacheKey(), $this->cacheMinutes);
-	}
-
-	/**
-	 * Get a unique cache key for the complete query.
-	 *
-	 * @return string
-	 */
-	public function getCacheKey()
-	{
-		return $this->cacheKey ?: $this->generateCacheKey();
-	}
-
-	/**
-	 * Generate the unique cache key for the query.
-	 *
-	 * @return string
-	 */
-	public function generateCacheKey()
-	{
-		$name = $this->connection->getName();
-
-		return md5($name.$this->toSql().serialize($this->getBindings()));
-	}
-
-	/**
-	 * Get the Closure callback used when caching queries.
-	 *
-	 * @param  array  $columns
-	 * @return \Closure
-	 */
-	protected function getCacheCallback($columns)
-	{
-		return function() use ($columns) { return $this->getFresh($columns); };
+		$this->backups = [];
 	}
 
 	/**
@@ -1513,7 +1479,10 @@ class Builder {
 			// On each chunk result set, we will pass them to the callback and then let the
 			// developer take care of everything within the callback, which allows us to
 			// keep the memory low for spinning through large result sets for working.
-			call_user_func($callback, $results);
+			if (call_user_func($callback, $results) === false)
+			{
+				break;
+			}
 
 			$page++;
 
@@ -1532,24 +1501,9 @@ class Builder {
 	{
 		$columns = $this->getListSelect($column, $key);
 
-		// First we will just get all of the column values for the record result set
-		// then we can associate those values with the column if it was specified
-		// otherwise we can just give these values back without a specific key.
 		$results = new Collection($this->get($columns));
 
-		$values = $results->fetch($columns[0])->all();
-
-		// If a key was specified and we have results, we will go ahead and combine
-		// the values with the keys of all of the records so that the values can
-		// be accessed by the key of the rows instead of simply being numeric.
-		if ( ! is_null($key) && count($results) > 0)
-		{
-			$keys = $results->fetch($key)->all();
-
-			return array_combine($keys, $values);
-		}
-
-		return $values;
+		return $results->lists($columns[0], array_get($columns, 1))->all();
 	}
 
 	/**
@@ -1566,12 +1520,12 @@ class Builder {
 		// If the selected column contains a "dot", we will remove it so that the list
 		// operation can run normally. Specifying the table is not needed, since we
 		// really want the names of the columns as it is in this resulting array.
-		if (($dot = strpos($select[0], '.')) !== false)
+		return array_map(function($column)
 		{
-			$select[0] = substr($select[0], $dot + 1);
-		}
+			$dot = strpos($column, '.');
 
-		return $select;
+			return $dot === false ? $column : substr($column, $dot + 1);
+		}, $select);
 	}
 
 	/**
@@ -1586,154 +1540,6 @@ class Builder {
 		if (is_null($glue)) return implode($this->lists($column));
 
 		return implode($glue, $this->lists($column));
-	}
-
-	/**
-	 * Get a paginator for the "select" statement.
-	 *
-	 * @param  int    $perPage
-	 * @param  array  $columns
-	 * @return \Illuminate\Pagination\Paginator
-	 */
-	public function paginate($perPage = 15, $columns = array('*'))
-	{
-		$paginator = $this->connection->getPaginator();
-
-		if (isset($this->groups))
-		{
-			return $this->groupedPaginate($paginator, $perPage, $columns);
-		}
-
-		return $this->ungroupedPaginate($paginator, $perPage, $columns);
-	}
-
-	/**
-	 * Create a paginator for a grouped pagination statement.
-	 *
-	 * @param  \Illuminate\Pagination\Factory  $paginator
-	 * @param  int    $perPage
-	 * @param  array  $columns
-	 * @return \Illuminate\Pagination\Paginator
-	 */
-	protected function groupedPaginate($paginator, $perPage, $columns)
-	{
-		$results = $this->get($columns);
-
-		return $this->buildRawPaginator($paginator, $results, $perPage);
-	}
-
-	/**
-	 * Build a paginator instance from a raw result array.
-	 *
-	 * @param  \Illuminate\Pagination\Factory  $paginator
-	 * @param  array  $results
-	 * @param  int    $perPage
-	 * @return \Illuminate\Pagination\Paginator
-	 */
-	public function buildRawPaginator($paginator, $results, $perPage)
-	{
-		// For queries which have a group by, we will actually retrieve the entire set
-		// of rows from the table and "slice" them via PHP. This is inefficient and
-		// the developer must be aware of this behavior; however, it's an option.
-		$start = ($paginator->getCurrentPage() - 1) * $perPage;
-
-		$sliced = array_slice($results, $start, $perPage);
-
-		return $paginator->make($sliced, count($results), $perPage);
-	}
-
-	/**
-	 * Create a paginator for an un-grouped pagination statement.
-	 *
-	 * @param  \Illuminate\Pagination\Factory  $paginator
-	 * @param  int    $perPage
-	 * @param  array  $columns
-	 * @return \Illuminate\Pagination\Paginator
-	 */
-	protected function ungroupedPaginate($paginator, $perPage, $columns)
-	{
-		$total = $this->getPaginationCount();
-
-		// Once we have the total number of records to be paginated, we can grab the
-		// current page and the result array. Then we are ready to create a brand
-		// new Paginator instances for the results which will create the links.
-		$page = $paginator->getCurrentPage($total);
-
-		$results = $this->forPage($page, $perPage)->get($columns);
-
-		return $paginator->make($results, $total, $perPage);
-	}
-
-	/**
-	 * Get the count of the total records for pagination.
-	 *
-	 * @return int
-	 */
-	public function getPaginationCount()
-	{
-		$this->backupFieldsForCount();
-
-		// Because some database engines may throw errors if we leave the ordering
-		// statements on the query, we will "back them up" and remove them from
-		// the query. Once we have the count we will put them back onto this.
-		$total = $this->count();
-
-		$this->restoreFieldsForCount();
-
-		return $total;
-	}
-
-	/**
-	 * Get a paginator only supporting simple next and previous links.
-	 *
-	 * This is more efficient on larger data-sets, etc.
-	 *
-	 * @param  int    $perPage
-	 * @param  array  $columns
-	 * @return \Illuminate\Pagination\Paginator
-	 */
-	public function simplePaginate($perPage = null, $columns = array('*'))
-	{
-		$paginator = $this->connection->getPaginator();
-
-		$page = $paginator->getCurrentPage();
-
-		$perPage = $perPage ?: $this->model->getPerPage();
-
-		$this->skip(($page - 1) * $perPage)->take($perPage + 1);
-
-		return $paginator->make($this->get($columns), $perPage);
-	}
-
-	/**
-	 * Backup certain fields for a pagination count.
-	 *
-	 * @return void
-	 */
-	protected function backupFieldsForCount()
-	{
-		foreach (array('orders', 'limit', 'offset') as $field)
-		{
-			$this->backups[$field] = $this->{$field};
-
-			$this->{$field} = null;
-		}
-
-	}
-
-	/**
-	 * Restore certain fields for a pagination count.
-	 *
-	 * @return void
-	 */
-	protected function restoreFieldsForCount()
-	{
-		foreach (array('orders', 'limit', 'offset') as $field)
-		{
-			$this->{$field} = $this->backups[$field];
-		}
-
-		$this->backups = array();
 	}
 
 	/**
@@ -1772,7 +1578,7 @@ class Builder {
 	 * Retrieve the minimum value of a given column.
 	 *
 	 * @param  string  $column
-	 * @return mixed
+	 * @return float|int
 	 */
 	public function min($column)
 	{
@@ -1783,7 +1589,7 @@ class Builder {
 	 * Retrieve the maximum value of a given column.
 	 *
 	 * @param  string  $column
-	 * @return mixed
+	 * @return float|int
 	 */
 	public function max($column)
 	{
@@ -1794,7 +1600,7 @@ class Builder {
 	 * Retrieve the sum of the values of a given column.
 	 *
 	 * @param  string  $column
-	 * @return mixed
+	 * @return float|int
 	 */
 	public function sum($column)
 	{
@@ -1807,7 +1613,7 @@ class Builder {
 	 * Retrieve the average of the values of a given column.
 	 *
 	 * @param  string  $column
-	 * @return mixed
+	 * @return float|int
 	 */
 	public function avg($column)
 	{
@@ -1819,7 +1625,7 @@ class Builder {
 	 *
 	 * @param  string  $function
 	 * @param  array   $columns
-	 * @return mixed
+	 * @return float|int
 	 */
 	public function aggregate($function, $columns = array('*'))
 	{
@@ -1852,6 +1658,8 @@ class Builder {
 	 */
 	public function insert(array $values)
 	{
+		if (empty($values)) return true;
+
 		// Since every insert gets treated like a batch insert, we will make sure the
 		// bindings are structured in a way that is convenient for building these
 		// inserts statements by verifying the elements are actually an array.
@@ -2072,7 +1880,7 @@ class Builder {
 	{
 		if ( ! array_key_exists($type, $this->bindings))
 		{
-			throw new \InvalidArgumentException("Invalid binding type: {$type}.");
+			throw new InvalidArgumentException("Invalid binding type: {$type}.");
 		}
 
 		$this->bindings[$type] = $bindings;
@@ -2093,7 +1901,7 @@ class Builder {
 	{
 		if ( ! array_key_exists($type, $this->bindings))
 		{
-			throw new \InvalidArgumentException("Invalid binding type: {$type}.");
+			throw new InvalidArgumentException("Invalid binding type: {$type}.");
 		}
 
 		if (is_array($value))
@@ -2181,7 +1989,7 @@ class Builder {
 
 		$className = get_class($this);
 
-		throw new \BadMethodCallException("Call to undefined method {$className}::{$method}()");
+		throw new BadMethodCallException("Call to undefined method {$className}::{$method}()");
 	}
 
 }

@@ -51,7 +51,7 @@ class BelongsToMany extends Relation {
 	protected $pivotWheres = [];
 
 	/**
-	 * Create a new has many relationship instance.
+	 * Create a new belongs to many relationship instance.
 	 *
 	 * @param  \Illuminate\Database\Eloquent\Builder  $query
 	 * @param  \Illuminate\Database\Eloquent\Model  $parent
@@ -173,20 +173,54 @@ class BelongsToMany extends Relation {
 	 *
 	 * @param  int    $perPage
 	 * @param  array  $columns
-	 * @return \Illuminate\Pagination\Paginator
+	 * @return \Illuminate\Contracts\Pagination\LengthAwarePaginator
 	 */
 	public function paginate($perPage = null, $columns = array('*'))
 	{
 		$this->query->addSelect($this->getSelectColumns($columns));
 
-		// When paginating results, we need to add the pivot columns to the query and
-		// then hydrate into the pivot objects once the results have been gathered
-		// from the database since this isn't performed by the Eloquent builder.
-		$pager = $this->query->paginate($perPage, $columns);
+		$paginator = $this->query->paginate($perPage, $columns);
 
-		$this->hydratePivotRelation($pager->getItems());
+		$this->hydratePivotRelation($paginator->items());
 
-		return $pager;
+		return $paginator;
+	}
+
+	/**
+	 * Paginate the given query into a simple paginator.
+	 *
+	 * @param  int  $perPage
+	 * @param  array  $columns
+	 * @return \Illuminate\Contracts\Pagination\Paginator
+	 */
+	public function simplePaginate($perPage = null, $columns = array('*'))
+	{
+		$this->query->addSelect($this->getSelectColumns($columns));
+
+		$paginator = $this->query->simplePaginate($perPage, $columns);
+
+		$this->hydratePivotRelation($paginator->items());
+
+		return $paginator;
+	}
+
+	/**
+	 * Chunk the results of the query.
+	 *
+	 * @param  int  $count
+	 * @param  callable  $callback
+	 * @return void
+	 */
+	public function chunk($count, callable $callback)
+	{
+		$this->query->addSelect($this->getSelectColumns());
+
+		$this->query->chunk($count, function($results) use ($callback)
+		{
+			$this->hydratePivotRelation($results->all());
+
+			call_user_func($callback, $results);
+		});
 	}
 
 	/**
@@ -534,6 +568,111 @@ class BelongsToMany extends Relation {
 	}
 
 	/**
+	 * Find a related model by its primary key.
+	 *
+	 * @param  mixed  $id
+	 * @param  array  $columns
+	 * @return \Illuminate\Database\Eloquent\Model|\Illuminate\Database\Eloquent\Collection|null
+	 */
+	public function find($id, $columns = ['*'])
+	{
+		if (is_array($id))
+		{
+			return $this->findMany($id, $columns);
+		}
+
+		$this->where($this->getRelated()->getQualifiedKeyName(), '=', $id);
+
+		return $this->first($columns);
+	}
+
+	/**
+	 * Find multiple related models by their primary keys.
+	 *
+	 * @param  mixed  $id
+	 * @param  array  $columns
+	 * @return \Illuminate\Database\Eloquent\Collection
+	 */
+	public function findMany($ids, $columns = ['*'])
+	{
+		if (empty($ids)) return $this->getRelated()->newCollection();
+
+		$this->whereIn($this->getRelated()->getQualifiedKeyName(), $ids);
+
+		return $this->get($columns);
+	}
+
+	/**
+	 * Find a related model by its primary key or return new instance of the related model.
+	 *
+	 * @param  mixed  $id
+	 * @param  array  $columns
+	 * @return \Illuminate\Support\Collection|\Illuminate\Database\Eloquent\Model
+	 */
+	public function findOrNew($id, $columns = ['*'])
+	{
+		if (is_null($instance = $this->find($id, $columns)))
+		{
+			$instance = $this->getRelated()->newInstance();
+		}
+
+		return $instance;
+	}
+
+	/**
+	 * Get the first related model record matching the attributes or instantiate it.
+	 *
+	 * @param  array  $attributes
+	 * @return \Illuminate\Database\Eloquent\Model
+	 */
+	public function firstOrNew(array $attributes)
+	{
+		if (is_null($instance = $this->where($attributes)->first()))
+		{
+			$instance = $this->related->newInstance();
+		}
+
+		return $instance;
+	}
+
+	/**
+	 * Get the first related record matching the attributes or create it.
+	 *
+	 * @param  array  $attributes
+	 * @return \Illuminate\Database\Eloquent\Model
+	 */
+	public function firstOrCreate(array $attributes, array $joining = [], $touch = true)
+	{
+		if (is_null($instance = $this->where($attributes)->first()))
+		{
+			$instance = $this->create($attributes, $joining, $touch);
+		}
+
+		return $instance;
+	}
+
+	/**
+	 * Create or update a related record matching the attributes, and fill it with values.
+	 *
+	 * @param  array  $attributes
+	 * @param  array  $values
+	 * @return \Illuminate\Database\Eloquent\Model
+	 */
+	public function updateOrCreate(array $attributes, array $values = [], array $joining = [], $touch = true)
+	{
+		if (is_null($instance = $this->where($attributes)->first()))
+		{
+			return $this->create($values, $joining, $touch);
+		}
+
+		$instance->fill($values);
+
+		$instance->save(['touch' => false]);
+
+		return $instance;
+	}
+
+	/**
 	 * Create a new instance of the related model.
 	 *
 	 * @param  array  $attributes
@@ -586,7 +725,7 @@ class BelongsToMany extends Relation {
 	public function sync($ids, $detaching = true)
 	{
 		$changes = array(
-			'attached' => array(), 'detached' => array(), 'updated' => array()
+			'attached' => array(), 'detached' => array(), 'updated' => array(),
 		);
 
 		if ($ids instanceof Collection) $ids = $ids->modelKeys();
@@ -737,7 +876,8 @@ class BelongsToMany extends Relation {
 	{
 		$records = array();
 
-		$timed = ($this->hasPivotColumn($this->createdAt()) || $this->hasPivotColumn($this->updatedAt()));
+		$timed = ($this->hasPivotColumn($this->createdAt()) ||
+			      $this->hasPivotColumn($this->updatedAt()));
 
 		// To create the attachment records, we will simply spin through the IDs given
 		// and create a new record to insert for each ID. Each ID may actually be a

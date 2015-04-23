@@ -211,7 +211,7 @@ class Grammar extends BaseGrammar {
 		{
 			$sql = implode(' ', $sql);
 
-			return 'where '.preg_replace('/and |or /', '', $sql, 1);
+			return 'where '.$this->removeLeadingBoolean($sql);
 		}
 
 		return '';
@@ -479,7 +479,7 @@ class Grammar extends BaseGrammar {
 	{
 		$sql = implode(' ', array_map(array($this, 'compileHaving'), $havings));
 
-		return 'having '.preg_replace('/and |or /', '', $sql, 1);
+		return 'having '.$this->removeLeadingBoolean($sql);
 	}
 
 	/**
@@ -530,8 +530,7 @@ class Grammar extends BaseGrammar {
 			if (isset($order['sql'])) return $order['sql'];
 
 			return $this->wrap($order['column']).' '.$order['direction'];
-		}
-		, $orders));
+		}, $orders));
 	}
 
 	/**
