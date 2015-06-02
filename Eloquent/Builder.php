@@ -248,7 +248,7 @@ class Builder
             }
         }
 
-        return $results;
+        return collect($results);
     }
 
     /**
