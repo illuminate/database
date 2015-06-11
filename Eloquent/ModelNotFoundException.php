@@ -1,37 +1,40 @@
-<?php namespace Illuminate\Database\Eloquent;
+<?php
 
-class ModelNotFoundException extends \RuntimeException {
+namespace Illuminate\Database\Eloquent;
 
-	/**
-	 * Name of the affected Eloquent model.
-	 *
-	 * @var string
-	 */
-	protected $model;
+use RuntimeException;
 
-	/**
-	 * Set the affected Eloquent model.
-	 *
-	 * @param  string   $model
-	 * @return $this
-	 */
-	public function setModel($model)
-	{
-		$this->model = $model;
+class ModelNotFoundException extends RuntimeException
+{
+    /**
+     * Name of the affected Eloquent model.
+     *
+     * @var string
+     */
+    protected $model;
 
-		$this->message = "No query results for model [{$model}].";
+    /**
+     * Set the affected Eloquent model.
+     *
+     * @param  string   $model
+     * @return $this
+     */
+    public function setModel($model)
+    {
+        $this->model = $model;
 
-		return $this;
-	}
+        $this->message = "No query results for model [{$model}].";
 
-	/**
-	 * Get the affected Eloquent model.
-	 *
-	 * @return string
-	 */
-	public function getModel()
-	{
-		return $this->model;
-	}
+        return $this;
+    }
 
+    /**
+     * Get the affected Eloquent model.
+     *
+     * @return string
+     */
+    public function getModel()
+    {
+        return $this->model;
+    }
 }
