@@ -378,6 +378,17 @@ class Blueprint
     {
         return $this->unsignedInteger($column, true);
     }
+    
+    /**
+     * Create a new auto-incrementing small integer (2-byte) column on the table.
+     *
+     * @param  string  $column
+     * @return \Illuminate\Support\Fluent
+     */
+    public function tinyIncrements($column)
+    {
+        return $this->unsignedTinyInteger($column, true);
+    }
 
     /**
      * Create a new auto-incrementing small integer (2-byte) column on the table.
