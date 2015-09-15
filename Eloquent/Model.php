@@ -2462,7 +2462,7 @@ abstract class Model implements ArrayAccess, ArrayableInterface, JsonableInterfa
 		// date fields without having to create a mutator for each property.
 		elseif (in_array($key, $this->getDates()))
 		{
-			if ($value) return $this->asDateTime($value);
+			if ( ! is_null($value)) return $this->asDateTime($value);
 		}
 
 		return $value;
