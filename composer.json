@@ -1,5 +1,5 @@
 {
-    "name": "duyld-yoncode/database",
+    "name": "yoncode/database",
     "description": "The Illuminate Database modified package to works with Silex application and PHP 5.3.",
     "license": "MIT",
     "homepage": "https://www.linkedin.com/in/lyduy",
