@@ -1,24 +1,20 @@
 {
-    "name": "illuminate/database",
-    "description": "The Illuminate Database package.",
+    "name": "yoncode/database",
+    "description": "The Illuminate Database modified package to works with Silex application and PHP 5.3.",
     "license": "MIT",
-    "homepage": "http://laravel.com",
-    "support": {
-        "issues": "https://github.com/laravel/framework/issues",
-        "source": "https://github.com/laravel/framework"
-    },
-    "keywords": ["laravel", "database", "sql", "orm"],
+    "homepage": "https://www.linkedin.com/in/lyduy",
+    "keywords": ["silex", "database", "sql", "orm"],
     "authors": [
         {
-            "name": "Taylor Otwell",
-            "email": "taylorotwell@gmail.com"
+            "name": "duyld",
+            "email": "duy.1407@gmail.com"
         }
     ],
     "require": {
-        "php": ">=5.6.4",
-        "illuminate/container": "5.3.*",
-        "illuminate/contracts": "5.3.*",
-        "illuminate/support": "5.3.*",
+        "php": ">=5.5.9",
+        "illuminate/container": "5.2.7",
+        "illuminate/contracts": "5.2.7",
+        "illuminate/support": "5.2.7",
         "nesbot/carbon": "~1.20"
     },
     "autoload": {
