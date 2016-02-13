@@ -22,6 +22,11 @@
             "Illuminate\\Database\\": ""
         }
     },
+    "extra": {
+        "branch-alias": {
+            "dev-master": "master"
+        }
+    },
     "suggest": {
         "doctrine/dbal": "Required to rename columns and drop SQLite columns (~2.4).",
         "fzaninotto/faker": "Required to use the eloquent factory builder (~1.4).",
