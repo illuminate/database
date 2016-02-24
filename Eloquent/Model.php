@@ -4,6 +4,7 @@ namespace Illuminate\Database\Eloquent;
 
 use Closure;
 use DateTime;
+use DateTimeImmutable;
 use Exception;
 use ArrayAccess;
 use Carbon\Carbon;
@@ -2908,7 +2909,7 @@ abstract class Model implements ArrayAccess, Arrayable, Jsonable, JsonSerializab
         // If the value is already a DateTime instance, we will just skip the rest of
         // these checks since they will be a waste of time, and hinder performance
         // when checking the field. We will just return the DateTime right away.
-        if ($value instanceof DateTime) {
+        if ($value instanceof DateTime || $value instanceof DateTimeImmutable) {
             return Carbon::instance($value);
         }
 
