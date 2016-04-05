@@ -2068,6 +2068,17 @@ abstract class Model implements ArrayAccess, Arrayable, Jsonable, JsonSerializab
         return Str::snake(class_basename($this)).'_id';
     }
 
+
+    /**
+     * Get the with attributes for the model.
+     *
+     * @return array
+     */
+    public function getWith()
+    {
+        return $this->with;
+    }
+
     /**
      * Get the hidden attributes for the model.
      *
