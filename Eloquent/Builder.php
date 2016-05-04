@@ -346,11 +346,12 @@ class Builder
      *
      * @param  int  $count
      * @param  callable  $callback
+     * @param  array  $column
      * @return bool
      */
-    public function chunk($count, callable $callback)
+    public function chunk($count, callable $callback, $column = [])
     {
-        $results = $this->forPage($page = 1, $count)->get();
+        $results = $this->forPage($page = 1, $count)->get($column);
 
         while (! $results->isEmpty()) {
             // On each chunk result set, we will pass them to the callback and then let the
@@ -362,7 +363,7 @@ class Builder
 
             $page++;
 
-            $results = $this->forPage($page, $count)->get();
+            $results = $this->forPage($page, $count)->get($column);
         }
 
         return true;
