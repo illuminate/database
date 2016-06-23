@@ -6,6 +6,7 @@ use PDO;
 use Exception;
 use Illuminate\Support\Arr;
 use Illuminate\Database\DetectsLostConnections;
+use Illuminate\Encryption\Encrypter;
 
 class Connector
 {
@@ -43,19 +44,27 @@ class Connector
      * @param  string  $dsn
      * @param  array   $config
      * @param  array   $options
+     * @param  array   $decrypt
      * @return \PDO
      */
-    public function createConnection($dsn, array $config, array $options)
+    public function createConnection($dsn, array $config, array $options, $decrypt = null)
     {
         $username = Arr::get($config, 'username');
 
-        $password = Arr::get($config, 'password');
+        if (!is_null($decrypt)) {
+            $passwordEncrypted = Arr::get($config, 'password_encrypted');
+            $encrypter = new Encrypter($decrypt);
+            $password = $encrypter->decrypt($passwordEncrypted);
+            unset($encrypter);
+        } else {
+            $password = Arr::get($config, 'password');
+        }
 
         try {
             $pdo = new PDO($dsn, $username, $password, $options);
         } catch (Exception $e) {
             $pdo = $this->tryAgainIfCausedByLostConnection(
-                $e, $dsn, $username, $password, $options
+                $e, $dsn, $username, (!is_null($decrypt) ? $passwordEncrypted : $password, $options
             );
         }
 
