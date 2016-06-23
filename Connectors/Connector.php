@@ -44,7 +44,7 @@ class Connector
      * @param  string  $dsn
      * @param  array   $config
      * @param  array   $options
-     * @param  array   $decrypt
+     * @param  mixed   $decrypt null | string which is the key for the encrypter
      * @return \PDO
      */
     public function createConnection($dsn, array $config, array $options, $decrypt = null)
