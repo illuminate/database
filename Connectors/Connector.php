@@ -64,7 +64,7 @@ class Connector
             $pdo = new PDO($dsn, $username, $password, $options);
         } catch (Exception $e) {
             $pdo = $this->tryAgainIfCausedByLostConnection(
-                $e, $dsn, $username, (!is_null($decrypt) ? $passwordEncrypted : $password, $options
+                $e, $dsn, $username, (!is_null($decrypt)) ? $passwordEncrypted : $password, $options
             );
         }
 
