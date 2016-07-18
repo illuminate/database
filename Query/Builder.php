@@ -1235,10 +1235,10 @@ class Builder
     /**
      * Add a "group by" clause to the query.
      *
-     * @param  array  ...$groups
+     * @param  array $groups
      * @return $this
      */
-    public function groupBy(...$groups)
+    public function groupBy($groups)
     {
         foreach ($groups as $group) {
             $this->groups = array_merge((array) $this->groups, is_array($group) ? $group : [$group]);
