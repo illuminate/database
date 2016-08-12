@@ -1955,7 +1955,7 @@ class Builder
      */
     public function min($column)
     {
-        return $this->aggregate(__FUNCTION__, [$column]);
+        return (float) $this->aggregate(__FUNCTION__, [$column]);
     }
 
     /**
@@ -1966,7 +1966,7 @@ class Builder
      */
     public function max($column)
     {
-        return $this->aggregate(__FUNCTION__, [$column]);
+        return (float) $this->aggregate(__FUNCTION__, [$column]);
     }
 
     /**
@@ -1977,7 +1977,7 @@ class Builder
      */
     public function sum($column)
     {
-        $result = $this->aggregate(__FUNCTION__, [$column]);
+        $result = (float) $this->aggregate(__FUNCTION__, [$column]);
 
         return $result ?: 0;
     }
@@ -1990,7 +1990,7 @@ class Builder
      */
     public function avg($column)
     {
-        return $this->aggregate(__FUNCTION__, [$column]);
+        return (float) $this->aggregate(__FUNCTION__, [$column]);
     }
 
     /**
