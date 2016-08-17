@@ -34,7 +34,9 @@ class Manager
         // Once we have the container setup, we will setup the default configuration
         // options in the container "config" binding. This will make the database
         // manager work correctly out of the box without extreme configuration.
-        $this->setupDefaultConfiguration();
+        if(!$container) {
+            $this->setupDefaultConfiguration();
+        }
 
         $this->setupManager();
     }
