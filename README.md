@@ -68,3 +68,15 @@ $users = User::where('votes', '>', 1)->get();
 ```
 
 For further documentation on using the various database facilities this library provides, consult the [Laravel framework documentation](https://laravel.com/docs).
+
+**Without using the global Capsule instance**
+
+To use Capsule without creating a global instance, use the following syntax.
+
+```PHP
+// ...
+$capsule->bootEloquent();
+
+// Use the previously defined "default" connection to access the "users" table:
+$users = $capsule->getConnection('default')->table('users')->where('votes', '>', 100)->get();
+```
