@@ -448,6 +448,38 @@ class Connection implements ConnectionInterface
     }
 
     /**
+     * Run multiple update statements against the database.
+     *
+     * @param  string  $query
+     * @param  array   $batchBindings
+     * @return int
+     */
+    public function updateBatch($query, $batchBindings = [])
+    {
+        return $this->run($query, $batchBindings, function ($me, $query, $batchBindings) {
+            if ($me->pretending()) {
+                return 0;
+            }
+
+            // For update or delete statements, we want to get the number of rows affected
+            // by the statement and return that back to the developer. We'll first need
+            // to execute the statement and then we'll use PDO to fetch the affected.
+            $statement = $me->getPdo()->prepare($query);
+
+            $rowCount = 0;
+            foreach ($batchBindings as $bindings) {
+                $this->bindValues($statement, $me->prepareBindings($bindings));
+
+                $statement->execute();
+
+                $rowCount += $statement->rowCount();
+            }
+
+            return $rowCount;
+        });
+    }
+
+    /**
      * Run a delete statement against the database.
      *
      * @param  string  $query

@@ -2160,6 +2160,40 @@ class Builder
     }
 
     /**
+     * Update multiple records in the database.
+     *
+     * @param  array   $batch
+     * @param  string  $key
+     * @return int
+     */
+    public function updateBatch(array $batch, $key)
+    {
+        $originalBindings = $this->getBindings();
+
+        $values = $batch[0];
+        $this->where($key, $values[$key]);
+        unset($values[$key]);
+
+        $sql = $this->grammar->compileUpdate($this, $values);
+
+        $batchBindings = array();
+
+        foreach ($batch as $values) {
+            $keyValue = $values[$key];
+            unset($values[$key]);
+
+            $bindings = array_values(array_merge($values, $originalBindings));
+            $bindings[] = $keyValue;
+
+            $batchBindings[] = $this->cleanBindings(
+                $this->grammar->prepareBindingsForUpdate($bindings, $values)
+            );
+        }
+
+        return $this->connection->updateBatch($sql, $batchBindings);
+    }
+
+    /**
      * Insert or update a record matching the attributes, and fill it with values.
      *
      * @param  array  $attributes
