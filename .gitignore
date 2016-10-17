@@ -1,0 +1,8 @@
+# Created by .ignore support plugin (hsz.mobi)
+.gitignore
+.idea/
+.idea/copyright/
+.idea/database.iml
+.idea/misc.xml
+.idea/modules.xml
+.idea/workspace.xml
