@@ -108,8 +108,10 @@ class HasManyThrough extends Relation
         $query = $query ?: $this->query;
 
         $foreignKey = $this->related->getTable().'.'.$this->secondKey;
+        
+        $localKey = $this->localKey?$this->parent->getTable().'.'.$this->localKey:$this->getQualifiedParentKeyName();
 
-        $query->join($this->parent->getTable(), $this->getQualifiedParentKeyName(), '=', $foreignKey);
+        $query->join($this->parent->getTable(), $localKey, '=', $foreignKey);
 
         if ($this->parentSoftDeletes()) {
             $query->whereNull($this->parent->getQualifiedDeletedAtColumn());
