@@ -3,11 +3,11 @@
 namespace Illuminate\Database\Migrations;
 
 use Closure;
-use Illuminate\Support\Arr;
-use Illuminate\Support\Str;
-use Illuminate\Support\Collection;
-use Illuminate\Filesystem\Filesystem;
 use Illuminate\Database\ConnectionResolverInterface as Resolver;
+use Illuminate\Filesystem\Filesystem;
+use Illuminate\Support\Arr;
+use Illuminate\Support\Collection;
+use Illuminate\Support\Str;
 
 class Migrator
 {
@@ -56,9 +56,10 @@ class Migrator
     /**
      * Create a new migrator instance.
      *
-     * @param  \Illuminate\Database\Migrations\MigrationRepositoryInterface  $repository
-     * @param  \Illuminate\Database\ConnectionResolverInterface  $resolver
-     * @param  \Illuminate\Filesystem\Filesystem  $files
+     * @param \Illuminate\Database\Migrations\MigrationRepositoryInterface $repository
+     * @param \Illuminate\Database\ConnectionResolverInterface             $resolver
+     * @param \Illuminate\Filesystem\Filesystem                            $files
+     *
      * @return void
      */
     public function __construct(MigrationRepositoryInterface $repository,
@@ -73,8 +74,9 @@ class Migrator
     /**
      * Run the outstanding migrations at a given path.
      *
-     * @param  array|string  $paths
-     * @param  array  $options
+     * @param array|string $paths
+     * @param array        $options
+     *
      * @return array
      */
     public function run($paths = [], array $options = [])
@@ -103,8 +105,9 @@ class Migrator
     /**
      * Run an array of migrations.
      *
-     * @param  array  $migrations
-     * @param  array  $options
+     * @param array $migrations
+     * @param array $options
+     *
      * @return void
      */
     public function runMigrationList($migrations, array $options = [])
@@ -142,9 +145,10 @@ class Migrator
     /**
      * Run "up" a migration instance.
      *
-     * @param  string  $file
-     * @param  int     $batch
-     * @param  bool    $pretend
+     * @param string $file
+     * @param int    $batch
+     * @param bool   $pretend
+     *
      * @return void
      */
     protected function runUp($file, $batch, $pretend)
@@ -175,8 +179,9 @@ class Migrator
     /**
      * Rollback the last migration operation.
      *
-     * @param  array|string $paths
-     * @param  array  $options
+     * @param array|string $paths
+     * @param array        $options
+     *
      * @return array
      */
     public function rollback($paths = [], array $options = [])
@@ -224,8 +229,9 @@ class Migrator
     /**
      * Rolls all of the currently applied migrations back.
      *
-     * @param  array|string $paths
-     * @param  bool  $pretend
+     * @param array|string $paths
+     * @param bool         $pretend
+     *
      * @return array
      */
     public function reset($paths = [], $pretend = false)
@@ -264,9 +270,10 @@ class Migrator
     /**
      * Run "down" a migration instance.
      *
-     * @param  string  $file
-     * @param  object  $migration
-     * @param  bool    $pretend
+     * @param string $file
+     * @param object $migration
+     * @param bool   $pretend
+     *
      * @return void
      */
     protected function runDown($file, $migration, $pretend)
@@ -297,7 +304,8 @@ class Migrator
     /**
      * Get all of the migration files in a given path.
      *
-     * @param  string|array  $paths
+     * @param string|array $paths
+     *
      * @return array
      */
     public function getMigrationFiles($paths)
@@ -314,7 +322,8 @@ class Migrator
     /**
      * Require in all the migration files in a given path.
      *
-     * @param  array   $files
+     * @param array $files
+     *
      * @return void
      */
     public function requireFiles(array $files)
@@ -327,8 +336,9 @@ class Migrator
     /**
      * Pretend to run the migrations.
      *
-     * @param  object  $migration
-     * @param  string  $method
+     * @param object $migration
+     * @param string $method
+     *
      * @return void
      */
     protected function pretendToRun($migration, $method)
@@ -343,8 +353,9 @@ class Migrator
     /**
      * Get all of the queries that would be run for a migration.
      *
-     * @param  object  $migration
-     * @param  string  $method
+     * @param object $migration
+     * @param string $method
+     *
      * @return array
      */
     protected function getQueries($migration, $method)
@@ -364,7 +375,8 @@ class Migrator
     /**
      * Run a migration inside a transaction if the database supports it.
      *
-     * @param  \Closure  $callback
+     * @param \Closure $callback
+     *
      * @return void
      */
     protected function runMigration(Closure $callback)
@@ -381,20 +393,22 @@ class Migrator
     /**
      * Resolve a migration instance from a file.
      *
-     * @param  string  $file
+     * @param string $file
+     *
      * @return object
      */
     public function resolve($file)
     {
         $class = Str::studly(implode('_', array_slice(explode('_', $file), 4)));
 
-        return new $class;
+        return new $class();
     }
 
     /**
      * Get the name of the migration.
      *
-     * @param  string  $path
+     * @param string $path
+     *
      * @return string
      */
     public function getMigrationName($path)
@@ -405,7 +419,8 @@ class Migrator
     /**
      * Raise a note event for the migrator.
      *
-     * @param  string  $message
+     * @param string $message
+     *
      * @return void
      */
     protected function note($message)
@@ -426,7 +441,8 @@ class Migrator
     /**
      * Resolve the database connection instance.
      *
-     * @param  string  $connection
+     * @param string $connection
+     *
      * @return \Illuminate\Database\Connection
      */
     public function resolveConnection($connection)
@@ -439,7 +455,8 @@ class Migrator
      *
      * These path will not automatically be applied.
      *
-     * @param  string  $path
+     * @param string $path
+     *
      * @return void
      */
     public function path($path)
@@ -462,12 +479,13 @@ class Migrator
     /**
      * Set the default connection name.
      *
-     * @param  string  $name
+     * @param string $name
+     *
      * @return void
      */
     public function setConnection($name)
     {
-        if (! is_null($name)) {
+        if (!is_null($name)) {
             $this->resolver->setDefaultConnection($name);
         }
 
