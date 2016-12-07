@@ -9,7 +9,7 @@ class HasMany extends HasOneOrMany
     /**
      * Get the results of the relationship.
      *
-     * @return mixed
+     * @return \Illuminate\Database\Eloquent\Collection|static[]
      */
     public function getResults()
     {
