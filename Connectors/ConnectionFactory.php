@@ -128,10 +128,10 @@ class ConnectionFactory
                     if (count($hosts) - 1 === $key && $this->container->bound(ExceptionHandler::class)) {
                         $this->container->make(ExceptionHandler::class)->report($e);
                     }
+
+                    throw $e;
                 }
             }
-
-            throw $e;
         };
     }
 
