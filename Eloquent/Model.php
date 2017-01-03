@@ -1841,7 +1841,7 @@ abstract class Model implements ArrayAccess, Arrayable, Jsonable, JsonSerializab
      */
     public function freshTimestamp()
     {
-        return new Carbon;
+        return new Carbon('now', config('app.timezone'));
     }
 
     /**
