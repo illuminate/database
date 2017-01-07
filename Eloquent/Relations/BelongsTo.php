@@ -39,12 +39,11 @@ class BelongsTo extends Relation
     /**
      * Create a new belongs to relationship instance.
      *
-     * @param  \Illuminate\Database\Eloquent\Builder  $query
-     * @param  \Illuminate\Database\Eloquent\Model  $parent
-     * @param  string  $foreignKey
-     * @param  string  $otherKey
-     * @param  string  $relation
-     * @return void
+     * @param  \Illuminate\Database\Eloquent\Builder $query
+     * @param  \Illuminate\Database\Eloquent\Model $parent
+     * @param  string $foreignKey
+     * @param  string $otherKey
+     * @param  string $relation
      */
     public function __construct(Builder $query, Model $parent, $foreignKey, $otherKey, $relation)
     {

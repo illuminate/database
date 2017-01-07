@@ -32,11 +32,10 @@ abstract class HasOneOrMany extends Relation
     /**
      * Create a new has one or many relationship instance.
      *
-     * @param  \Illuminate\Database\Eloquent\Builder  $query
-     * @param  \Illuminate\Database\Eloquent\Model  $parent
-     * @param  string  $foreignKey
-     * @param  string  $localKey
-     * @return void
+     * @param  \Illuminate\Database\Eloquent\Builder $query
+     * @param  \Illuminate\Database\Eloquent\Model $parent
+     * @param  string $foreignKey
+     * @param  string $localKey
      */
     public function __construct(Builder $query, Model $parent, $foreignKey, $localKey)
     {
