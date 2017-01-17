@@ -27,7 +27,7 @@ use Illuminate\Events\Dispatcher;
 use Illuminate\Container\Container;
 $capsule->setEventDispatcher(new Dispatcher(new Container));
 
-// Make this Capsule instance available globally via static methods... (optional)
+// Make this Capsule instance available globally via static methods... 
 $capsule->setAsGlobal();
 
 // Setup the Eloquent ORM... (optional; unless you've used setEventDispatcher())
