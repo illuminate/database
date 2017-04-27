@@ -344,7 +344,7 @@ class Connection implements ConnectionInterface
             }
 
             if (isset($fetchArgument)) {
-                return ($fetchMode === ($fetchMode | PDO::FETCH_COLUMN))
+                return ($fetchMode === ($fetchMode | PDO::FETCH_COLUMN) || $fetchMode === ($fetchMode | PDO::FETCH_INFO))
                     ? $statement->fetchAll($fetchMode, $fetchArgument)
                     : $statement->fetchAll($fetchMode, $fetchArgument, $fetchConstructorArgument);
             } else {
@@ -380,7 +380,7 @@ class Connection implements ConnectionInterface
             }
 
             if (isset($fetchArgument)) {
-                ($fetchMode === ($fetchMode | PDO::FETCH_COLUMN))
+                ($fetchMode === ($fetchMode | PDO::FETCH_COLUMN) || $fetchMode === ($fetchMode | PDO::FETCH_INFO))
                     ? $statement->setFetchMode($fetchMode, $fetchArgument)
                     : $statement->setFetchMode($fetchMode, $fetchArgument, $fetchConstructorArgument);
             } else {
