@@ -3277,7 +3277,9 @@ abstract class Model implements ArrayAccess, Arrayable, Jsonable, JsonSerializab
      */
     public function getConnection()
     {
-        return static::resolveConnection($this->getConnectionName());
+        $connection = static::resolveConnection($this->getConnectionName());
+        $connection->setFetchMode(\PDO::FETCH_OBJ, null, []);
+        return $connection;
     }
 
     /**
