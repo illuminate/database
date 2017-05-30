@@ -968,6 +968,7 @@ class Builder
      *
      * @param  \Illuminate\Database\Query\Builder  $query
      * @param  array  $whereSlice
+     *
      * @return void
      */
     protected function groupWhereSliceForScope(QueryBuilder $query, $whereSlice)
