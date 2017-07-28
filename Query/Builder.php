@@ -2100,11 +2100,43 @@ class Builder
      */
     public function insertGetId(array $values, $sequence = null)
     {
+        if (empty($values)) {
+            return true;
+        }
+
+        // Since every insert gets treated like a batch insert, we will make sure the
+        // bindings are structured in a way that is convenient for building these
+        // inserts statements by verifying the elements are actually an array.
+        if (! is_array(reset($values))) {
+            $values = [$values];
+        }
+
+        // Since every insert gets treated like a batch insert, we will make sure the
+        // bindings are structured in a way that is convenient for building these
+        // inserts statements by verifying the elements are actually an array.
+        else {
+            foreach ($values as $key => $value) {
+                ksort($value);
+                $values[$key] = $value;
+            }
+        }
+
+        // We'll treat every insert like a batch insert so we can easily insert each
+        // of the records into the database consistently. This will make it much
+        // easier on the grammars to just handle one type of record insertion.
+        $bindings = [];
+
+        foreach ($values as $record) {
+            foreach ($record as $value) {
+                $bindings[] = $value;
+            }
+        }
+
         $sql = $this->grammar->compileInsertGetId($this, $values, $sequence);
 
-        $values = $this->cleanBindings($values);
+        $bindings = $this->cleanBindings($bindings);
 
-        return $this->processor->processInsertGetId($this, $sql, $values, $sequence);
+        return $this->processor->processInsertGetId($this, $sql, $bindings, $sequence);
     }
 
     /**
