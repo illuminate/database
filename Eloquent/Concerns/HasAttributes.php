@@ -2,6 +2,7 @@
 
 namespace Illuminate\Database\Eloquent\Concerns;
 
+use InvalidArgumentException;
 use LogicException;
 use DateTimeInterface;
 use Illuminate\Support\Arr;
@@ -707,13 +708,19 @@ trait HasAttributes
         if ($this->isStandardDateFormat($value)) {
             return Carbon::createFromFormat('Y-m-d', $value)->startOfDay();
         }
+        try {
 
-        // Finally, we will just assume this date is in the format used by default on
-        // the database connection and use that format to create the Carbon object
-        // that is returned back out to the developers after we convert it here.
-        return Carbon::createFromFormat(
-            $this->getDateFormat(), $value
-        );
+            // Finally, we will just assume this date is in the format used by default on
+            // the database connection and use that format to create the Carbon object
+            // that is returned back out to the developers after we convert it here.
+            return Carbon::createFromFormat(
+                $this->getDateFormat(), $value
+            );
+        } catch (InvalidArgumentException $e) {
+            // However if the submitted date is not in the default or defined format,
+            // eloquent will attempt to create from Carbon::parse.
+            return Carbon::parse($value);
+        }
     }
 
     /**
