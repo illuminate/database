@@ -708,6 +708,7 @@ trait HasAttributes
         if ($this->isStandardDateFormat($value)) {
             return Carbon::createFromFormat('Y-m-d', $value)->startOfDay();
         }
+
         try {
 
             // Finally, we will just assume this date is in the format used by default on
