@@ -681,8 +681,11 @@ trait HasAttributes
         // If this value is already a Carbon instance, we shall just return it as is.
         // This prevents us having to re-instantiate a Carbon instance when we know
         // it already is one, which wouldn't be fulfilled by the DateTime check.
+
         if ($value instanceof Carbon) {
             return $value;
+        } else {
+            return Carbon::parse($value);
         }
 
         // If the value is already a DateTime instance, we will just skip the rest of
@@ -724,7 +727,12 @@ trait HasAttributes
      */
     protected function isStandardDateFormat($value)
     {
-        return preg_match('/^(\d{4})-(\d{1,2})-(\d{1,2})$/', $value);
+        if(!is_array($value)) {
+            return preg_match('/^(\d{4})-(\d{1,2})-(\d{1,2})$/', $value);
+        } else {
+            return preg_match('/^(\d{4})-(\d{1,2})-(\d{1,2})$/', $value['date']);
+        }
+
     }
 
     /**
@@ -735,9 +743,16 @@ trait HasAttributes
      */
     public function fromDateTime($value)
     {
-        return empty($value) ? $value : $this->asDateTime($value)->format(
-            $this->getDateFormat()
-        );
+        if(!is_array($value)) {
+            return empty($value) ? $value : $this->asDateTime($value)->format(
+                $this->getDateFormat()
+            );
+        } else {
+            return empty($value) ? $value : $this->asDateTime($value['date'])->format(
+                $this->getDateFormat()
+            );
+        }
+
     }
 
     /**
