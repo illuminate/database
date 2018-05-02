@@ -98,6 +98,9 @@ class PostgresBuilder extends Builder
             }
 
             $schema = head($schema);
+        } elseif (count($table) > 1) {
+            $schema = array_shift($table);
+            return [$schema, implode('.', $table)];
         }
 
         return [$schema ?: 'public', implode('.', $table)];
