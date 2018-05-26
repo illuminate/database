@@ -185,6 +185,15 @@ class Builder
         '~', '~*', '!~', '!~*', 'similar to',
         'not similar to', 'not ilike', '~~*', '!~~*',
     ];
+    
+    /**
+     * All of the available operators where parameters are numerous.
+     *
+     * @var array
+     */
+    protected $numerous = [
+        'between', 'not between', 'in', 'not in'
+    ];
 
     /**
      * Whether use write pdo for select.
@@ -601,6 +610,12 @@ class Builder
         if ($column instanceof Closure) {
             return $this->whereNested($column, $boolean);
         }
+        
+        // If the parameters of the comparison operator are numerous, we call
+        // the corresponding method
+        if ($this->isNumerous($operator)) {
+            return $this->{'where'.Str::studly($operator)}($column, $value, $boolean);
+        }
 
         // If the given operator is not found in the list of valid operators we will
         // assume that the developer is just short-cutting the '=' operators and
@@ -713,6 +728,17 @@ class Builder
     {
         return ! in_array(strtolower($operator), $this->operators, true) &&
                ! in_array(strtolower($operator), $this->grammar->getOperators(), true);
+    }
+    
+    /**
+     * Determine if the parameters of given operator is numerous.
+     * 
+     * @param string $operator
+     * @return bool
+     */
+    protected function isNumerous($operator)
+    {
+        return in_array(strtolower($operator), $this->numerous, true);
     }
 
     /**
