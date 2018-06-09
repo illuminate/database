@@ -57,6 +57,13 @@ trait HasAttributes
     protected $dateFormat;
 
     /**
+     * The output format for serialize.
+     *
+     * @var string
+     */
+    protected $outputDateFormat;
+
+    /**
      * The accessors to append to the model's array form.
      *
      * @var array
@@ -741,12 +748,10 @@ trait HasAttributes
             return Carbon::createFromFormat('Y-m-d', $value)->startOfDay();
         }
 
-        // Finally, we will just assume this date is in the format used by default on
-        // the database connection and use that format to create the Carbon object
-        // that is returned back out to the developers after we convert it here.
-        return Carbon::createFromFormat(
-            str_replace('.v', '.u', $this->getDateFormat()), $value
-        );
+        // Finally, we will just assume this date able to be parsed by Carbon, and 
+        // create a object that is returned back out to the developers after we convert 
+        // it here.
+        return Carbon::parse($value);
     }
 
     /**
@@ -792,7 +797,7 @@ trait HasAttributes
      */
     protected function serializeDate(DateTimeInterface $date)
     {
-        return $date->format($this->getDateFormat());
+        return $date->format($this->getOutputDateFormat());
     }
 
     /**
@@ -817,6 +822,16 @@ trait HasAttributes
     public function getDateFormat()
     {
         return $this->dateFormat ?: $this->getConnection()->getQueryGrammar()->getDateFormat();
+    }
+
+    /**
+     * Get the format for serialize.
+     *
+     * @return string
+     */
+    protected function getOutputDateFormat()
+    {
+        return $this->outputDateFormat ?: $this->getDateFormat();
     }
 
     /**
