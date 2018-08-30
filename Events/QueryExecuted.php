@@ -24,6 +24,13 @@ class QueryExecuted
      * @var float
      */
     public $time;
+    
+    /**
+     * The number of rows query execution has affected.
+     *
+     * @var int
+     */
+    public $rows;
 
     /**
      * The database connection instance.
@@ -45,13 +52,15 @@ class QueryExecuted
      * @param  string  $sql
      * @param  array  $bindings
      * @param  float|null  $time
+     * @param  int  $rows
      * @param  \Illuminate\Database\Connection  $connection
      * @return void
      */
-    public function __construct($sql, $bindings, $time, $connection)
+    public function __construct($sql, $bindings, $time, $rows, $connection)
     {
         $this->sql = $sql;
         $this->time = $time;
+        $this->rows = $rows;
         $this->bindings = $bindings;
         $this->connection = $connection;
         $this->connectionName = $connection->getName();

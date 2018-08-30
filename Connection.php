@@ -114,6 +114,13 @@ class Connection implements ConnectionInterface
      * @var int
      */
     protected $recordsModified = false;
+    
+    /**
+     * The number of rows affected by the last statement
+     * 
+     * @var int
+     */
+    protected $rowCount = 0;
 
     /**
      * All of the queries run against the connection.
@@ -328,6 +335,8 @@ class Connection implements ConnectionInterface
             $this->bindValues($statement, $this->prepareBindings($bindings));
 
             $statement->execute();
+            
+            $this->rowCount = $statement->rowCount();
 
             return $statement->fetchAll();
         });
@@ -362,6 +371,8 @@ class Connection implements ConnectionInterface
             // so we can return the cursor. The cursor will use a PHP generator to give
             // back one row at a time without using a bunch of memory to render them.
             $statement->execute();
+            
+            $this->rowCount = $statement->rowCount();
 
             return $statement;
         });
@@ -455,7 +466,11 @@ class Connection implements ConnectionInterface
 
             $this->recordsHaveBeenModified();
 
-            return $statement->execute();
+            $result = $statement->execute();
+            
+            $this->rowCount = $statement->rowCount();
+            
+            return $result;
         });
     }
 
@@ -481,12 +496,14 @@ class Connection implements ConnectionInterface
             $this->bindValues($statement, $this->prepareBindings($bindings));
 
             $statement->execute();
+            
+            $this->rowCount = $statement->rowCount();
 
             $this->recordsHaveBeenModified(
-                ($count = $statement->rowCount()) > 0
+                $this->rowCount > 0
             );
 
-            return $count;
+            return $this->rowCount;
         });
     }
 
@@ -679,10 +696,11 @@ class Connection implements ConnectionInterface
      */
     public function logQuery($query, $bindings, $time = null)
     {
-        $this->event(new QueryExecuted($query, $bindings, $time, $this));
+        $this->event(new QueryExecuted($query, $bindings, $time, $this->rowCount, $this));
 
         if ($this->loggingQueries) {
-            $this->queryLog[] = compact('query', 'bindings', 'time');
+            $rows = $this->rowCount;
+            $this->queryLog[] = compact('query', 'bindings', 'time', 'rows');
         }
     }
 
