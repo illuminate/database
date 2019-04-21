@@ -80,7 +80,7 @@ abstract class MorphOneOrMany extends HasOneOrMany
         $model->{$this->getMorphType()} = $this->morphClass;
     }
 
-    /**
+/**
      * Get the relationship query.
      *
      * @param  \Illuminate\Database\Eloquent\Builder  $query
@@ -90,6 +90,13 @@ abstract class MorphOneOrMany extends HasOneOrMany
      */
     public function getRelationExistenceQuery(Builder $query, Builder $parentQuery, $columns = ['*'])
     {
+        if ($query->getQuery()->from == $parentQuery->getQuery()->from) {
+            $query = parent::getRelationExistenceQuery($query, $parentQuery, $columns);
+            return $query->where(
+                $query->getModel()->getTable().'.'.$this->getMorphType(), $this->morphClass
+            );
+        }
+
         return parent::getRelationExistenceQuery($query, $parentQuery, $columns)->where(
             $this->morphType, $this->morphClass
         );
