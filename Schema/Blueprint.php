@@ -981,9 +981,11 @@ class Blueprint
      */
     public function timestamps($precision = 0)
     {
-        $this->timestamp('created_at', $precision)->nullable();
-
-        $this->timestamp('updated_at', $precision)->nullable();
+        $table->timestamp('created_at', $precision)->useCurrent();
+        
+        $table->timestamp('updated_at', $precision)->default(
+                DB::raw('CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP')
+            );
     }
 
     /**
