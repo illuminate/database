@@ -589,17 +589,32 @@ class Connection implements ConnectionInterface
         $grammar = $this->getQueryGrammar();
 
         foreach ($bindings as $key => $value) {
-            // We need to transform all instances of DateTimeInterface into the actual
-            // date string. Each query grammar maintains its own date string format
-            // so we'll just ask the grammar for the format to get from the date.
-            if ($value instanceof DateTimeInterface) {
-                $bindings[$key] = $value->format($grammar->getDateFormat());
-            } elseif (is_bool($value)) {
-                $bindings[$key] = (int) $value;
-            }
+            $bindings[$key] = $this->prepareBinding($value, $key, $grammar);
         }
 
         return $bindings;
+    }
+    
+    /**
+     * Prepare the values for binding.
+     *
+     * @param  mixed  $value
+     * @param  string $key
+     * @param  \Illuminate\Database\Query\Grammars\Grammar $grammar
+     * @return mixed
+     */
+    public function prepareBinding($value, string $key, Grammar $grammar)
+    {
+        // We need to transform all instances of DateTimeInterface into the actual
+        // date string. Each query grammar maintains its own date string format
+        // so we'll just ask the grammar for the format to get from the date.
+        if ($value instanceof DateTimeInterface) {
+            return $value->format($grammar->getDateFormat());
+        } elseif (is_bool($value)) {
+            return (int) $value;
+        }
+        
+        return $value;
     }
 
     /**
