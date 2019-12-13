@@ -443,6 +443,10 @@ class Connection implements ConnectionInterface
             }
 
             $statement = $this->getPdo()->prepare($query);
+            if(!$statement){ //If have a problem throw an Exception insthead
+                $error = $this->getPdo()->errorInfo();
+                throw new \PDOException($error[1]);
+            }
 
             $this->bindValues($statement, $this->prepareBindings($bindings));
 
