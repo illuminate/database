@@ -43,6 +43,13 @@ class MorphTo extends BelongsTo
      * @var array
      */
     protected $morphableEagerLoads = [];
+    
+    /**
+     * A map of model type properties to show on individual morph type.
+     *
+     * @var array
+     */
+    protected $morphableProperties = [];
 
     /**
      * Create a new morph to relationship instance.
@@ -122,6 +129,10 @@ class MorphTo extends BelongsTo
                                 $this->getQuery()->getEagerLoads(),
                                 (array) ($this->morphableEagerLoads[get_class($instance)] ?? [])
                             ));
+        
+        if(!empty($this->morphableProperties[get_class($instance)])) {
+            $query->select($this->morphableProperties[get_class($instance)]);
+        }
 
         $whereIn = $this->whereInMethod($instance, $ownerKey);
 
@@ -273,6 +284,21 @@ class MorphTo extends BelongsTo
     {
         $this->morphableEagerLoads = array_merge(
             $this->morphableEagerLoads, $with
+        );
+
+        return $this;
+    }
+    
+    /**
+     * Specify which properties to load for a given morph type.
+     *
+     * @param  array  $properties
+     * @return \Illuminate\Database\Eloquent\Relations\MorphTo
+     */
+    public function morphProperties(array $properties)
+    {
+        $this->morphableProperties = array_merge(
+            $this->morphableProperties, $properties
         );
 
         return $this;
