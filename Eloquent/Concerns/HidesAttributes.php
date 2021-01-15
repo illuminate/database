@@ -115,6 +115,39 @@ trait HidesAttributes
     }
 
     /**
+     * Make all, typically visible attributes hidden, except ones given.
+     * @param array|string|null $attributes
+     * @return $this
+     */
+    public function makeAllHiddenExcept($attributes)
+    {
+        $this->hidden = array_diff(
+            array_keys($this->getAttributes()),
+            is_array($attributes) ? $attributes : func_get_args()
+        );
+
+        return $this;
+    }
+
+    /**
+     * Make all, typically visible attributes hidden, except ones given, if the given truth test passes.
+     * @param bool|closure $condition
+     * @param array $attributes
+     * @return $this
+     */
+    public function makeAllHiddenExceptIf($condition, array $attributes)
+    {
+        $condition = $condition instanceof Closure ? $condition($this) : $condition;
+
+        $attributesToHide = array_diff(
+            array_keys($this->getAttributes()),
+            $attributes
+        );
+
+        return value($condition) ? $this->makeHidden($attributesToHide) : $this;
+    }
+
+    /**
      * Make the given, typically visible, attributes hidden if the given truth test passes.
      *
      * @param  bool|Closure  $condition
