@@ -270,6 +270,30 @@ class Grammar extends BaseGrammar
 
         return '0 = 1';
     }
+    
+    /**
+    * Complile a "search" clause
+    *
+    * @param \Illuminate\Database\Query\Builder $query
+    * @param array $where
+    * @return string
+    */
+    
+    protected function whereSearch(Builder $query, $where)
+    {
+        $value = $this->parameter($where['value']);
+        $delimeter = $where['delimeter'];
+        $separator = $where['separator'];
+        $operator = 'like';
+        
+        $value_splited = explode($delimeter,$value);
+        
+        $flag=$this->wrap($where['column']).' '.$operator.' '.'%'.$value_splited[0].'%';
+        for($i=1;$i<count($value_splited);$i++){
+            $flag.=$separator.' where '.$where['column'].' '.$operator.'%'.$value_splited[$i].'%';
+        }
+        return $flag;
+    }
 
     /**
      * Compile a "where not in" clause.
