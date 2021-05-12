@@ -38,11 +38,10 @@ class MySqlBuilder extends Builder
      */
     public function hasTable($table)
     {
-        $table = $this->connection->getTablePrefix() . $table;
+        $table = $this->connection->getTablePrefix().$table;
 
         return count($this->connection->select(
-            $this->grammar->compileTableExists(),
-            [$this->connection->getDatabaseName(), $table]
+            $this->grammar->compileTableExists(), [$this->connection->getDatabaseName(), $table]
         )) > 0;
     }
 
