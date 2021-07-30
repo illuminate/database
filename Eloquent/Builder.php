@@ -637,7 +637,14 @@ class Builder implements BuilderContract
         // and error prone. We don't want constraints because we add eager ones.
         $relation = Relation::noConstraints(function () use ($name) {
             try {
-                return $this->getModel()->newInstance()->$name();
+                $instance = $this->getModel()->newInstance();
+                $modelMethods = get_class_methods($instance);
+                $caseSensitiveMethodExists =
+                    false !== array_search($name, $modelMethods, true);
+                if (false === $caseSensitiveMethodExists) {
+                    throw new BadMethodCallException();
+                }
+                return $instance->$name();
             } catch (BadMethodCallException $e) {
                 throw RelationNotFoundException::make($this->getModel(), $name);
             }
