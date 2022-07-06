@@ -1032,11 +1032,22 @@ class Blueprint
      * Create a new enum column on the table.
      *
      * @param  string  $column
-     * @param  array  $allowed
+     * @param  string|array  $allowed
      * @return \Illuminate\Database\Schema\ColumnDefinition
+     * @throws \Exception
      */
-    public function enum($column, array $allowed)
+    public function enum($column, string|array $allowed)
     {
+        if(is_array($allowed))
+            return $this->addColumn('enum', $column, compact('allowed'));
+
+        if(enum_exists($allowed))
+            $allowed = (method_exists($allowed, 'tryFrom'))
+                ? array_map(fn($case) => $case->value, call_user_func(array($allowed, 'cases')))
+                : array_map(fn($case) => $case->name, call_user_func(array($allowed, 'cases')));
+        else
+            throw new \Exception("Enum $allowed does not exist");
+
         return $this->addColumn('enum', $column, compact('allowed'));
     }
 
