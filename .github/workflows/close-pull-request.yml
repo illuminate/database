@@ -4,8 +4,12 @@ on:
   pull_request_target:
     types: [opened]
 
+permissions: {}
 jobs:
   run:
+    permissions:
+      pull-requests: write #  to comment on and close pull-request
+
     runs-on: ubuntu-latest
     steps:
     - uses: superbrothers/close-pull-request@v3
