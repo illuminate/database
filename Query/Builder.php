@@ -622,7 +622,6 @@ class Builder implements BuilderContract
 
     /**
      * Add a "cross join" clause to the query.
-     *
      * @param  string  $table
      * @param  \Closure|string|null  $first
      * @param  string|null  $operator
@@ -3764,6 +3763,16 @@ class Builder implements BuilderContract
     public function dd()
     {
         dd($this->toSql(), $this->getBindings());
+    }
+    
+    /**
+     * Die and dump the final SQL query.
+     *
+     * @return never
+     */
+    public function ddFinalQuery()
+    {
+        dd(vsprintf(str_replace(array('?'), array('\'%s\''), $this->toSql()), $this->getBindings()));
     }
 
     /**
