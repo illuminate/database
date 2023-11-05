@@ -1228,6 +1228,19 @@ class Blueprint
     }
 
     /**
+     * Add creation and update dateTimeTz columns to the table.
+     *
+     * @param  int|null  $precision
+     * @return void
+     */
+    public function datetimesTz($precision = 0)
+    {
+        $this->dateTimeTz('created_at', $precision)->nullable();
+
+        $this->dateTimeTz('updated_at', $precision)->nullable();
+    }
+
+    /**
      * Add a "deleted at" timestamp for the table.
      *
      * @param  string  $column
@@ -1261,6 +1274,18 @@ class Blueprint
     public function softDeletesDatetime($column = 'deleted_at', $precision = 0)
     {
         return $this->datetime($column, $precision)->nullable();
+    }
+
+    /**
+     * Add a "deleted at" dateTimeTz column to the table.
+     *
+     * @param  string  $column
+     * @param  int|null  $precision
+     * @return \Illuminate\Database\Schema\ColumnDefinition
+     */
+    public function softDeletesDatetimeTz($column = 'deleted_at', $precision = 0)
+    {
+        return $this->dateTimeTz($column, $precision)->nullable();
     }
 
     /**
