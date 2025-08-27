@@ -83,6 +83,59 @@ class Collection extends BaseCollection implements QueueableCollection
     }
 
     /**
+     * Find a model in the collection by key with eager loaded relations.
+     *
+     * @template TFindDefault
+     *
+     * @param  mixed  $key
+     * @param  string|array $relations;
+     * @return ($key is (\Illuminate\Contracts\Support\Arrayable<array-key, mixed>|array<mixed>) ? static : TModel)
+     */
+    public function findOrFailWith($key, $relations)
+    {
+        if (is_string($relations)) {
+            $relations = [$relations];
+        }
+
+        $result = $this->findOrFail($key);
+        if ($result instanceof Collection) {
+            $result->loadMissing($relations);
+        }
+        if ($result instanceof Model) {
+            $result->loadMissing($relations);
+        }
+
+        return $result;
+    }
+
+    /**
+     * Find a model in the collection by key with eager loaded relations.
+     *
+     * @template TFindDefault
+     *
+     * @param  mixed  $key
+     * @param  string|array $relations;
+     * @param  TFindDefault  $default
+     * @return ($key is (\Illuminate\Contracts\Support\Arrayable<array-key, mixed>|array<mixed>) ? static : TModel|TFindDefault)
+     */
+    public function findWith($key, $relations, $default = null)
+    {
+        if (is_string($relations)) {
+            $relations = [$relations];
+        }
+
+        $result = $this->find($key, $default);
+        if ($result instanceof Collection) {
+            $result->loadMissing($relations);
+        }
+        if ($result instanceof Model) {
+            $result->loadMissing($relations);
+        }
+
+        return $result;
+    }
+
+    /**
      * Load a set of relationships onto the collection.
      *
      * @param  array<array-key, array|(callable(\Illuminate\Database\Eloquent\Relations\Relation<*, *, *>): mixed)|string>|string  $relations

@@ -624,6 +624,31 @@ class Builder implements BuilderContract
     }
 
     /**
+     * Find a model by its primary key with eager loaded relations, or throw an exception.
+     *
+     * @param  mixed  $id
+     * @param  array|string  $relations
+     * @param  array|string  $columns
+     * @return ($id is (\Illuminate\Contracts\Support\Arrayable<array-key, mixed>|array<mixed>) ? \Illuminate\Database\Eloquent\Collection<int, TModel> : TModel|null)
+     */
+    public function findOrFailWith($id, $relations, $columns = ['*'])
+    {
+        if (is_string($relations)) {
+            $relations = [$relations];
+        }
+
+        $result = $this->findOrFail($id, $columns);
+        if ($result instanceof Collection) {
+            $result->loadMissing($relations);
+        }
+        if ($result instanceof Model) {
+            $result->loadMissing($relations);
+        }
+
+        return $result;
+    }
+
+    /**
      * Find a model by its primary key or return fresh model instance.
      *
      * @param  mixed  $id
@@ -666,6 +691,31 @@ class Builder implements BuilderContract
         }
 
         return $callback();
+    }
+
+    /**
+     * Find a model by its primary key with eager loaded relations.
+     *
+     * @param  mixed  $id
+     * @param  array|string  $relations
+     * @param  array|string  $columns
+     * @return ($id is (\Illuminate\Contracts\Support\Arrayable<array-key, mixed>|array<mixed>) ? \Illuminate\Database\Eloquent\Collection<int, TModel> : TModel|null)
+     */
+    public function findWith($id, $relations, $columns = ['*'])
+    {
+        if (is_string($relations)) {
+            $relations = [$relations];
+        }
+
+        $result = $this->find($id, $columns);
+        if ($result instanceof Collection) {
+            $result->loadMissing($relations);
+        }
+        if ($result instanceof Model) {
+            $result->loadMissing($relations);
+        }
+
+        return $result;
     }
 
     /**
