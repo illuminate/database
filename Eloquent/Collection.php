@@ -85,8 +85,6 @@ class Collection extends BaseCollection implements QueueableCollection
     /**
      * Find a model in the collection by key with eager loaded relations.
      *
-     * @template TFindDefault
-     *
      * @param  mixed  $key
      * @param  string|array $relations;
      * @return ($key is (\Illuminate\Contracts\Support\Arrayable<array-key, mixed>|array<mixed>) ? static : TModel)
