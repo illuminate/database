@@ -1071,7 +1071,7 @@ abstract class Model implements Arrayable, ArrayAccess, CanBeEscapedWhenCastToSt
      * @param  string  $column
      * @param  float|int  $amount
      * @param  array  $extra
-     * @return int
+     * @return int|bool
      */
     protected function increment($column, $amount = 1, array $extra = [])
     {
@@ -1084,7 +1084,7 @@ abstract class Model implements Arrayable, ArrayAccess, CanBeEscapedWhenCastToSt
      * @param  string  $column
      * @param  float|int  $amount
      * @param  array  $extra
-     * @return int
+     * @return int|bool
      */
     protected function decrement($column, $amount = 1, array $extra = [])
     {
@@ -1098,7 +1098,7 @@ abstract class Model implements Arrayable, ArrayAccess, CanBeEscapedWhenCastToSt
      * @param  float|int  $amount
      * @param  array  $extra
      * @param  string  $method
-     * @return int
+     * @return int|bool
      */
     protected function incrementOrDecrement($column, $amount, $extra, $method)
     {
