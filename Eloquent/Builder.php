@@ -12,6 +12,7 @@ use Illuminate\Database\Concerns\BuildsQueries;
 use Illuminate\Database\Eloquent\Concerns\QueriesRelationships;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\Relation;
+use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Database\Query\Builder as QueryBuilder;
 use Illuminate\Database\RecordsNotFoundException;
 use Illuminate\Database\UniqueConstraintViolationException;
@@ -637,6 +638,59 @@ class Builder implements BuilderContract
 
         return $result;
     }
+
+    /**
+     * Find a model by its primary key and eager load relations.
+     *
+     * @param  mixed  $id
+     * @param  array  $relations
+     * @param  array|string  $columns
+     * @return ($id is (\Illuminate\Contracts\Support\Arrayable<array-key, mixed>|array<mixed>)
+     *     ? \Illuminate\Database\Eloquent\Collection<int, TModel>
+     *     : TModel|null)
+     */
+    public function findWith($id, array $relations = [], $columns = ['*'])
+    {
+        return $this->with($relations)->find($id, $columns);
+    }
+
+    /**
+     * Find a model by its primary key and eager load relations or throw an exception.
+     *
+     * @param  mixed  $id
+     * @param  array  $relations
+     * @param  array|string  $columns
+     * @return ($id is (\Illuminate\Contracts\Support\Arrayable<array-key, mixed>|array<mixed>)
+     *     ? \Illuminate\Database\Eloquent\Collection<int, TModel>
+     *     : TModel)
+     *
+     * @throws \Illuminate\Database\Eloquent\ModelNotFoundException<TModel>
+     */
+    public function findOrFailWith($id, array $relations = [], $columns = ['*'])
+    {
+        $result = $this->findWith($id, $relations, $columns);
+
+        $id = $id instanceof Arrayable ? $id->toArray() : $id;
+
+        if (is_array($id)) {
+            if (count($result) !== count(array_unique($id))) {
+                throw (new ModelNotFoundException)->setModel(
+                    get_class($this->model), array_diff($id, $result->modelKeys())
+                );
+            }
+
+            return $result;
+        }
+
+        if (is_null($result)) {
+            throw (new ModelNotFoundException)->setModel(
+                get_class($this->model), $id
+            );
+        }
+
+        return $result;
+    }
+
 
     /**
      * Find a model by its primary key or return fresh model instance.
